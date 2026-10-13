@@ -29,3 +29,7 @@ export const db = drizzle(pool, {
 export async function checkDatabase() {
   await pool.query("SELECT 1");
 }
+
+// A transaction handle from db.transaction(); services accept either.
+export type Tx = Parameters<Parameters<typeof db.transaction>[0]>[0];
+export type DbOrTx = typeof db | Tx;

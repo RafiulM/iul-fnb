@@ -3,6 +3,8 @@
 services:
   postgres:
     image: postgres:17-alpine
+    # Use Docker's default bridge: this machine's address pools are exhausted.
+    network_mode: bridge
     environment:
       POSTGRES_USER: ${POSTGRES_USER:?Run pnpm run setup first}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Run pnpm run setup first}

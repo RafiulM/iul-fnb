@@ -1,7 +1,7 @@
 {
   "id": "express-tanstack-postgres",
-  "name": "Express TanStack Postgres",
-  "description": "An AI-friendly monorepo with an Express API, a TanStack Start web app, Drizzle and PostgreSQL.",
+  "name": "IUL FnB",
+  "description": "Sistem pemesanan kafe: menu QR untuk pelanggan, layar kasir, dan dashboard pemilik.",
   "baseVersion": "0.1.0",
   "framework": "express+tanstack-start",
   "database": "postgresql"

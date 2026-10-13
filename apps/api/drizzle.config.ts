@@ -3,10 +3,12 @@ import { defineConfig } from "drizzle-kit";
 
 // Node's built-in parser reads the repository root's .env.local then .env;
 // values already in the environment win, so a supplied DATABASE_URL is never
-// overridden.
+// overridden. drizzle-kit loads this file as CommonJS, where
+// import.meta.dirname is undefined, so fall back to __dirname.
+const configDir = import.meta.dirname ?? __dirname;
 for (const file of [".env.local", ".env"]) {
   try {
-    process.loadEnvFile(resolve(import.meta.dirname, "../..", file));
+    process.loadEnvFile(resolve(configDir, "../..", file));
   } catch {
     // Missing file: nothing to load.
   }

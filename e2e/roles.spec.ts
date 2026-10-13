@@ -40,12 +40,11 @@ test("the admin page renders only for a permitted role and can delete any note",
 
   const email = `roles-${randomUUID()}@example.com`;
   await page.goto("/sign-up");
-  await page.getByLabel("Name").fill("Page Viewer");
-  await page.getByLabel("Email").fill(email);
-  await page.getByLabel("Password").fill(PASSWORD);
-  await page.getByRole("button", { name: "Create account" }).click();
-  await expect(page).toHaveURL(/\/app$/);
-  await expect(page.getByRole("link", { name: "Admin" })).toHaveCount(0);
+  await page.getByLabel("Nama", { exact: true }).fill("Page Viewer");
+  await page.getByLabel("Email", { exact: true }).fill(email);
+  await page.getByLabel("Kata sandi", { exact: true }).fill(PASSWORD);
+  await page.getByRole("button", { name: "Buat akun", exact: true }).click();
+  await expect(page).toHaveURL(/\/kasir$/);
 
   await page.goto("/admin");
   await expect(page.getByText("Every account’s notes")).toHaveCount(0);
@@ -55,7 +54,6 @@ test("the admin page renders only for a permitted role and can delete any note",
   await expect(
     page.getByRole("heading", { name: "Every account’s notes" }),
   ).toBeVisible();
-  await expect(page.getByRole("link", { name: "Admin" })).toBeVisible();
   await page.getByRole("button", { name: `Delete ${note.title}` }).click();
   await expect(page.getByText(note.title)).toHaveCount(0);
   expect(

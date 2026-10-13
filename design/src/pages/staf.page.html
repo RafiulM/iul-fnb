@@ -1,0 +1,809 @@
+<!-- dpai:page {"scoped":true,"typography":true} -->
+<style>
+  .p-staf { display: grid; gap: var(--space-6); align-content: start; font-family: var(--font-ui); }
+  .ak-context { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-3); margin: calc(var(--space-4) * -1) 0 0; font: 400 var(--text-body-sm) / var(--leading-body-sm) var(--font-ui); color: var(--color-text-muted); }
+  .ak-sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+  .ak-grow { flex: 1; min-width: 0; }
+  :is(.l-staf-input, .l-staf-btn, .l-staf-iconbtn, .l-staf-seg button, .l-staf-tabs button):focus-visible { outline: 2px solid var(--color-focus-ring); outline-offset: 3px; }
+  .l-staf-tabs button:focus-visible { outline-offset: -2px; border-radius: var(--radius-compact); }
+
+  /* Tab */
+  .ak-count { display: inline-grid; place-items: center; min-width: 22px; height: 20px; padding: 0 7px; border-radius: var(--radius-pill); background: var(--color-surface-muted); color: var(--color-text-soft); font: 600 var(--text-label-sm) / 1 var(--font-ui); font-variant-numeric: tabular-nums; }
+  .ak-panel { display: grid; gap: var(--space-4); align-content: start; }
+  .ak-akses { grid-template-columns: minmax(0, 1.7fr) minmax(290px, 1fr); align-items: start; }
+
+  /* Work Ledger: daftar akun */
+  .ak-ledger { container: ak-ledger / inline-size; }
+  .ak-ledger .l-staf-card-head .l-staf-search { width: 280px; min-width: 0; max-width: 100%; }
+  .ak-toolbar { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-3); padding: var(--space-4) var(--spacing-20); }
+  .ak-table-wrap { border-block-start: var(--border-hairline) solid var(--color-border); }
+  .ak-ledger .ak-table td { padding-block: 14px; }
+  .ak-ledger .ak-table .ak-end { text-align: end; }
+  .ak-table td:first-child { position: relative; }
+  .ak-table tbody tr[data-fresh] { background: var(--color-surface-subtle); }
+  .ak-table tbody tr[data-fresh] td:first-child::before { content: ""; position: absolute; inset-block: 14px; inset-inline-start: 0; width: 3px; border-radius: 0 var(--radius-pill) var(--radius-pill) 0; background: var(--color-accent); }
+  .ak-who-cell { display: flex; align-items: center; gap: var(--space-3); min-width: 0; }
+  .ak-avatar { flex: none; display: grid; place-items: center; width: 36px; height: 36px; border-radius: var(--radius-pill); background: var(--color-surface-muted); color: var(--color-text); font: 600 12px / 1 var(--font-ui); letter-spacing: 0.3px; }
+  .ak-who { min-width: 0; }
+  .ak-who strong { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; font: 600 var(--text-body-sm) / 1.35 var(--font-ui); letter-spacing: -0.14px; }
+  .ak-who small { display: block; margin-top: 1px; font: 400 var(--text-label-sm) / var(--leading-label-sm) var(--font-ui); color: var(--color-text-muted); overflow-wrap: anywhere; }
+  .ak-who .l-staf-chip { padding: 1px 8px; }
+  .ak-table tr[data-inactive] .ak-avatar { background: var(--color-surface-subtle); color: var(--color-text-muted); box-shadow: inset 0 0 0 1px var(--color-border); }
+  .ak-table tr[data-inactive] .ak-who strong { color: var(--color-text-muted); }
+  .ak-role-inline { display: none; }
+  .ak-status { display: flex; align-items: center; gap: var(--space-3); }
+  .ak-st { display: block; font: 600 var(--text-body-sm) / 1.3 var(--font-ui); }
+  .ak-table tr[data-inactive] .ak-st { font-weight: 500; color: var(--color-text-muted); }
+  .ak-status small { display: block; max-width: 120px; font: 500 var(--text-label-sm) / 1.3 var(--font-ui); color: var(--color-text-muted); }
+  .ak-seen { white-space: nowrap; color: var(--color-text-soft); }
+  .ak-faint { color: var(--color-text-muted); }
+  .ak-num { font-variant-numeric: tabular-nums; white-space: nowrap; color: var(--color-text-soft); }
+  .ak-acts { display: inline-flex; align-items: center; justify-content: flex-end; gap: 6px; }
+  .ak-acts .l-staf-iconbtn { width: 36px; height: 36px; }
+  .ak-acts .l-staf-iconbtn iconify-icon { font-size: 16px; }
+  .l-staf-iconbtn:disabled { cursor: not-allowed; border-style: dashed; border-color: var(--color-border-strong); background: var(--color-surface-muted); color: var(--color-text-faint); }
+  .ak-foot { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: var(--space-2) var(--space-4); padding: var(--space-3) var(--spacing-20); border-block-start: var(--border-hairline) solid var(--color-border); font: 500 var(--text-label-sm) / var(--leading-label-sm) var(--font-ui); color: var(--color-text-muted); }
+  .ak-ledger .l-staf-empty { border-block-start: var(--border-hairline) solid var(--color-border); }
+
+  @container ak-ledger (max-width: 760px) {
+    .ak-col-role, .ak-col-join { display: none; }
+    .ak-role-inline { display: inline-flex; }
+  }
+  @container ak-ledger (max-width: 540px) {
+    .ak-table thead { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
+    .ak-table, .ak-table tbody { display: block; }
+    .ak-ledger .ak-table tbody tr { position: relative; display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; gap: var(--space-3); padding: var(--space-4) var(--spacing-20); border-block-end: var(--border-hairline) solid var(--color-border); }
+    .ak-ledger .ak-table tbody tr:last-child { border-block-end: 0; }
+    .ak-ledger .ak-table tbody td:nth-child(n) { display: block; padding: 0; border: 0; position: static; }
+    .ak-ledger .ak-table tbody td.ak-col-role, .ak-ledger .ak-table tbody td.ak-col-join { display: none; }
+    .ak-ledger .ak-table tbody td:nth-child(1) { grid-area: 1 / 1; }
+    .ak-ledger .ak-table tbody td:nth-child(6) { grid-area: 1 / 2; align-self: start; }
+    .ak-ledger .ak-table tbody td:nth-child(3) { grid-area: 2 / 1; }
+    .ak-ledger .ak-table tbody td:nth-child(4) { grid-area: 2 / 2; justify-self: end; font-size: var(--text-label-sm); }
+  }
+
+  /* Hak akses */
+  .ak-matrix-wrap { margin-top: var(--space-4); border-block-start: var(--border-hairline) solid var(--color-border); }
+  .ak-matrix-card .ak-matrix .ak-c { width: 118px; text-align: center; }
+  .ak-matrix thead th small { display: block; margin-top: 2px; font: 500 var(--text-label-sm) / 1.2 var(--font-ui); color: var(--color-text-muted); }
+  .ak-matrix-card .ak-matrix tbody th { position: relative; padding: 14px 12px 14px var(--spacing-20); border-block-end: var(--border-hairline) solid var(--color-border); text-align: start; font-weight: 400; vertical-align: middle; }
+  .ak-matrix-card .ak-matrix tbody tr.ak-grp th { padding-block: 10px; background: var(--color-surface-subtle); font: 600 var(--text-label-sm) / var(--leading-label-sm) var(--font-ui); color: var(--color-text-muted); }
+  .ak-matrix tbody tr.ak-grp:hover { background: none; }
+  .ak-matrix tbody tr[data-changed] { background: var(--color-surface-subtle); }
+  .ak-matrix tbody tr[data-changed] th::before { content: ""; position: absolute; inset-block: 14px; inset-inline-start: 0; width: 3px; border-radius: 0 var(--radius-pill) var(--radius-pill) 0; background: var(--color-accent); }
+  .ak-perm strong { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-2); font: 600 var(--text-body-sm) / 1.35 var(--font-ui); letter-spacing: -0.14px; }
+  .ak-perm strong .l-staf-chip { padding: 1px 8px; }
+  .ak-perm small { display: block; margin-top: 2px; font: 400 var(--text-label-sm) / 1.45 var(--font-ui); color: var(--color-text-muted); }
+  .ak-perm .ak-dep { display: flex; align-items: center; gap: 5px; margin-top: 6px; font-weight: 600; color: var(--color-warning-text); }
+  .ak-chg { display: block; margin-top: 6px; font: 600 var(--text-label-sm) / 1 var(--font-ui); color: var(--color-accent-text); }
+  .ak-matrix .l-staf-switch { vertical-align: middle; }
+
+  .ak-savebar { position: sticky; inset-block-end: var(--space-4); z-index: 2; display: flex; align-items: center; gap: var(--space-3); margin: var(--space-1) var(--space-4) var(--space-4); padding: 10px 10px 10px var(--space-4); border: var(--border-hairline) solid var(--color-border-strong); border-radius: var(--radius-image); background: var(--color-surface); box-shadow: var(--shadow-sm); animation: ak-in var(--duration-base) var(--ease-standard); }
+  .ak-sb-dot { flex: none; width: 8px; height: 8px; border-radius: var(--radius-pill); background: var(--color-accent); }
+  .ak-savebar strong { display: block; font: 600 var(--text-body-sm) / 1.3 var(--font-ui); }
+  .ak-savebar small { display: block; font: 400 var(--text-label-sm) / 1.3 var(--font-ui); color: var(--color-text-muted); }
+  .ak-savebar[data-nudge] { animation: ak-nudge var(--duration-base) var(--ease-standard); }
+  @keyframes ak-in { from { opacity: 0; transform: translateY(8px); } }
+  @keyframes ak-nudge { 25% { transform: translateX(-6px); } 75% { transform: translateX(6px); } }
+
+  .ak-side { display: grid; gap: var(--space-4); align-content: start; }
+  .ak-demo-top { display: flex; align-items: center; justify-content: space-between; gap: var(--space-3); }
+  .ak-demo-top h2 { margin: 0; font: 600 17px / 1.25 var(--font-ui); letter-spacing: -0.17px; }
+  .ak-demo-txt { margin: var(--space-3) 0 0; font: 400 var(--text-body-sm) / 1.55 var(--font-ui); color: var(--color-text-soft); }
+  .ak-eyebrow { margin: var(--spacing-20) 0 var(--space-2); font: 600 var(--text-label-sm) / var(--leading-label-sm) var(--font-ui); color: var(--color-text-muted); }
+  .ak-mini { display: grid; gap: 6px; margin: 0; padding: 0; list-style: none; font: 500 var(--text-body-sm) / 1.4 var(--font-ui); }
+  .ak-mini li { display: flex; align-items: flex-start; gap: var(--space-2); }
+  .ak-mini iconify-icon { flex: none; margin-top: 2px; color: var(--color-positive); }
+  .ak-locks { display: flex; flex-wrap: wrap; gap: 6px; }
+  .ak-locks iconify-icon { color: var(--color-text-muted); }
+  .ak-demo .l-staf-btn[data-block] { margin-top: var(--spacing-20); }
+  .ak-demo-note { margin-top: var(--space-3); }
+
+  .ak-activity { margin: 0; padding: var(--space-2) var(--spacing-20) var(--space-3); list-style: none; }
+  .ak-activity li { display: flex; align-items: flex-start; gap: var(--space-3); padding: var(--space-3) 0; border-block-end: var(--border-hairline) dashed var(--color-border); }
+  .ak-activity li:last-child { border-block-end: 0; }
+  .ak-activity .ak-avatar { width: 28px; height: 28px; font-size: 10.5px; }
+  .ak-activity p { margin: 0; font: 400 var(--text-body-sm) / 1.45 var(--font-ui); color: var(--color-text-soft); }
+  .ak-activity p strong { font-weight: 600; color: var(--color-text); }
+  .ak-activity time { white-space: nowrap; font-size: var(--text-label-sm); font-weight: 500; color: var(--color-text-muted); }
+
+  /* Dialog staf */
+  .ak-form { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--space-4); }
+  .ak-span { grid-column: 1 / -1; }
+  .ak-fieldset { display: grid; gap: var(--space-2); min-width: 0; margin: 0; padding: 0; border: 0; }
+  .ak-legend { margin-bottom: 6px; padding: 0; font: 600 var(--text-body-sm) / var(--leading-body-sm) var(--font-ui); }
+  .ak-roles { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--space-3); }
+  .ak-role { position: relative; display: block; padding: var(--space-4); border: var(--border-hairline) solid var(--color-border-strong); border-radius: var(--radius-image); background: var(--color-surface); cursor: pointer; transition: border-color var(--duration-fast) var(--ease-standard), box-shadow var(--duration-fast) var(--ease-standard); }
+  .ak-role:hover { border-color: var(--color-text); }
+  .ak-role input { position: absolute; inset-block-start: 16px; inset-inline-start: 16px; width: 18px; height: 18px; margin: 0; opacity: 0; }
+  .ak-role:has(input:checked) { border-color: var(--color-primary); box-shadow: inset 0 0 0 1px var(--color-primary); }
+  .ak-role:has(input:focus-visible) { outline: 2px solid var(--color-focus-ring); outline-offset: 3px; }
+  .ak-role:has(input:disabled) { cursor: not-allowed; }
+  .ak-role:has(input:disabled:not(:checked)) { border-style: dashed; background: var(--color-surface-subtle); color: var(--color-text-muted); }
+  .ak-role-top { display: flex; align-items: flex-start; gap: var(--space-3); cursor: inherit; }
+  .ak-role-top::after { content: ""; position: absolute; inset: 0; border-radius: inherit; }
+  .ak-radio { flex: none; display: grid; place-items: center; width: 18px; height: 18px; margin-top: 1px; border: 2px solid var(--color-border-strong); border-radius: var(--radius-pill); background: var(--color-surface); }
+  .ak-role:has(input:checked) .ak-radio { border-color: var(--color-primary); }
+  .ak-role:has(input:checked) .ak-radio::after { content: ""; width: 8px; height: 8px; border-radius: var(--radius-pill); background: var(--color-primary); }
+  .ak-role-top strong { display: block; font: 600 15px / 1.3 var(--font-ui); }
+  .ak-role-top small { display: block; font: 400 var(--text-label-sm) / 1.4 var(--font-ui); color: var(--color-text-muted); }
+  .ak-perms { display: grid; gap: 6px; margin: var(--space-3) 0 0; padding: var(--space-3) 0 0; border-block-start: var(--border-hairline) dashed var(--color-border); list-style: none; font: 400 var(--text-label-sm) / 1.4 var(--font-ui); color: var(--color-text-soft); }
+  .ak-perms li { display: flex; align-items: flex-start; gap: 6px; }
+  .ak-perms iconify-icon { flex: none; margin-top: 1px; color: var(--color-positive); }
+  .ak-perms .ak-pre { font-weight: 600; color: var(--color-text); }
+  .ak-role-warn { margin-top: var(--space-1); }
+  .ak-foot-hint { flex: 1 1 120px; }
+
+  /* Konfirmasi */
+  .ak-person { display: flex; align-items: center; gap: var(--space-3); padding: var(--space-3); border: var(--border-hairline) solid var(--color-border); border-radius: var(--radius-image); background: var(--color-surface-subtle); }
+  .ak-person strong { display: block; font: 600 var(--text-body-sm) / 1.3 var(--font-ui); }
+  .ak-person small { display: block; font: 400 var(--text-label-sm) / 1.4 var(--font-ui); color: var(--color-text-muted); }
+  .ak-cf-desc { margin: var(--space-4) 0 6px; font: 400 var(--text-body-sm) / 1.55 var(--font-ui); }
+
+  /* Terkunci untuk kasir */
+  .ak-locked .l-staf-empty { padding-block: var(--spacing-64); }
+  .ak-locked h2 { margin: 0; font: 500 var(--text-heading-sm) / 1.25 var(--font-ui); letter-spacing: -0.66px; color: var(--color-text); }
+  .ak-locked p { max-width: 480px; margin: 0; }
+  .ak-locked p b { color: var(--color-text); }
+  .ak-locked .l-staf-btn { margin-top: var(--space-3); }
+
+  @media (max-width: 1180px) {
+    .ak-akses { grid-template-columns: minmax(0, 1fr); }
+    .ak-side { grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); }
+  }
+  @media (max-width: 720px) {
+    :scope > .l-staf-btn { flex: 1 1 auto; }
+    .ak-context { margin-top: 0; }
+    .ak-ledger .l-staf-card-head .l-staf-search { width: 100%; }
+    .ak-matrix-card .ak-matrix .ak-c { width: 72px; padding-inline: 4px; white-space: normal; }
+    .ak-matrix-card .ak-matrix tbody th { padding-inline-end: 6px; }
+    .ak-savebar { flex-wrap: wrap; }
+    .ak-savebar > div { flex-basis: calc(100% - 24px); }
+    .ak-savebar .l-staf-btn { flex: 1; }
+  }
+  @media (max-width: 560px) {
+    .ak-form, .ak-roles { grid-template-columns: minmax(0, 1fr); }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .ak-savebar, .ak-savebar[data-nudge] { animation: none; }
+  }
+</style>
+
+<template data-slot="header-actions">
+  <button class="l-staf-btn" data-variant="primary" type="button" data-action="add"><iconify-icon icon="lucide:plus" aria-hidden="true"></iconify-icon>Tambah staf</button>
+</template>
+
+<template data-slot="content">
+  <main aria-label="Akun &amp; Staf" class="p-staf" data-node-id="staf">
+    <p class="ak-context" data-node-id="staf.context"><span data-part="subtitle">Akun aktif &amp; nonaktif</span></p>
+
+    <!-- Gerbang peran: kasir tidak bisa membuka halaman khusus pemilik -->
+    <section class="l-staf-card ak-locked" aria-labelledby="staf-locked-title" data-part="locked" data-node-id="staf.locked" hidden>
+      <div class="l-staf-empty">
+        <iconify-icon icon="lucide:lock" aria-hidden="true"></iconify-icon>
+        <h2 id="staf-locked-title">Halaman ini khusus Pemilik</h2>
+        <p>Akun <b data-part="locked-name">Rina Kartika</b> (Kasir) tidak punya akses ke <b>Akun &amp; Staf</b>. Minta pemilik mengubah hak akses di menu Akun &amp; Staf.</p>
+        <a class="l-staf-btn" data-variant="primary" href="#/kasir" data-route-link><iconify-icon icon="lucide:clipboard-list" aria-hidden="true"></iconify-icon>Kembali ke Pesanan</a>
+      </div>
+    </section>
+
+    <div class="ak-panel" data-part="app">
+      <div class="l-staf-tabs" role="tablist" aria-label="Akun &amp; Staf" data-part="tabs" data-node-id="staf.tabs">
+        <button type="button" role="tab" id="staf-tab-staf" data-tab="staf" aria-selected="true" aria-controls="staf-panel-staf">Staf <span class="ak-count" data-part="tab-count"></span></button>
+        <button type="button" role="tab" id="staf-tab-akses" data-tab="akses" aria-selected="false" aria-controls="staf-panel-akses" tabindex="-1">Hak Akses</button>
+      </div>
+
+      <!-- Tab: Staf -->
+      <section class="ak-panel" id="staf-panel-staf" role="tabpanel" aria-labelledby="staf-tab-staf" data-part="panel-staf" data-node-id="staf.panel-staf">
+        <div class="l-staf-card ak-ledger" data-node-id="staf.ledger">
+          <div class="l-staf-card-head">
+            <div>
+              <h2>Daftar akun</h2>
+              <p>Setiap staf masuk dengan email &amp; kata sandinya sendiri.</p>
+            </div>
+            <label class="l-staf-search">
+              <iconify-icon icon="lucide:search" aria-hidden="true"></iconify-icon>
+              <input type="search" placeholder="Cari nama atau email…" aria-label="Cari staf" autocomplete="off" data-part="q">
+            </label>
+          </div>
+          <div class="ak-toolbar">
+            <div class="l-staf-seg" role="group" aria-label="Saring status akun" data-part="filters"></div>
+          </div>
+          <div class="l-staf-table-wrap ak-table-wrap" data-part="table-wrap">
+            <table class="l-staf-table ak-table">
+              <thead>
+                <tr>
+                  <th scope="col">Nama</th>
+                  <th scope="col" class="ak-col-role">Peran</th>
+                  <th scope="col">Status</th>
+                  <th scope="col">Terakhir masuk</th>
+                  <th scope="col" class="ak-col-join">Bergabung</th>
+                  <th scope="col" class="ak-end">Aksi</th>
+                </tr>
+              </thead>
+              <tbody data-part="rows"></tbody>
+            </table>
+          </div>
+          <div class="l-staf-empty" data-part="empty" hidden>
+            <iconify-icon icon="lucide:search-x" aria-hidden="true"></iconify-icon>
+            <strong>Tidak ada staf yang cocok</strong>
+            <span>Coba kata lain atau tampilkan semua akun.</span>
+            <button type="button" class="l-staf-btn" data-size="sm" data-clear style="margin-top:var(--space-2)">Tampilkan semua</button>
+          </div>
+          <div class="ak-foot">
+            <span data-part="role-summary"></span>
+            <span>Prototipe — email undangan &amp; atur ulang tidak benar-benar dikirim.</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- Tab: Hak Akses -->
+      <section class="ak-panel ak-akses" id="staf-panel-akses" role="tabpanel" aria-labelledby="staf-tab-akses" data-part="panel-akses" data-node-id="staf.panel-akses" hidden>
+        <div class="l-staf-card ak-matrix-card" data-node-id="staf.matrix">
+          <div class="l-staf-card-head">
+            <div>
+              <h2>Hak akses per peran</h2>
+              <p>Atur apa saja yang boleh dilakukan kasir. Pemilik selalu punya akses penuh agar tidak ada yang terkunci.</p>
+            </div>
+          </div>
+          <div class="l-staf-table-wrap ak-matrix-wrap">
+            <table class="l-staf-table ak-matrix">
+              <thead>
+                <tr>
+                  <th scope="col">Akses</th>
+                  <th scope="col" class="ak-c">Pemilik<small>selalu penuh</small></th>
+                  <th scope="col" class="ak-c">Kasir<small data-part="kasir-count"></small></th>
+                </tr>
+              </thead>
+              <tbody data-part="perm-rows"></tbody>
+            </table>
+          </div>
+          <div class="ak-savebar" role="region" aria-label="Perubahan hak akses" data-part="savebar" hidden>
+            <span class="ak-sb-dot" aria-hidden="true"></span>
+            <div class="ak-grow"><strong>Ada perubahan belum disimpan</strong><small data-part="sb-count"></small></div>
+            <button type="button" class="l-staf-btn" data-size="sm" data-part="sb-cancel">Batal</button>
+            <button type="button" class="l-staf-btn" data-size="sm" data-variant="primary" data-part="sb-save">Simpan</button>
+          </div>
+        </div>
+
+        <div class="ak-side">
+          <section class="l-staf-card ak-demo" aria-labelledby="staf-demo-title" data-node-id="staf.demo">
+            <div class="l-staf-card-body">
+              <div class="ak-demo-top">
+                <h2 id="staf-demo-title">Coba sebagai kasir</h2>
+                <span class="l-staf-chip" data-tone="plain">Demo</span>
+              </div>
+              <p class="ak-demo-txt">Akses dibagi menurut peran. Lihat aplikasi seperti yang dilihat <strong data-part="demo-name">kasir</strong>: halaman khusus pemilik disembunyikan dari menu samping dan terkunci bila dibuka langsung.</p>
+              <p class="ak-eyebrow">Kasir bisa</p>
+              <ul class="ak-mini" data-part="demo-can"></ul>
+              <p class="ak-eyebrow">Disembunyikan dari kasir</p>
+              <div class="ak-locks" data-part="demo-hidden"></div>
+              <button type="button" class="l-staf-btn" data-block data-part="try-cashier"><iconify-icon icon="lucide:eye" aria-hidden="true"></iconify-icon>Masuk sebagai kasir</button>
+              <p class="l-staf-hint ak-demo-note">Untuk kembali, klik ikon keluar di bawah menu samping lalu masuk sebagai Pemilik. Di prototipe ini menu samping memakai hak akses bawaan, jadi perubahan pada tabel belum ikut terbawa.</p>
+            </div>
+          </section>
+
+          <section class="l-staf-card" aria-labelledby="staf-act-title" data-node-id="staf.activity">
+            <div class="l-staf-card-head">
+              <div>
+                <h2 id="staf-act-title">Aktivitas terbaru</h2>
+                <p>Siapa melakukan apa, terbaru di atas</p>
+              </div>
+            </div>
+            <ul class="ak-activity" data-part="activity"></ul>
+          </section>
+        </div>
+      </section>
+    </div>
+
+    <!-- Dialog: tambah / ubah staf -->
+    <dialog class="l-staf-dialog" aria-labelledby="staf-s-title" data-part="staff" data-node-id="staf.staff-dialog">
+      <div class="l-staf-dialog-head">
+        <div>
+          <h2 id="staf-s-title" data-part="s-title">Tambah staf</h2>
+          <p data-part="s-sub"></p>
+        </div>
+        <button class="l-staf-iconbtn" type="button" data-close aria-label="Tutup"><iconify-icon icon="lucide:x" aria-hidden="true"></iconify-icon></button>
+      </div>
+      <form class="l-staf-dialog-body" id="staf-s-form" novalidate data-part="s-form">
+        <div class="ak-form">
+          <div class="l-staf-field">
+            <label for="staf-s-name">Nama lengkap</label>
+            <input class="l-staf-input" id="staf-s-name" maxlength="60" autocomplete="off" placeholder="mis. Putri Anggraini" autofocus aria-describedby="staf-s-name-err" data-part="s-name">
+            <p class="l-staf-error" id="staf-s-name-err" data-part="s-name-err" hidden></p>
+          </div>
+          <div class="l-staf-field">
+            <label for="staf-s-email">Email</label>
+            <input class="l-staf-input" id="staf-s-email" type="email" maxlength="80" autocomplete="off" placeholder="nama@kedaisenja.id" aria-describedby="staf-s-email-err" data-part="s-email">
+            <p class="l-staf-error" id="staf-s-email-err" data-part="s-email-err" hidden></p>
+          </div>
+          <fieldset class="ak-span ak-fieldset">
+            <legend class="ak-legend">Peran</legend>
+            <div class="ak-roles" data-part="roles"></div>
+            <p class="l-staf-hint" data-part="role-hint" hidden>Peran akun pemilik utama tidak bisa diubah.</p>
+            <div class="l-staf-alert ak-role-warn" data-tone="warning" data-part="role-warn" hidden><iconify-icon icon="lucide:shield" aria-hidden="true"></iconify-icon><span>Pemilik bisa mengelola akun staf, mengubah menu, dan melihat laporan penjualan. Berikan hanya kepada orang yang dipercaya.</span></div>
+          </fieldset>
+          <div class="ak-span l-staf-alert" data-tone="neutral"><iconify-icon icon="lucide:mail" aria-hidden="true"></iconify-icon><span data-part="s-note"></span></div>
+        </div>
+      </form>
+      <div class="l-staf-dialog-foot">
+        <p class="l-staf-hint ak-foot-hint">Prototipe — email tidak benar-benar dikirim.</p>
+        <button class="l-staf-btn" data-variant="ghost" type="button" data-close>Batal</button>
+        <button class="l-staf-btn" data-variant="primary" type="submit" form="staf-s-form" data-part="s-save">Kirim undangan</button>
+      </div>
+    </dialog>
+
+    <!-- Dialog: konfirmasi nonaktifkan -->
+    <dialog class="l-staf-dialog" data-size="sm" aria-labelledby="staf-cf-title" aria-describedby="staf-cf-desc" data-part="confirm" data-node-id="staf.confirm">
+      <div class="l-staf-dialog-head">
+        <div><h2 id="staf-cf-title" data-part="cf-title">Nonaktifkan akun?</h2></div>
+        <button class="l-staf-iconbtn" type="button" data-close aria-label="Tutup"><iconify-icon icon="lucide:x" aria-hidden="true"></iconify-icon></button>
+      </div>
+      <div class="l-staf-dialog-body">
+        <div class="ak-person" data-part="cf-person"></div>
+        <p class="ak-cf-desc" id="staf-cf-desc">Ia tidak bisa masuk lagi. Riwayat transaksinya tetap tersimpan.</p>
+        <p class="l-staf-hint">Akun bisa diaktifkan kembali kapan saja dari daftar staf.</p>
+      </div>
+      <div class="l-staf-dialog-foot">
+        <button class="l-staf-btn" type="button" data-close autofocus>Batal</button>
+        <button class="l-staf-btn" data-variant="danger" type="button" data-part="cf-ok"><iconify-icon icon="lucide:user-x" aria-hidden="true"></iconify-icon>Ya, nonaktifkan</button>
+      </div>
+    </dialog>
+
+    <div class="l-staf-toast" popover="manual" role="status" data-part="toast"></div>
+  </main>
+</template>
+
+<script>
+  /* ===== Data tiruan (struktur mengikuti skema PRD §6, sama dengan halaman lain) ===== */
+  const KEYS = { role: "iulfnb:role" };
+  const ROLE_LABEL = { OWNER: "Pemilik", CASHIER: "Kasir" };
+  const SEED_PERMISSIONS = [
+    { key: "pos", label: "Buka layar kasir & proses pesanan", OWNER: true, CASHIER: true },
+    { key: "payment", label: "Terima pembayaran & cetak struk", OWNER: true, CASHIER: true },
+    { key: "stock_view", label: "Lihat sisa stok bahan", OWNER: true, CASHIER: true },
+    { key: "stock_in", label: "Catat bahan masuk", OWNER: true, CASHIER: true },
+    { key: "menu", label: "Ubah menu, harga & ketersediaan", OWNER: true, CASHIER: false },
+    { key: "tables", label: "Atur meja & cetak QR", OWNER: true, CASHIER: false },
+    { key: "report", label: "Lihat laporan penjualan", OWNER: true, CASHIER: false },
+    { key: "staff", label: "Kelola akun staf", OWNER: true, CASHIER: false },
+    { key: "settings", label: "Ubah pengaturan kafe", OWNER: true, CASHIER: false },
+  ];
+  const PERM_DESC = {
+    pos: "Melihat pesanan masuk, mencatat pesanan manual, dan mengubah status pesanan.",
+    payment: "Mencatat pembayaran tunai/non-tunai dan mencetak struk.",
+    stock_view: "Membuka halaman Stok Bahan dan melihat peringatan stok menipis.",
+    stock_in: "Menambah stok saat bahan datang dari pemasok atau belanja.",
+    menu: "Menambah menu, mengubah harga & foto, menandai menu habis.",
+    tables: "Menambah meja dan mencetak QR untuk tiap meja.",
+    report: "Membuka dashboard penjualan dan mengunduh laporan.",
+    staff: "Menambah, mengubah, dan menonaktifkan akun staf.",
+    settings: "Mengubah profil kafe, jam buka, pajak, dan format struk.",
+  };
+  const OPS = ["pos", "payment", "stock_view", "stock_in"];
+  const SENSITIVE = new Set(["staff", "settings"]);
+  const REQUIRES = { payment: "pos", stock_in: "stock_view" }; // akses anak butuh akses induk
+  const OWNER_ONLY_PAGES = ["Menu & Meja", "Penjualan", "Akun & Staf", "Pengaturan"];
+  const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
+
+  /* ===== Util ===== */
+  const $ = (part) => root.querySelector(`[data-part="${part}"]`);
+  const $$ = (sel, el = root) => [...el.querySelectorAll(sel)];
+  const esc = (s) => String(s ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+  const rp = (n) => "Rp " + Math.round(n).toLocaleString("id-ID");
+  const hhmm = (d) => new Date(d).toLocaleTimeString("id-ID", { hour: "2-digit", minute: "2-digit" });
+  const tgl = (d, opt = { day: "numeric", month: "short", year: "numeric" }) => new Date(d).toLocaleDateString("id-ID", opt);
+  const minsSince = (d) => Math.max(0, Math.floor((Date.now() - new Date(d)) / 60000));
+  const ago = (d) => { const m = minsSince(d); return m < 1 ? "baru saja" : m < 60 ? m + " mnt lalu" : m < 1440 ? Math.floor(m / 60) + " jam lalu" : Math.floor(m / 1440) + " hari lalu"; };
+  const initials = (name) => name.split(/\s+/).filter(Boolean).map((w) => w[0]).slice(0, 2).join("").toUpperCase();
+  const icon = (name, size = 18) => `<iconify-icon icon="lucide:${name}" aria-hidden="true" style="font-size:${size}px"></iconify-icon>`;
+  const store = {
+    get(k, d) { try { const v = localStorage.getItem(k); return v == null ? d : JSON.parse(v); } catch { return d; } },
+    set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch {} },
+  };
+  const DAY = 864e5;
+  const pad = (n) => String(n).padStart(2, "0");
+  const isoDay = (d) => { const x = new Date(d); return x.getFullYear() + "-" + pad(x.getMonth() + 1) + "-" + pad(x.getDate()); };
+  const sameDay = (a, b) => isoDay(a) === isoDay(b);
+  const when = (d) => sameDay(d, Date.now()) ? hhmm(d) : sameDay(d, Date.now() - DAY) ? "Kemarin " + hhmm(d) : tgl(d, { day: "numeric", month: "short" });
+
+  /* ===== State (bertahan saat pindah halaman) ===== */
+  const S = root.stafState ??= (() => {
+    const now = Date.now();
+    const staff = [
+      { id: "u1", name: "Iul Rahman", email: "iul@kedaisenja.id", role: "OWNER", is_active: true, created_at: "2025-02-03", last_login: now - 6 * 60e3 },
+      { id: "u2", name: "Rina Kartika", email: "rina@kedaisenja.id", role: "CASHIER", is_active: true, created_at: "2025-03-10", last_login: now - 42 * 60e3 },
+      { id: "u3", name: "Dimas Pratama", email: "dimas@kedaisenja.id", role: "CASHIER", is_active: true, created_at: "2025-08-21", last_login: now - 26 * 3600e3 },
+      { id: "u4", name: "Sari Wulandari", email: "sari@kedaisenja.id", role: "CASHIER", is_active: false, created_at: "2025-04-02", last_login: now - 40 * 86400e3 },
+    ];
+    const ll = (id) => staff.find((s) => s.id === id).last_login;
+    return {
+      staff,
+      perms: SEED_PERMISSIONS.map((p) => ({ ...p })),
+      draft: null,
+      activity: [
+        { by: "u1", text: "masuk", at: ll("u1") },
+        { by: "u2", text: "mencatat pembayaran A-024 · " + rp(46200), at: now - 19 * 60e3 },
+        { by: "u2", text: "masuk", at: ll("u2") },
+        { by: "u3", text: "mencatat bahan masuk: Susu segar 5 L", at: ll("u3") + 20 * 60e3 },
+        { by: "u3", text: "masuk", at: ll("u3") },
+        { by: "u1", text: "mengubah harga Matcha Latte jadi " + rp(28000), at: now - 2 * DAY - 3 * 3600e3 },
+        { by: "u1", text: "menonaktifkan akun Sari Wulandari", at: ll("u4") + DAY },
+      ],
+      tab: "staf", filter: "ALL", q: "",
+      editId: null, confirmId: null,
+    };
+  })();
+  const resetDraft = () => { S.draft = Object.fromEntries(S.perms.map((p) => [p.key, !!p.CASHIER])); };
+  if (!S.draft) resetDraft();
+  const changedCount = () => S.perms.filter((p) => !!p.CASHIER !== S.draft[p.key]).length;
+
+  const byId = (id) => S.staff.find((s) => s.id === id);
+  const PRIMARY = S.staff.filter((s) => s.role === "OWNER").sort((a, b) => new Date(a.created_at) - new Date(b.created_at))[0];
+  const isPrimary = (s) => !!PRIMARY && s.id === PRIMARY.id;
+  const roleChip = (r) => r === "OWNER" ? `<span class="l-staf-chip" data-tone="dark">${ROLE_LABEL.OWNER}</span>` : `<span class="l-staf-chip" data-tone="plain">${ROLE_LABEL.CASHIER}</span>`;
+
+  /* Peran: kasir tidak bisa membuka halaman khusus pemilik */
+  const ROLE = store.get(KEYS.role, "OWNER") === "CASHIER" ? "CASHIER" : "OWNER";
+  const ME = byId(ROLE === "CASHIER" ? "u2" : "u1");
+  const addBtn = actions?.querySelector('[data-action="add"]');
+  $("locked").hidden = ROLE !== "CASHIER";
+  $("app").hidden = ROLE === "CASHIER";
+  $("subtitle").parentElement.hidden = ROLE === "CASHIER";
+  if (addBtn) addBtn.hidden = ROLE === "CASHIER";
+  $("locked-name").textContent = ME.name;
+  if (ROLE === "CASHIER") return;
+
+  /* ===== Toast & dialog ===== */
+  const toastEl = $("toast");
+  let toastTimer;
+  function toast(msg) {
+    toastEl.textContent = msg;
+    try { if (toastEl.matches(":popover-open")) toastEl.hidePopover(); toastEl.showPopover(); } catch {}
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => { try { toastEl.hidePopover(); } catch {} }, 2600);
+  }
+  onCleanup(() => clearTimeout(toastTimer));
+  const open = (part) => { const d = $(part); if (!d.open) d.showModal(); };
+  const close = (part) => { const d = $(part); if (d.open) d.close(); };
+  for (const d of $$("dialog")) {
+    d.addEventListener("click", (e) => {
+      if (e.target === d) d.close();
+      if (e.target.closest("[data-close]")) d.close();
+    }, { signal });
+  }
+  onCleanup(() => { for (const d of $$("dialog")) if (d.open) d.close(); });
+
+  /* Penanda baris yang baru berubah (sinyal oranye sementara) */
+  const fresh = new Set();
+  const freshTimers = [];
+  function markFresh(id) {
+    fresh.add(id);
+    freshTimers.push(setTimeout(() => { fresh.delete(id); root.querySelector(`tr[data-id="${id}"]`)?.removeAttribute("data-fresh"); }, 6000));
+  }
+  onCleanup(() => { freshTimers.forEach(clearTimeout); fresh.clear(); });
+
+  const log = (text) => { S.activity.push({ by: ME.id, text, at: Date.now() }); renderActivity(); };
+
+  /* ===== Ringkasan atas ===== */
+  function renderHead() {
+    const act = S.staff.filter((s) => s.is_active).length;
+    $("subtitle").textContent = `${act} akun aktif · ${S.staff.length - act} nonaktif`;
+    $("tab-count").textContent = S.staff.length;
+    const owners = S.staff.filter((s) => s.role === "OWNER").length;
+    $("role-summary").textContent = `${S.staff.length} akun · ${owners} pemilik, ${S.staff.length - owners} kasir`;
+  }
+
+  /* ===== Tab Staf ===== */
+  const FILTERS = [["ALL", "Semua"], ["ACTIVE", "Aktif"], ["INACTIVE", "Nonaktif"]];
+  function renderFilters() {
+    const count = (k) => k === "ALL" ? S.staff.length : S.staff.filter((s) => s.is_active === (k === "ACTIVE")).length;
+    $("filters").innerHTML = FILTERS.map(([k, l]) => `<button type="button" data-filter="${k}" aria-pressed="${S.filter === k}">${l}<small>${count(k)}</small></button>`).join("");
+  }
+  function visibleStaff() {
+    const q = S.q.trim().toLowerCase();
+    return S.staff
+      .filter((s) => (S.filter === "ALL" || s.is_active === (S.filter === "ACTIVE")) && (!q || s.name.toLowerCase().includes(q) || s.email.toLowerCase().includes(q)))
+      .sort((a, b) => (isPrimary(b) - isPrimary(a)) || ((a.role === "OWNER" ? 0 : 1) - (b.role === "OWNER" ? 0 : 1)) || a.name.localeCompare(b.name, "id"));
+  }
+  function rowHTML(s) {
+    const prim = isPrimary(s);
+    const resetTitle = s.invited ? "Kirim ulang undangan" : "Kirim tautan atur ulang kata sandi";
+    const seen = s.last_login
+      ? `<span title="${esc(tgl(s.last_login) + " " + hhmm(s.last_login))}">${ago(s.last_login)}</span>`
+      : s.invited ? '<span class="l-staf-chip" data-tone="accent">Undangan terkirim</span>' : '<span class="ak-faint">Belum pernah</span>';
+    return `<tr data-id="${s.id}"${s.is_active ? "" : " data-inactive"}${fresh.has(s.id) ? " data-fresh" : ""}>
+      <td><div class="ak-who-cell">
+        <span class="ak-avatar" aria-hidden="true">${esc(initials(s.name))}</span>
+        <div class="ak-who"><strong>${esc(s.name)}${s.id === ME.id ? '<span class="l-staf-chip" data-tone="accent">Anda</span>' : ""}<span class="ak-role-inline">${roleChip(s.role)}</span></strong><small>${esc(s.email)}</small></div>
+      </div></td>
+      <td class="ak-col-role">${roleChip(s.role)}</td>
+      <td><div class="ak-status">
+        <label class="l-staf-switch"${prim ? ' title="Akun pemilik utama selalu aktif"' : ""}><input type="checkbox" role="switch" data-toggle="${s.id}"${s.is_active ? " checked" : ""}${prim ? " disabled" : ""} aria-label="Akun ${esc(s.name)} aktif"${prim ? ` aria-describedby="staf-prim-${s.id}"` : ""}><span></span></label>
+        <div><span class="ak-st">${s.is_active ? "Aktif" : "Nonaktif"}</span>${prim ? `<small id="staf-prim-${s.id}">Akun pemilik utama</small>` : ""}</div>
+      </div></td>
+      <td class="ak-seen">${seen}</td>
+      <td class="ak-col-join ak-num">${tgl(s.created_at)}</td>
+      <td class="ak-end"><div class="ak-acts">
+        <button type="button" class="l-staf-iconbtn" data-edit="${s.id}" aria-label="Ubah data ${esc(s.name)}" title="Ubah data">${icon("pencil", 16)}</button>
+        <button type="button" class="l-staf-iconbtn" data-reset="${s.id}" aria-label="${esc(resetTitle + " ke " + s.email)}" title="${s.is_active ? resetTitle : "Aktifkan akun dulu untuk mengirim tautan"}"${s.is_active ? "" : " disabled"}>${icon("mail", 16)}</button>
+      </div></td>
+    </tr>`;
+  }
+  function renderStaff() {
+    renderHead();
+    renderFilters();
+    const list = visibleStaff();
+    $("rows").innerHTML = list.map(rowHTML).join("");
+    $("table-wrap").hidden = !list.length;
+    $("empty").hidden = list.length > 0;
+  }
+  function askDeactivate(s) {
+    S.confirmId = s.id;
+    $("cf-title").textContent = `Nonaktifkan ${s.name}?`;
+    $("cf-person").innerHTML = `<span class="ak-avatar" aria-hidden="true">${esc(initials(s.name))}</span>
+      <div><strong>${esc(s.name)}</strong><small>${esc(s.email)} · ${ROLE_LABEL[s.role]}</small></div>`;
+    open("confirm");
+  }
+  const focusToggle = (id) => root.querySelector(`[data-toggle="${id}"]`)?.focus({ preventScroll: true });
+
+  /* ===== Dialog tambah / ubah staf ===== */
+  function setErr(part, msg) {
+    const input = $(part), err = $(part + "-err");
+    if (err) { err.textContent = msg; err.hidden = !msg; }
+    if (input) { if (msg) input.setAttribute("aria-invalid", "true"); else input.removeAttribute("aria-invalid"); }
+  }
+  function renderRoleCards(selected, locked) {
+    const li = (t) => `<li>${icon("check", 14)}<span>${esc(t)}</span></li>`;
+    const cashierCan = S.perms.filter((p) => p.CASHIER);
+    const ownerExtra = S.perms.filter((p) => !p.CASHIER);
+    const card = (role, title, sub, items) => `<div class="ak-role">
+      <label class="ak-role-top"><input type="radio" name="staf-role" value="${role}"${selected === role ? " checked" : ""}${locked ? " disabled" : ""}><span class="ak-radio" aria-hidden="true"></span><span><strong>${title}</strong><small>${sub}</small></span></label>
+      <ul class="ak-perms">${items}</ul>
+    </div>`;
+    $("roles").innerHTML =
+      card("OWNER", "Pemilik", "Akses penuh", ownerExtra.length ? '<li class="ak-pre">Semua akses kasir, ditambah:</li>' + ownerExtra.map((p) => li(p.label)).join("") : li("Semua akses aplikasi")) +
+      card("CASHIER", "Kasir", "Layar kasir & stok bahan", cashierCan.length ? cashierCan.map((p) => li(p.label)).join("") : '<li class="ak-pre">Belum ada akses — atur di tab Hak Akses</li>');
+    $("role-hint").hidden = !locked;
+    syncRoleCards();
+  }
+  function syncRoleCards() {
+    const editing = S.editId && byId(S.editId);
+    const picked = root.querySelector('input[name="staf-role"]:checked');
+    $("role-warn").hidden = !(picked && picked.value === "OWNER") || !!(editing && editing.role === "OWNER");
+  }
+  function openStaff(id) {
+    const s = id ? byId(id) : null;
+    S.editId = s ? s.id : null;
+    $("s-title").textContent = s ? "Ubah data staf" : "Tambah staf";
+    $("s-sub").textContent = s ? `${s.name} · bergabung ${tgl(s.created_at)}` : "Staf menerima undangan lewat email dan membuat kata sandinya sendiri.";
+    $("s-name").value = s ? s.name : "";
+    $("s-email").value = s ? s.email : "";
+    setErr("s-name", ""); setErr("s-email", "");
+    renderRoleCards(s ? s.role : "CASHIER", !!(s && isPrimary(s)));
+    $("s-note").textContent = s
+      ? "Jika email diganti, tautan konfirmasi dikirim ke alamat baru. Kata sandi tetap dibuat & diubah sendiri oleh staf."
+      : "Undangan berisi tautan untuk membuat kata sandi dikirim ke email ini.";
+    $("s-save").innerHTML = s ? "Simpan perubahan" : icon("mail", 18) + "Kirim undangan";
+    open("staff");
+  }
+  function saveStaff() {
+    const name = $("s-name").value.trim().replace(/\s+/g, " ");
+    const email = $("s-email").value.trim().toLowerCase();
+    const picked = root.querySelector('input[name="staf-role"]:checked');
+    const role = picked && picked.value === "OWNER" ? "OWNER" : "CASHIER";
+    let bad = null;
+    if (name.length < 2) { setErr("s-name", "Isi nama lengkap staf."); bad = bad || $("s-name"); }
+    else setErr("s-name", "");
+    const dup = S.staff.find((s) => s.id !== S.editId && s.email.toLowerCase() === email);
+    if (!email) { setErr("s-email", "Isi email untuk mengirim undangan."); bad = bad || $("s-email"); }
+    else if (!EMAIL_RE.test(email)) { setErr("s-email", "Format email belum benar, contoh: nama@kedaisenja.id"); bad = bad || $("s-email"); }
+    else if (dup) { setErr("s-email", `Email ini sudah dipakai akun ${dup.name}.`); bad = bad || $("s-email"); }
+    else setErr("s-email", "");
+    if (bad) { bad.focus(); return; }
+
+    if (S.editId) {
+      const s = byId(S.editId);
+      const emailChanged = s.email.toLowerCase() !== email;
+      const roleChanged = s.role !== role && !isPrimary(s);
+      s.name = name;
+      s.email = email;
+      if (roleChanged) { s.role = role; log(`mengubah peran ${name} menjadi ${ROLE_LABEL[role]}`); }
+      else log(`memperbarui data akun ${name}`);
+      markFresh(s.id);
+      close("staff");
+      renderStaff();
+      toast(emailChanged ? `Tautan konfirmasi dikirim ke ${email}` : roleChanged ? `${name} kini berperan sebagai ${ROLE_LABEL[role]}` : `Data ${name} disimpan`);
+    } else {
+      const s = {
+        id: "u" + (Math.max(0, ...S.staff.map((x) => parseInt(x.id.slice(1), 10) || 0)) + 1),
+        name, email, role, is_active: true, created_at: isoDay(Date.now()), last_login: null, invited: true,
+      };
+      S.staff.push(s);
+      markFresh(s.id);
+      S.filter = "ALL"; S.q = ""; $("q").value = "";
+      log(`mengundang ${name} sebagai ${ROLE_LABEL[role]}`);
+      close("staff");
+      setTab("staf");
+      renderStaff();
+      toast(`Undangan dikirim ke ${email}`);
+    }
+  }
+
+  /* ===== Tab Hak Akses ===== */
+  function permRow(p) {
+    const parentKey = REQUIRES[p.key];
+    const parent = parentKey && S.perms.find((x) => x.key === parentKey);
+    const locked = !!parent && !S.draft[parentKey];
+    const changed = !!p.CASHIER !== S.draft[p.key];
+    return `<tr${changed ? " data-changed" : ""}>
+      <th scope="row"><div class="ak-perm">
+        <strong>${esc(p.label)}${SENSITIVE.has(p.key) ? '<span class="l-staf-chip" data-tone="warning">Sensitif</span>' : ""}</strong>
+        <small>${esc(PERM_DESC[p.key] || "")}</small>
+        ${locked ? `<small class="ak-dep">${icon("lock", 12)}Aktifkan “${esc(parent.label)}” dulu</small>` : ""}
+      </div></th>
+      <td class="ak-c"><label class="l-staf-switch" title="Pemilik selalu punya akses ini"><input type="checkbox" role="switch" checked disabled aria-label="Pemilik: ${esc(p.label)} (selalu aktif)"><span></span></label></td>
+      <td class="ak-c"><label class="l-staf-switch"><input type="checkbox" role="switch" data-perm="${p.key}"${S.draft[p.key] ? " checked" : ""}${locked ? " disabled" : ""} aria-label="Kasir: ${esc(p.label)}"><span></span></label>${changed ? '<span class="ak-chg">Diubah</span>' : ""}</td>
+    </tr>`;
+  }
+  function renderMatrix() {
+    const groups = [
+      ["Operasional harian", S.perms.filter((p) => OPS.includes(p.key))],
+      ["Kelola & laporan", S.perms.filter((p) => !OPS.includes(p.key))],
+    ].filter((g) => g[1].length);
+    $("perm-rows").innerHTML = groups.map(([label, list]) => `<tr class="ak-grp"><th scope="colgroup" colspan="3">${label}</th></tr>` + list.map(permRow).join("")).join("");
+    $("kasir-count").textContent = `${S.perms.filter((p) => S.draft[p.key]).length} dari ${S.perms.length} akses`;
+    const n = changedCount();
+    $("savebar").hidden = !n;
+    $("sb-count").textContent = `${n} akses kasir diubah`;
+  }
+  function renderDemo() {
+    const kasir = byId("u2") || S.staff.find((s) => s.role === "CASHIER");
+    $("demo-name").textContent = kasir ? `${kasir.name} (Kasir)` : "kasir";
+    const can = S.perms.filter((p) => p.CASHIER);
+    $("demo-can").innerHTML = can.length ? can.map((p) => `<li>${icon("check", 15)}<span>${esc(p.label)}</span></li>`).join("") : "<li>Belum ada akses</li>";
+    $("demo-hidden").innerHTML = OWNER_ONLY_PAGES.map((l) => `<span class="l-staf-chip" data-tone="plain">${icon("lock", 12)}${esc(l)}</span>`).join("");
+  }
+  function renderActivity() {
+    const list = S.activity.slice().sort((a, b) => b.at - a.at).slice(0, 7);
+    $("activity").innerHTML = list.map((a) => {
+      const s = byId(a.by) || { name: "Sistem" };
+      return `<li>
+        <span class="ak-avatar" aria-hidden="true">${esc(initials(s.name))}</span>
+        <p class="ak-grow"><strong>${esc(s.name)}</strong> ${esc(a.text)} · <time datetime="${new Date(a.at).toISOString()}">${when(a.at)}</time></p>
+      </li>`;
+    }).join("");
+  }
+
+  /* ===== Tab (tanpa mengubah hash rute) ===== */
+  const tabs = $$('[role="tab"]', $("tabs"));
+  function setTab(t, focus) {
+    S.tab = t;
+    tabs.forEach((b) => {
+      const on = b.dataset.tab === t;
+      b.setAttribute("aria-selected", String(on));
+      b.tabIndex = on ? 0 : -1;
+      if (on && focus) b.focus();
+    });
+    $("panel-staf").hidden = t !== "staf";
+    $("panel-akses").hidden = t !== "akses";
+  }
+
+  /* ===== Event ===== */
+  $("tabs").addEventListener("click", (e) => { const b = e.target.closest("[data-tab]"); if (b) setTab(b.dataset.tab); }, { signal });
+  $("tabs").addEventListener("keydown", (e) => {
+    const i = tabs.findIndex((b) => b.dataset.tab === S.tab);
+    let n = null;
+    if (e.key === "ArrowRight") n = (i + 1) % tabs.length;
+    else if (e.key === "ArrowLeft") n = (i - 1 + tabs.length) % tabs.length;
+    else if (e.key === "Home") n = 0;
+    else if (e.key === "End") n = tabs.length - 1;
+    if (n === null) return;
+    e.preventDefault();
+    setTab(tabs[n].dataset.tab, true);
+  }, { signal });
+
+  root.addEventListener("click", (e) => {
+    const b = e.target.closest("button");
+    if (!b) return;
+    const d = b.dataset;
+    if (d.filter) { S.filter = d.filter; renderStaff(); return; }
+    if ("clear" in d) { S.q = ""; S.filter = "ALL"; $("q").value = ""; renderStaff(); return; }
+    if (d.edit) return openStaff(d.edit);
+    if (d.reset) {
+      const s = byId(d.reset);
+      if (!s || !s.is_active) return;
+      if (s.invited) { log(`mengirim ulang undangan ke ${s.name}`); toast(`Undangan dikirim ulang ke ${s.email}`); }
+      else { log(`mengirim tautan atur ulang kata sandi ke ${s.name}`); toast(`Tautan atur ulang dikirim ke ${s.email}`); }
+      return;
+    }
+    if (d.part === "cf-ok") {
+      const s = byId(S.confirmId);
+      close("confirm");
+      if (!s) return;
+      s.is_active = false;
+      log(`menonaktifkan akun ${s.name}`);
+      markFresh(s.id);
+      renderStaff();
+      focusToggle(s.id);
+      toast(`${s.name} dinonaktifkan — riwayat transaksinya tetap tersimpan`);
+      return;
+    }
+    if (d.part === "sb-cancel") { resetDraft(); renderMatrix(); toast("Perubahan hak akses dibatalkan"); return; }
+    if (d.part === "sb-save") {
+      const n = changedCount();
+      S.perms.forEach((p) => { p.CASHIER = S.draft[p.key]; });
+      log(`mengubah ${n} hak akses kasir`);
+      renderMatrix();
+      renderDemo();
+      toast("Hak akses kasir disimpan · berlaku saat kasir masuk lagi");
+      return;
+    }
+    if (d.part === "try-cashier") {
+      if (changedCount()) {
+        setTab("akses");
+        const bar = $("savebar");
+        bar.removeAttribute("data-nudge"); void bar.offsetWidth; bar.setAttribute("data-nudge", "");
+        toast("Simpan atau batalkan perubahan hak akses dulu");
+        return;
+      }
+      store.set(KEYS.role, "CASHIER");
+      location.hash = "#/kasir";
+    }
+  }, { signal });
+
+  root.addEventListener("change", (e) => {
+    const el = e.target;
+    if (el.dataset.toggle) {
+      const s = byId(el.dataset.toggle);
+      if (!s || isPrimary(s)) { el.checked = true; return; }
+      if (!el.checked) {
+        el.checked = true; // tunggu konfirmasi dulu
+        askDeactivate(s);
+      } else {
+        s.is_active = true;
+        log(`mengaktifkan kembali akun ${s.name}`);
+        markFresh(s.id);
+        renderStaff();
+        focusToggle(s.id);
+        toast(`${s.name} aktif lagi dan bisa masuk seperti biasa`);
+      }
+    } else if (el.name === "staf-role") syncRoleCards();
+    else if (el.dataset.perm) {
+      const key = el.dataset.perm;
+      S.draft[key] = el.checked;
+      if (!el.checked) Object.keys(REQUIRES).forEach((k) => { if (REQUIRES[k] === key) S.draft[k] = false; });
+      renderMatrix();
+      root.querySelector(`[data-perm="${key}"]`)?.focus({ preventScroll: true });
+    }
+  }, { signal });
+
+  root.addEventListener("input", (e) => {
+    const p = e.target.dataset.part;
+    if (p === "q") { S.q = e.target.value; renderStaff(); }
+    else if (p === "s-name" || p === "s-email") setErr(p, "");
+  }, { signal });
+  root.addEventListener("submit", (e) => {
+    if (e.target.dataset.part !== "s-form") return;
+    e.preventDefault();
+    saveStaff();
+  }, { signal });
+
+  addBtn?.addEventListener("click", () => openStaff(null), { signal });
+  addEventListener("beforeunload", (e) => {
+    if (!changedCount()) return;
+    e.preventDefault();
+    e.returnValue = "";
+  }, { signal });
+
+  /* ===== Mulai ===== */
+  $("q").value = S.q;
+  renderStaff();
+  renderMatrix();
+  renderDemo();
+  renderActivity();
+  setTab(S.tab);
+  // Perbarui label "x mnt lalu" tiap menit
+  const tick = setInterval(() => { if (!$("rows").contains(document.activeElement)) renderStaff(); renderActivity(); }, 60e3);
+  onCleanup(() => clearInterval(tick));
+</script>

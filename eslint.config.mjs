@@ -13,6 +13,12 @@ export default defineConfig([
     "**/.tanstack/**",
     "**/.turbo/**",
     "apps/web/src/routeTree.gen.ts",
+    "apps/qr-menu/src/routeTree.gen.ts",
+    // Design references (DesainPakeAI export and the older HTML prototype)
+    // and local scratch files are not app code.
+    "design/**",
+    "desainpakeai/**",
+    ".data/**",
     "playwright-report/**",
     "test-results/**",
   ]),
@@ -24,7 +30,7 @@ export default defineConfig([
     },
   },
   {
-    files: ["apps/web/**/*.{ts,tsx}"],
+    files: ["apps/web/**/*.{ts,tsx}", "apps/qr-menu/**/*.{ts,tsx}"],
     ...reactHooks.configs.flat.recommended,
     languageOptions: {
       globals: { ...globals.browser, ...globals.node },

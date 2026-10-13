@@ -10,7 +10,6 @@ import {
 } from "@tanstack/react-router";
 import { siteConfig } from "@/config/site";
 import { Providers } from "@/components/providers";
-import { Button } from "@/components/ui/button";
 import { getSessionFn, type Session } from "@/lib/session";
 import globalsCss from "@/styles/globals.css?url";
 
@@ -28,7 +27,8 @@ export const Route = createRootRouteWithContext<RouterContext>()({
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: `${siteConfig.name} — Your starting point` },
+      { title: `${siteConfig.name} — Kasir & Dashboard` },
+      { name: "theme-color", content: "#FBF5F0" },
       { name: "description", content: siteConfig.description },
     ],
     links: [
@@ -44,7 +44,7 @@ export const Route = createRootRouteWithContext<RouterContext>()({
 
 function RootDocument({ children }: { children: ReactNode }) {
   return (
-    <html lang="en">
+    <html lang="id">
       <head>
         <HeadContent />
       </head>
@@ -54,7 +54,7 @@ function RootDocument({ children }: { children: ReactNode }) {
             href="#main-content"
             className="sr-only z-50 rounded-md bg-foreground p-3 text-background focus:not-sr-only focus:fixed focus:top-4 focus:left-4"
           >
-            Skip to content
+            Lewati ke konten
           </a>
           {children}
         </Providers>
@@ -66,17 +66,18 @@ function RootDocument({ children }: { children: ReactNode }) {
 
 function NotFound() {
   return (
-    <main id="main-content" className="mx-auto max-w-lg px-6 py-24">
-      <p className="mb-3 font-mono text-sm text-primary">404</p>
-      <h1 className="text-3xl font-semibold tracking-tight">
-        This page isn’t here
-      </h1>
-      <p className="my-4 text-muted-foreground">
-        Head back to your starting point.
-      </p>
-      <Button asChild>
-        <Link to="/">Go home</Link>
-      </Button>
+    <main
+      id="main-content"
+      className="l-staf-empty"
+      style={{ minHeight: "70vh", alignContent: "center" }}
+    >
+      <strong>Halaman tidak ditemukan</strong>
+      <span>
+        Alamat ini tidak ada. Kembali ke layar utama untuk melanjutkan.
+      </span>
+      <Link className="l-staf-btn" data-variant="primary" to="/">
+        Ke layar utama
+      </Link>
     </main>
   );
 }
@@ -84,13 +85,23 @@ function NotFound() {
 function ErrorPage() {
   const router = useRouter();
   return (
-    <main id="main-content" className="mx-auto max-w-lg px-6 py-24">
-      <h1 className="text-2xl font-semibold">Something went wrong</h1>
-      <p className="my-4 leading-7 text-muted-foreground">
-        Try loading this page again. If it keeps happening, check the terminal
-        running <code>pnpm dev</code> for details.
-      </p>
-      <Button onClick={() => router.invalidate()}>Try again</Button>
+    <main
+      id="main-content"
+      className="l-staf-empty"
+      style={{ minHeight: "70vh", alignContent: "center" }}
+    >
+      <strong>Terjadi kesalahan</strong>
+      <span>
+        Coba muat ulang halaman ini. Kalau terus terjadi, periksa terminal yang
+        menjalankan <code>pnpm dev</code>.
+      </span>
+      <button
+        className="l-staf-btn"
+        data-variant="primary"
+        onClick={() => router.invalidate()}
+      >
+        Coba lagi
+      </button>
     </main>
   );
 }

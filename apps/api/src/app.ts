@@ -76,14 +76,26 @@ export function createApp({
 
   // The browser calls the API from WEB_URL (plus TRUSTED_ORIGINS) with
   // cookies. Other origins get no CORS headers, so browsers block them.
-  app.use(
-    cors({
-      origin: env.trustedOrigins,
-      credentials: true,
-      methods: ["GET", "HEAD", "POST", "PATCH", "DELETE", "OPTIONS"],
-      exposedHeaders: ["X-Request-Id", "Location"],
-      maxAge: 600,
-    }),
+  // The customer QR Menu app calls /api/public/* without cookies, so those
+  // routes allow its origin but never credentials.
+  const privateCors = cors({
+    origin: env.trustedOrigins,
+    credentials: true,
+    methods: ["GET", "HEAD", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
+    exposedHeaders: ["X-Request-Id", "Location"],
+    maxAge: 600,
+  });
+  const publicCors = cors({
+    origin: env.publicOrigins,
+    credentials: false,
+    methods: ["GET", "HEAD", "POST", "OPTIONS"],
+    exposedHeaders: ["X-Request-Id", "Location"],
+    maxAge: 600,
+  });
+  app.use((req, res, next) =>
+    req.path.startsWith("/api/public/")
+      ? publicCors(req, res, next)
+      : privateCors(req, res, next),
   );
 
   // Better Auth sees only headers, not the socket. Hand it the client IP

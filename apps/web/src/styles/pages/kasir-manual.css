@@ -1,0 +1,349 @@
+/* Styles for the kasir-manual page, ported from design/src/pages/kasir-manual.page.html.
+   Scoped under [data-page="kasir-manual"]. */
+[data-page="kasir-manual"] {
+  /* Layar POS: katalog kiri + tiket kanan, setinggi viewport (gulir di dalam kolom) */
+  .p-kasir-manual {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 400px;
+    gap: var(--space-6);
+    height: max(560px, calc(100vh - 132px));
+    margin-block-end: calc(var(--space-6) - var(--space-12));
+    font-family: var(--font-ui);
+  }
+
+  .m-menu {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-4);
+    min-width: 0;
+    min-height: 0;
+  }
+  .m-tools {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-3);
+  }
+  .m-tools .l-staf-search {
+    flex: 1 1 200px;
+    max-width: 320px;
+    min-width: 200px;
+  }
+  .m-catalog {
+    flex: 1;
+    min-height: 0;
+    overflow-y: auto;
+    padding: var(--space-3);
+    border-radius: var(--radius-card);
+    background: var(--color-surface-muted);
+    scrollbar-width: thin;
+  }
+  .m-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(156px, 1fr));
+    align-content: start;
+    gap: var(--space-3);
+  }
+  .m-grid .l-staf-empty {
+    grid-column: 1 / -1;
+  }
+  .m-pm {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    padding: var(--space-2) var(--space-2) var(--space-3);
+    border: var(--border-hairline) solid var(--color-border);
+    border-radius: var(--radius-image);
+    background: var(--color-surface);
+    color: var(--color-text);
+    font: inherit;
+    text-align: start;
+    cursor: pointer;
+    transition: border-color var(--duration-fast) var(--ease-standard);
+  }
+  .m-pm:hover {
+    border-color: var(--color-border-strong);
+  }
+  .m-pm:focus-visible {
+    outline: 2px solid var(--color-focus-ring);
+    outline-offset: 3px;
+  }
+  .m-pm .l-staf-thumb {
+    width: 100%;
+    height: 84px;
+    margin-bottom: 6px;
+    font-size: 40px;
+  }
+  .m-pm strong {
+    padding-inline: 2px;
+    font: 600 var(--text-body-sm) / 1.3 var(--font-ui);
+  }
+  .m-price {
+    padding-inline: 2px;
+    font: 500 var(--text-body-sm) / 1.2 var(--font-ui);
+    color: var(--color-text-muted);
+    font-variant-numeric: tabular-nums;
+  }
+  .m-q {
+    position: absolute;
+    inset-block-start: 4px;
+    inset-inline-end: 4px;
+    display: grid;
+    place-items: center;
+    min-width: 26px;
+    height: 26px;
+    padding: 0 7px;
+    border: 2px solid var(--color-surface);
+    border-radius: var(--radius-pill);
+    background: var(--color-primary);
+    color: var(--color-on-primary);
+    font: 600 12px / 1 var(--font-ui);
+  }
+  .m-pm:disabled {
+    cursor: not-allowed;
+    background: var(--color-surface-subtle);
+  }
+  .m-pm:disabled:hover {
+    border-color: var(--color-border);
+  }
+  .m-pm:disabled .l-staf-thumb {
+    filter: grayscale(1);
+    opacity: 0.6;
+  }
+  .m-pm:disabled strong {
+    color: var(--color-text-muted);
+  }
+  .m-sold {
+    position: absolute;
+    inset-block-start: 14px;
+    inset-inline-start: 14px;
+  }
+
+  /* Tiket */
+  .m-ticket {
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+    overflow: hidden;
+  }
+  .m-ticket .l-staf-card-head {
+    align-items: center;
+    padding-bottom: var(--space-4);
+    border-block-end: var(--border-hairline) solid var(--color-border);
+  }
+  .m-ticket .l-staf-card-head {
+    flex-wrap: nowrap;
+  }
+  .m-ticket .l-staf-card-head > div {
+    min-width: 0;
+  }
+  .m-ticket-body {
+    flex: 1;
+    min-height: 0;
+    display: grid;
+    align-content: start;
+    gap: var(--space-4);
+    padding: var(--space-4) var(--spacing-20);
+    overflow-y: auto;
+    scrollbar-width: thin;
+  }
+  .m-ticket-foot {
+    display: grid;
+    gap: var(--space-3);
+    padding: var(--space-4) var(--spacing-20) var(--spacing-20);
+    border-block-start: var(--border-hairline) solid var(--color-border);
+  }
+  .m-form2 {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: var(--space-3);
+  }
+  .m-form2:has(> [data-part="table-field"][hidden]) > .l-staf-field {
+    grid-column: 1 / -1;
+  }
+  .m-lines-head {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: var(--space-2);
+    margin: 0;
+    font: 600 var(--text-label-sm) / var(--leading-label-sm) var(--font-ui);
+    color: var(--color-text-muted);
+  }
+  .m-saved {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    font-weight: 500;
+  }
+  .m-saved :is(iconify-icon, svg.lucide) {
+    color: var(--color-positive);
+  }
+  .m-lines {
+    display: grid;
+    gap: var(--space-3);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+  .m-line {
+    display: grid;
+    grid-template-columns: 40px minmax(0, 1fr) auto;
+    align-items: center;
+    gap: var(--space-2) var(--space-3);
+  }
+  .m-line .l-staf-thumb {
+    width: 40px;
+    height: 40px;
+    font-size: 20px;
+  }
+  .m-line strong {
+    display: block;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    font: 600 var(--text-body-sm) / 1.3 var(--font-ui);
+  }
+  .m-line small {
+    font: 500 var(--text-label-sm) / 1.3 var(--font-ui);
+    color: var(--color-text-muted);
+    font-variant-numeric: tabular-nums;
+  }
+  .m-note-btn {
+    margin-inline-start: 6px;
+    padding: 0;
+    border: 0;
+    background: none;
+    color: var(--color-accent-text);
+    font: 600 var(--text-label-sm) / 1.3 var(--font-ui);
+    cursor: pointer;
+  }
+  .m-note-btn:hover {
+    text-decoration: underline;
+  }
+  .m-line .l-staf-input {
+    grid-column: 2 / -1;
+    min-height: 40px;
+    padding-block: 6px;
+    font-size: var(--text-body-sm);
+  }
+  .m-stepper {
+    display: inline-flex;
+    align-items: center;
+    gap: 2px;
+    padding: 3px;
+    border: var(--border-hairline) solid var(--color-border);
+    border-radius: var(--radius-pill);
+    background: var(--color-surface-subtle);
+  }
+  .m-stepper button {
+    display: grid;
+    place-items: center;
+    width: 30px;
+    height: 30px;
+    padding: 0;
+    border: 0;
+    border-radius: var(--radius-pill);
+    background: var(--color-surface);
+    color: var(--color-text);
+    box-shadow: 0 0 0 1px var(--color-border);
+    cursor: pointer;
+  }
+  .m-stepper button:focus-visible {
+    outline: 2px solid var(--color-focus-ring);
+    outline-offset: 2px;
+  }
+  .m-stepper output {
+    min-width: 26px;
+    text-align: center;
+    font: 600 var(--text-body-sm) / 1 var(--font-ui);
+    font-variant-numeric: tabular-nums;
+  }
+  .m-empty-ticket {
+    padding: var(--space-6) var(--space-4);
+    border: var(--border-hairline) dashed var(--color-border-strong);
+    border-radius: var(--radius-image);
+    text-align: center;
+    font: 500 var(--text-body-sm) / 1.4 var(--font-ui);
+    color: var(--color-text-muted);
+  }
+  .m-empty-ticket :is(iconify-icon, svg.lucide) {
+    display: block;
+    margin: 0 auto var(--space-2);
+    font-size: 26px;
+    color: var(--color-text-faint);
+  }
+  .m-sum {
+    display: grid;
+    gap: 6px;
+    font: 400 var(--text-body-sm) / 1.4 var(--font-ui);
+    color: var(--color-text-muted);
+  }
+  .m-sum div {
+    display: flex;
+    justify-content: space-between;
+    gap: var(--space-3);
+  }
+  .m-sum span:last-child {
+    font-variant-numeric: tabular-nums;
+  }
+  .m-sum .m-sum-total {
+    padding-top: var(--space-1);
+    font: 600 17px / 1.3 var(--font-ui);
+    color: var(--color-text);
+  }
+  .m-row {
+    display: flex;
+    gap: var(--space-2);
+  }
+  .m-row > .l-staf-btn {
+    flex: 1;
+    padding-inline: var(--space-4);
+  }
+  .m-dlg-text {
+    margin: 0;
+    font: 400 var(--text-body-sm) / var(--leading-body-sm) var(--font-ui);
+    color: var(--color-text-muted);
+  }
+
+  @media (max-width: 1100px) {
+    .p-kasir-manual {
+      grid-template-columns: minmax(0, 1fr) 360px;
+      gap: var(--space-4);
+    }
+    .m-grid {
+      grid-template-columns: repeat(auto-fill, minmax(138px, 1fr));
+    }
+    .m-pm .l-staf-thumb {
+      height: 72px;
+      font-size: 34px;
+    }
+  }
+  @media (max-width: 860px) {
+    .p-kasir-manual {
+      grid-template-columns: minmax(0, 1fr);
+      height: auto;
+      margin-block-end: 0;
+    }
+    .m-catalog {
+      overflow: visible;
+    }
+    .m-ticket {
+      overflow: visible;
+    }
+    .m-ticket-body {
+      overflow: visible;
+    }
+  }
+  @media (max-width: 560px) {
+    .m-form2 {
+      grid-template-columns: minmax(0, 1fr);
+    }
+    .m-tools .l-staf-search {
+      flex-basis: 100%;
+      max-width: none;
+    }
+  }
+}

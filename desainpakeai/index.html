@@ -1,0 +1,154 @@
+<!doctype html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Prototipe — IUL FnB</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/staf.css">
+<style>
+  .wrap{max-width:1120px;margin:0 auto;padding:40px 28px 64px}
+  .hero{position:relative;overflow:hidden;border-radius:28px;padding:34px 36px;color:#F6EDE3;background:radial-gradient(120% 120% at 100% 0%,#4B3324 0%,rgba(75,51,36,0) 60%),var(--espresso)}
+  .hero .row{gap:14px}
+  .hero .logo{width:48px;height:48px;border-radius:14px;font-size:16px}
+  .hero small{font-size:12px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:#C9B6A4}
+  .hero h1{font-size:32px;font-weight:800;letter-spacing:-.025em;line-height:1.15;margin-top:22px;max-width:640px}
+  .hero p{font-size:15px;color:#D8C7B6;line-height:1.6;margin-top:10px;max-width:640px}
+  .hero-actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:22px}
+  .hero .btn:not(.btn-primary){background:rgba(255,255,255,.08);border-color:rgba(255,255,255,.16);color:#fff}
+  .hero .btn:not(.btn-primary):hover{background:rgba(255,255,255,.14)}
+  .flow{position:absolute;right:36px;bottom:30px;display:flex;align-items:center;gap:10px;font-size:12.5px;font-weight:700;color:#C9B6A4}
+  .flow span{background:rgba(255,255,255,.08);padding:6px 11px;border-radius:999px}
+  @media (max-width:980px){.flow{display:none}}
+
+  .demo{display:grid;grid-template-columns:auto 1fr auto;gap:16px;align-items:center;margin-top:18px;padding:16px 18px;border-radius:20px;background:var(--ok-soft);border:1px solid #CFE6D7}
+  .demo .ico{width:44px;height:44px;border-radius:14px;background:#fff;color:var(--ok);display:grid;place-items:center}
+  .demo strong{display:block;font-size:15px}
+  .demo p{font-size:13px;color:#205A39;margin-top:2px;line-height:1.5}
+  @media (max-width:760px){.demo{grid-template-columns:1fr}}
+
+  .sec{display:flex;align-items:baseline;justify-content:space-between;gap:12px;margin:34px 2px 14px;flex-wrap:wrap}
+  .sec h2{font-size:19px;font-weight:800;letter-spacing:-.015em}
+  .sec p{font-size:13px;color:var(--ink-3);font-weight:600}
+  .cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:14px}
+  .pcard{position:relative;display:flex;flex-direction:column;gap:10px;padding:18px;border-radius:20px;background:var(--surface);border:1px solid var(--line);box-shadow:var(--shadow-sm);text-decoration:none;transition:box-shadow .2s,transform .2s var(--ease),border-color .2s}
+  .pcard:hover{box-shadow:var(--shadow);transform:translateY(-2px);border-color:var(--line-2)}
+  .pcard .top{display:flex;align-items:center;justify-content:space-between}
+  .pcard .pi{width:44px;height:44px;border-radius:14px;display:grid;place-items:center;background:var(--accent-soft);color:var(--accent-ink)}
+  .pcard h3{font-size:16px;font-weight:800;letter-spacing:-.01em}
+  .pcard p{font-size:13px;color:var(--ink-2);line-height:1.55;flex:1}
+  .pcard .meta{display:flex;gap:6px;flex-wrap:wrap}
+  .pcard .go{position:absolute;right:16px;bottom:16px;color:var(--ink-3);transition:transform .2s var(--ease),color .2s}
+  .pcard:hover .go{transform:translateX(3px);color:var(--accent)}
+  .pcard.primary{background:var(--accent-soft);border-color:#F3CDB9}
+  .pcard.primary .pi{background:var(--accent);color:#fff}
+
+  .role{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+  .foot-note{margin-top:36px;font-size:12.5px;color:var(--ink-3);line-height:1.6;border-top:1px solid var(--line);padding-top:18px}
+  .foot-note code{font-family:ui-monospace,Menlo,monospace;font-size:12px;background:rgba(42,27,18,.06);padding:1px 6px;border-radius:6px}
+</style>
+</head>
+<body data-page="index">
+<div class="wrap">
+  <header class="hero">
+    <div class="row">
+      <span class="logo">KS</span>
+      <div><small>IUL FnB · Prototipe HTML</small><div style="font-weight:800;font-size:16px">Kedai Senja</div></div>
+    </div>
+    <h1>Satu sistem untuk pesanan QR, layar kasir, dan laporan pemilik.</h1>
+    <p>Kumpulan prototipe halaman utama berdasarkan PRD IUL FnB. Semua data adalah contoh dan disimpan di browser, jadi aman dicoba.</p>
+    <div class="hero-actions">
+      <a class="btn btn-primary btn-lg" href="halaman-utama.html" target="_blank" rel="noopener" id="ctaCustomer"></a>
+      <a class="btn btn-lg" href="kasir.html" target="_blank" rel="noopener" id="ctaKasir"></a>
+    </div>
+    <div class="flow" aria-hidden="true"><span>Scan QR</span>→<span>Pesan</span>→<span>Kasir proses</span>→<span>Diantar</span></div>
+  </header>
+
+  <div class="demo" role="note">
+    <span class="ico" id="demoIco"></span>
+    <div>
+      <strong>Coba alur real-time</strong>
+      <p>Buka <b>Layar Kasir</b> dan <b>Menu Pelanggan</b> di dua tab (atau dua jendela berdampingan). Kirim pesanan dari menu pelanggan, lalu pesanan langsung muncul di kasir. Ubah statusnya di kasir, dan layar pelanggan ikut berubah.</p>
+    </div>
+    <div class="role">
+      <span class="faint" style="font-size:12.5px;font-weight:700">Masuk sebagai</span>
+      <div class="seg" role="tablist" aria-label="Peran demo" id="roleSeg">
+        <button type="button" role="tab" data-role="OWNER">Pemilik</button>
+        <button type="button" role="tab" data-role="CASHIER">Kasir</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="sec"><h2>App Pelanggan (QR)</h2><p>Dibuka di ponsel setelah scan QR meja, tanpa install aplikasi</p></div>
+  <div class="cards" id="cardsCustomer"></div>
+
+  <div class="sec"><h2>App Kasir</h2><p>Layar utama kasir untuk memproses pesanan</p></div>
+  <div class="cards" id="cardsKasir"></div>
+
+  <div class="sec"><h2>Pengelolaan Pemilik</h2><p>Menu, stok, penjualan, akun, dan pengaturan</p></div>
+  <div class="cards" id="cardsOwner"></div>
+
+  <p class="foot-note">
+    Prototipe statis (HTML, CSS, JS tanpa framework) untuk divalidasi sebelum diimplementasikan di stack TanStack + Node.js + PostgreSQL.
+    Struktur data contoh mengikuti skema PRD §6. Data perubahan hanya tersimpan di memori halaman, kecuali sinkronisasi pesanan antar tab yang memakai <code>localStorage</code>.
+    QR code yang ditampilkan adalah ilustrasi.
+  </p>
+</div>
+
+<script src="assets/app.js"></script>
+<script>
+(function () {
+  const PAGES = {
+    cardsCustomer: [
+      { href:'halaman-utama.html', icon:'qr', title:'Menu & Pesan via QR', fase:1, roles:['Pelanggan'], primary:true, blank:true,
+        desc:'Lihat menu per kategori, atur jumlah & catatan, kirim pesanan, lalu lacak status Diproses → Siap → Diantar.' },
+    ],
+    cardsKasir: [
+      { href:'login.html', icon:'lock', title:'Masuk Akun', fase:3, roles:['Kasir', 'Pemilik'],
+        desc:'Halaman masuk untuk kasir dan pemilik. Peran menentukan halaman apa saja yang bisa dibuka.' },
+      { href:'kasir.html', icon:'orders', title:'Layar Kasir · Pesanan', fase:1, roles:['Kasir', 'Pemilik'], primary:true,
+        desc:'Pesanan QR masuk real-time, ubah status per kolom, input pesanan manual, terima pembayaran tunai/non-tunai, dan cetak struk.' },
+      { href:'stok.html', icon:'box', title:'Stok Bahan', fase:2, roles:['Kasir', 'Pemilik'],
+        desc:'Sisa bahan dalam satu layar, catat bahan masuk, stok berkurang otomatis dari penjualan, dan peringatan stok menipis.' },
+    ],
+    cardsOwner: [
+      { href:'menu.html', icon:'menu', title:'Menu & Meja', fase:2, roles:['Pemilik'],
+        desc:'Tambah dan ubah menu, atur kategori, tandai menu habis, kelola meja, dan cetak QR unik tiap meja.' },
+      { href:'dashboard.html', icon:'chart', title:'Dashboard Penjualan', fase:3, roles:['Pemilik'],
+        desc:'Ringkasan hari ini, grafik harian/mingguan, menu terlaris, riwayat transaksi, dan unduh laporan.' },
+      { href:'staf.html', icon:'users', title:'Akun & Hak Akses', fase:3, roles:['Pemilik'],
+        desc:'Tambah atau nonaktifkan akun staf, dan atur siapa yang boleh membuka kasir, mengubah menu, atau melihat laporan.' },
+      { href:'pengaturan.html', icon:'settings', title:'Pengaturan Kafe', fase:4, roles:['Pemilik'],
+        desc:'Profil kafe, jam operasional, pajak & biaya layanan, dan format struk dengan pratinjau langsung.' },
+    ],
+  };
+  Object.entries(PAGES).forEach(([id, list]) => {
+    $('#' + id).innerHTML = list.map(p => `
+      <a class="pcard${p.primary ? ' primary' : ''}" href="${p.href}"${p.blank ? ' target="_blank" rel="noopener"' : ''}>
+        <div class="top"><span class="pi">${icon(p.icon, 22)}</span><span class="badge ${p.fase === 1 ? 'accent' : p.fase === 2 ? 'info' : p.fase === 3 ? 'ok' : ''}">Fase ${p.fase}</span></div>
+        <h3>${p.title}</h3>
+        <p>${p.desc}</p>
+        <div class="meta">${p.roles.map(r => `<span class="badge">${r}</span>`).join('')}</div>
+        <span class="go">${ICON.chevronRight}</span>
+      </a>`).join('');
+  });
+
+  $('#ctaCustomer').innerHTML = `${ICON.qr}Buka Menu Pelanggan`;
+  $('#ctaKasir').innerHTML = `${ICON.orders}Buka Layar Kasir`;
+  $('#demoIco').innerHTML = icon('zap', 22);
+
+  const renderRole = () => $$('#roleSeg button').forEach(b => b.setAttribute('aria-selected', b.dataset.role === currentRole()));
+  $('#roleSeg').addEventListener('click', e => {
+    const b = e.target.closest('button');
+    if (!b) return;
+    store.set(KEYS.role, b.dataset.role);
+    renderRole();
+    toast(b.dataset.role === 'OWNER' ? 'Masuk sebagai Pemilik · Iul Rahman' : 'Masuk sebagai Kasir · Rina Kartika — halaman pemilik akan terkunci');
+  });
+  renderRole();
+})();
+</script>
+</body>
+</html>

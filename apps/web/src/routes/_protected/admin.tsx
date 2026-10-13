@@ -93,9 +93,9 @@ function AdminPage() {
 
       <div className="mt-8">
         <Button variant="ghost" asChild size="sm">
-          <Link to="/app">
+          <Link to="/kasir">
             <ArrowLeft aria-hidden="true" />
-            Back to your app
+            Kembali
           </Link>
         </Button>
       </div>

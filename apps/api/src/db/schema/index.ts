@@ -4,3 +4,8 @@ export * from "./session";
 export * from "./account";
 export * from "./verification";
 export * from "./notes";
+export * from "./menu";
+export * from "./tables";
+export * from "./stock";
+export * from "./orders";
+export * from "./settings";

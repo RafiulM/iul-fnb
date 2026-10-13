@@ -1,61 +1,41 @@
-import {
-  createFileRoute,
-  Link,
-  Outlet,
-  redirect,
-} from "@tanstack/react-router";
-import { roleHasPermission } from "@starter/shared/permissions";
-import { Brand } from "@/components/brand";
-import { SignOutButton } from "@/components/sign-out-button";
+import { createFileRoute, Outlet, redirect } from "@tanstack/react-router";
+import { StafRail } from "@/components/fnb/shell";
+import { staffRole } from "@/lib/staff-role";
 
-// Pathless layout for signed-in screens. The check runs on the server during
-// SSR and again on client navigation. It protects pages only: the API
-// authenticates every request itself.
+// Signed-in Kasir + Dashboard screens inside the "staf" layout.
+//
+// Live cashier boards that also keep device-local state (manual-order draft,
+// unprinted QR list) in localStorage, so this subtree renders on the client
+// only (`ssr: false`; the server sends the pending screen). Data comes from
+// the API through each feature's api.ts.
 export const Route = createFileRoute("/_protected")({
+  ssr: false,
   beforeLoad: ({ context }) => {
     if (!context.session) throw redirect({ to: "/sign-in" });
-    return { session: context.session };
+    return {
+      session: context.session,
+      role: staffRole(context.session.user.role),
+    };
   },
+  pendingComponent: () => (
+    <div className="l-staf-empty" role="status" style={{ minHeight: "60vh" }}>
+      Memuat…
+    </div>
+  ),
   component: ProtectedLayout,
 });
 
-const navLink =
-  "rounded-md px-3 py-1.5 text-sm font-medium text-muted-foreground transition-colors hover:text-foreground focus-visible:outline-2 focus-visible:outline-ring data-[status=active]:bg-muted data-[status=active]:text-foreground";
-
 function ProtectedLayout() {
-  const { user } = Route.useRouteContext().session;
-  // Presentation only; /admin guards itself and the API enforces the role.
-  const canAdmin = roleHasPermission(user.role, { notes: ["read-any"] });
-
+  const { session, role } = Route.useRouteContext();
   return (
-    <>
-      <header className="border-b bg-card">
-        <div className="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-4 px-6 py-5 sm:px-10">
-          <div className="flex flex-wrap items-center gap-6">
-            <Brand />
-            <nav aria-label="Main" className="flex gap-1">
-              <Link to="/app" className={navLink}>
-                App
-              </Link>
-              <Link to="/notes" className={navLink}>
-                Notes
-              </Link>
-              {canAdmin && (
-                <Link to="/admin" className={navLink}>
-                  Admin
-                </Link>
-              )}
-            </nav>
-          </div>
-          <SignOutButton />
-        </div>
-      </header>
-      <main
-        id="main-content"
-        className="mx-auto max-w-6xl px-6 py-12 sm:px-10 sm:py-16"
-      >
+    <div className="l-staf">
+      <a className="l-staf-skip" href="#main-content">
+        Lewati ke konten utama
+      </a>
+      <StafRail user={session.user} role={role} />
+      <div className="l-staf-main" id="main-content" tabIndex={-1}>
         <Outlet />
-      </main>
-    </>
+      </div>
+    </div>
   );
 }

@@ -5,10 +5,10 @@ test("anonymous visitors cannot access the protected app", async ({
   page,
   request,
 }) => {
-  await page.goto("/app");
+  await page.goto("/kasir");
   await expect(page).toHaveURL(/\/sign-in$/);
   await expect(
-    page.getByRole("heading", { name: "Welcome back" }),
+    page.getByRole("heading", { name: "Masuk ke akun" }),
   ).toBeVisible();
   // The root has no page: anonymous visitors land on sign-in.
   await page.goto("/");
@@ -25,25 +25,23 @@ test("signup, persisted session, signout, rejected password, and signin work acr
   page.on("pageerror", (error) => errors.push(error.message));
   const email = `builder-${Date.now()}@example.com`;
   await page.goto("/sign-up");
-  await page.getByLabel("Name", { exact: true }).fill("Ada Builder");
+  await page.getByLabel("Nama", { exact: true }).fill("Ada Builder");
   await page.getByLabel("Email", { exact: true }).fill(email);
-  await page.getByLabel("Password", { exact: true }).fill(PASSWORD);
-  await page
-    .getByRole("button", { name: "Create account", exact: true })
-    .click();
-  await expect(page).toHaveURL(/\/app$/);
+  await page.getByLabel("Kata sandi", { exact: true }).fill(PASSWORD);
+  await page.getByRole("button", { name: "Buat akun", exact: true }).click();
+  await expect(page).toHaveURL(/\/kasir$/);
   await expect(
-    page.getByRole("button", { name: "Sign out", exact: true }),
+    page.getByRole("button", { name: "Keluar", exact: true }),
   ).toBeVisible();
   // A full reload is rendered by the web server, which reads the session
   // from the API with the browser's cookie.
   await page.reload();
-  await expect(page).toHaveURL(/\/app$/);
+  await expect(page).toHaveURL(/\/kasir$/);
   await expect(
-    page.getByRole("button", { name: "Sign out", exact: true }),
+    page.getByRole("button", { name: "Keluar", exact: true }),
   ).toBeVisible();
   await page.goto("/");
-  await expect(page).toHaveURL(/\/app$/);
+  await expect(page).toHaveURL(/\/kasir$/);
   const cookies = await context.cookies(API_URL);
   expect(
     cookies.some(
@@ -51,20 +49,22 @@ test("signup, persisted session, signout, rejected password, and signin work acr
     ),
   ).toBe(true);
   await page.goto("/sign-in");
-  await expect(page).toHaveURL(/\/app$/);
-  await page.getByRole("button", { name: "Sign out", exact: true }).click();
+  await expect(page).toHaveURL(/\/kasir$/);
+  await page.getByRole("button", { name: "Keluar", exact: true }).click();
   await expect(page).toHaveURL(/\/sign-in$/);
-  await page.goto("/app");
+  await page.goto("/kasir");
   await expect(page).toHaveURL(/\/sign-in$/);
   await page.getByLabel("Email", { exact: true }).fill(email);
-  await page.getByLabel("Password", { exact: true }).fill("incorrect-password");
-  await page.getByRole("button", { name: "Sign in", exact: true }).click();
+  await page
+    .getByLabel("Kata sandi", { exact: true })
+    .fill("incorrect-password");
+  await page.getByRole("button", { name: "Masuk", exact: true }).click();
   await expect(
-    page.getByRole("alert").filter({ hasText: "We couldn't sign you in." }),
-  ).toContainText("Check your email and password");
-  await page.getByLabel("Password", { exact: true }).fill(PASSWORD);
-  await page.getByRole("button", { name: "Sign in", exact: true }).click();
-  await expect(page).toHaveURL(/\/app$/);
+    page.getByRole("alert").filter({ hasText: "Email atau kata sandi salah" }),
+  ).toContainText("Periksa lagi");
+  await page.getByLabel("Kata sandi", { exact: true }).fill(PASSWORD);
+  await page.getByRole("button", { name: "Masuk", exact: true }).click();
+  await expect(page).toHaveURL(/\/kasir$/);
   expect(errors).toEqual([]);
 });
 
@@ -93,12 +93,10 @@ test("auth pages fit a narrow screen", async ({ page }) => {
   await page.emulateMedia({ reducedMotion: "reduce" });
   await page.goto("/sign-in");
   await expect(
-    page.getByRole("heading", { name: "Welcome back" }),
+    page.getByRole("heading", { name: "Masuk ke akun" }),
   ).toBeVisible();
   expect(await fitsWidth(page)).toBe(true);
-  await page
-    .getByRole("link", { name: "Create an account", exact: true })
-    .click();
+  await page.getByRole("link", { name: /Buat akun pemilik/ }).click();
   await expect(page.getByLabel("Email", { exact: true })).toBeVisible();
   expect(await fitsWidth(page)).toBe(true);
 });

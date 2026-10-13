@@ -1,0 +1,993 @@
+<!doctype html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Stok Bahan — Kedai Senja | IUL FnB</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/staf.css">
+<style>
+/* ===== CSS khusus halaman Stok Bahan ===== */
+[hidden]{display:none!important}
+
+/* Peringatan */
+.alert .al-title{display:block;font-size:14px;font-weight:800;color:#5A3C0A}
+.alert p{margin-top:2px;line-height:1.5}
+.alert > .btn{flex:none;align-self:center}
+.lnk{border:0;background:none;padding:0;font:inherit;font-weight:700;color:inherit;text-decoration:underline;text-decoration-color:rgba(110,74,14,.35);text-underline-offset:3px;cursor:pointer}
+.lnk:hover{text-decoration-color:currentColor}
+.alert.pulse{animation:alertPulse 1.3s var(--ease) 2}
+@keyframes alertPulse{0%{box-shadow:0 0 0 0 rgba(224,164,58,.55)}100%{box-shadow:0 0 0 12px rgba(224,164,58,0)}}
+
+/* Tata letak 2 kolom */
+.stok-grid{display:grid;grid-template-columns:minmax(0,2.2fr) minmax(300px,1fr);gap:18px;align-items:start}
+.hist{position:sticky;top:16px;display:flex;flex-direction:column;min-height:0}
+@media (max-width:1180px){
+  .stok-grid{grid-template-columns:minmax(0,1fr)}
+  .hist{position:static}
+}
+
+/* Kartu tabel */
+.card-head .search{min-width:0;width:240px;max-width:100%}
+.toolbar{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;padding:14px 18px}
+.sort{display:flex;align-items:center;gap:8px;font-size:12.5px;font-weight:700;color:var(--ink-2)}
+.sort .select{width:auto;height:36px;min-width:150px;font-weight:600;font-size:13px}
+.stok-table th,.stok-table td{padding-left:10px;padding-right:10px}
+.stok-table tbody tr.flash td{animation:rowFlash 1.8s ease-out}
+@keyframes rowFlash{0%,35%{background:#FFF1D6}100%{background:transparent}}
+.ing-btn{display:block;border:0;background:none;padding:0;font-weight:700;font-size:13.5px;text-align:left;color:var(--ink);cursor:pointer}
+.ing-btn:hover{color:var(--accent-ink);text-decoration:underline;text-underline-offset:3px}
+.ing-txt small{display:block;font-size:12px;color:var(--ink-3);margin-top:1px}
+.meter{display:grid;gap:6px;min-width:110px;max-width:170px}
+.meter strong{font-size:14px;font-weight:800}
+.meter-min{display:none;font-size:11.5px;color:var(--ink-3);font-weight:600}
+.progress{position:relative}
+.progress b{position:absolute;top:0;bottom:0;width:2px;margin-left:-1px;background:rgba(36,23,14,.38)}
+.progress.danger{background:var(--danger-soft)}
+.row-actions{display:inline-flex;align-items:center;justify-content:flex-end;gap:6px}
+.tbl-foot{font-size:12.5px;color:var(--ink-3);font-weight:600}
+.legend{display:inline-flex;align-items:center;gap:6px}
+.legend i{display:inline-block;width:2px;height:12px;background:rgba(36,23,14,.38);border-radius:1px}
+@media (max-width:820px){
+  .col-min{display:none}
+  .meter-min{display:block}
+}
+
+/* Riwayat pergerakan */
+.hist .card-head{padding-bottom:2px}
+.hist-tools{padding:12px 18px 4px}
+.hist-list{padding:0 18px 8px;overflow-y:auto;max-height:calc(100vh - 270px);min-height:220px;overscroll-behavior:contain}
+@media (max-width:1180px){.hist-list{max-height:560px}}
+.mv-day{font-size:11px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-3);padding:14px 0 4px;position:sticky;top:0;background:var(--surface);z-index:1}
+.mv{display:flex;gap:11px;align-items:flex-start;padding:10px 0;border-bottom:1px dashed var(--line)}
+.mv:last-child{border-bottom:0}
+.mv.flash{animation:mvFlash 1.8s ease-out}
+@keyframes mvFlash{0%,35%{background:#FFF1D6}100%{background:transparent}}
+.mv-ico{flex:none;width:28px;height:28px;border-radius:9px;display:grid;place-items:center;font-weight:800;font-size:16px;line-height:1}
+.mv-ico.in{background:var(--ok-soft);color:var(--ok)}
+.mv-ico.out{background:#F1ECE6;color:var(--ink-2)}
+.mv-txt{flex:1;min-width:0}
+.mv-txt strong,.mv-name{display:block;font-size:13px;font-weight:700;line-height:1.35;color:var(--ink)}
+.mv-name{border:0;background:none;padding:0;text-align:left;cursor:pointer}
+.mv-name:hover{color:var(--accent-ink);text-decoration:underline;text-underline-offset:3px}
+.mv-txt small{display:block;font-size:12px;color:var(--ink-3);margin-top:2px;line-height:1.45}
+.mv-txt small b{font-weight:700;color:var(--ink-2);white-space:nowrap}
+.mv-end{flex:none;display:grid;justify-items:end;gap:3px;text-align:right}
+.mv-qty{font-weight:800;font-size:13px;font-variant-numeric:tabular-nums;white-space:nowrap}
+.mv-qty.in{color:var(--ok)}
+.mv-time{font-size:11.5px;color:var(--ink-3);font-weight:600;font-variant-numeric:tabular-nums;white-space:nowrap}
+.tag-sim{font-size:10px;font-weight:800;letter-spacing:.04em;text-transform:uppercase;color:var(--info);background:var(--info-soft);padding:1px 6px;border-radius:999px}
+.hist-foot{justify-content:flex-start;gap:8px;font-size:12.5px;color:var(--ink-2);font-weight:600}
+.hist-foot svg{flex:none;color:var(--ok)}
+
+/* Drawer detail bahan */
+.eyebrow{font-size:11px;font-weight:800;letter-spacing:.09em;text-transform:uppercase;color:var(--ink-3)}
+.drawer-head h2{font-size:20px;font-weight:800;letter-spacing:-.02em;margin-top:2px}
+.drawer-head p{font-size:13px;color:var(--ink-2);margin-top:2px}
+.stock-hero{border:1px solid var(--line);border-radius:18px;padding:16px;background:var(--surface-2)}
+.stock-hero .big{font-size:36px;font-weight:800;letter-spacing:-.03em;line-height:1.1;margin:8px 0 12px}
+.stock-hero .progress{height:10px}
+.hero-meta{margin-top:10px;font-size:13px;color:var(--ink-2)}
+.hero-meta strong{color:var(--ink)}
+.note{display:flex;gap:9px;align-items:flex-start;margin-top:12px;padding:10px 12px;border-radius:12px;font-size:13px;font-weight:600;line-height:1.45}
+.note svg{flex:none;margin-top:1px}
+.note.ok{background:var(--ok-soft);color:#205A39}
+.note.warn{background:var(--warn-soft);color:#6E4A0E}
+.note.danger{background:var(--danger-soft);color:#8A1D17}
+.sec-title{font-size:11px;font-weight:800;letter-spacing:.09em;text-transform:uppercase;color:var(--ink-3);margin:24px 0 8px}
+.uses{list-style:none;display:grid;gap:8px}
+.uses li{display:flex;align-items:center;gap:12px;padding:10px;border:1px solid var(--line);border-radius:14px}
+.uses .thumb{width:40px;height:40px;font-size:20px}
+.uses strong{display:block;font-size:13.5px;font-weight:700}
+.uses small{display:block;font-size:12px;color:var(--ink-3)}
+.est{flex:none;display:grid;justify-items:end;gap:4px;text-align:right;font-size:12px;color:var(--ink-2)}
+.est strong{font-size:13px;color:var(--ink);font-variant-numeric:tabular-nums}
+.est.none strong{color:var(--danger)}
+.dmv{list-style:none}
+.dmv li{display:flex;align-items:flex-start;gap:11px;padding:9px 0;border-bottom:1px dashed var(--line)}
+.dmv li:last-child{border-bottom:0}
+.dmv strong{display:block;font-size:13px;font-weight:800;font-variant-numeric:tabular-nums}
+.dmv strong.pos{color:var(--ok)}
+.dmv small{display:block;font-size:12px;color:var(--ink-3)}
+.drawer-foot .row .btn{flex:1}
+
+/* Form & modal */
+.field .opt{font-weight:500;color:var(--ink-3)}
+.err{font-size:12px;font-weight:700;color:var(--danger)}
+.unit-warn{font-size:12px;font-weight:700;color:var(--warn)}
+.affix:has(input[aria-invalid="true"]){border-color:var(--danger);box-shadow:0 0 0 3px var(--danger-soft)}
+.quick{display:flex;gap:6px;flex-wrap:wrap}
+.chip.sm{padding:4px 10px;font-size:12px}
+.preview{display:flex;align-items:center;justify-content:space-between;gap:10px 14px;flex-wrap:wrap;padding:14px 16px;border-radius:16px;background:var(--surface-2);border:1px dashed var(--line-2)}
+.pv-lbl{display:block;font-size:11px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-3)}
+.pv-flow{font-size:20px;font-weight:800;letter-spacing:-.02em;margin-top:2px}
+.pv-arrow{color:var(--ink-3);font-weight:600;margin:0 4px}
+.pv-badges{display:flex;align-items:center;gap:6px;color:var(--ink-3);font-weight:800}
+.pv-note{flex-basis:100%;font-size:12.5px;font-weight:700;color:var(--ok)}
+.pv-note.warn{color:var(--warn)}
+.helper{display:flex;gap:8px;align-items:flex-start;padding:10px 12px;border-radius:12px;background:var(--warn-soft);color:#6E4A0E;font-size:12.5px;line-height:1.45}
+.helper svg{flex:none;margin-top:1px}
+.status-line{display:flex;align-items:center;gap:8px;flex-wrap:wrap;font-size:13px;color:var(--ink-2)}
+@media (max-width:560px){.form-grid{grid-template-columns:minmax(0,1fr)}}
+@media (max-width:640px){.alert{flex-wrap:wrap}.alert > .btn{margin-left:32px}}
+</style>
+</head>
+<body data-page="stok">
+<div class="shell">
+  <aside class="side" id="side"></aside>
+  <div class="main">
+    <header class="topbar">
+      <div>
+        <h1>Stok Bahan</h1>
+        <p id="subtitle">Stok berkurang otomatis dari setiap penjualan</p>
+      </div>
+      <div class="actions">
+        <button type="button" class="btn" id="btnAdd"><span data-icon="plus"></span>Tambah Bahan</button>
+        <button type="button" class="btn btn-primary" id="btnCatat"><span data-icon="download"></span>Catat Bahan Masuk</button>
+      </div>
+    </header>
+
+    <main class="content">
+      <div id="alertBox"></div>
+
+      <section class="kpis" id="kpis" aria-label="Ringkasan stok"></section>
+
+      <div class="stok-grid">
+        <!-- Daftar bahan -->
+        <section class="card" aria-labelledby="tblTitle">
+          <div class="card-head">
+            <div>
+              <h2 id="tblTitle">Daftar bahan</h2>
+              <p>Klik bahan untuk melihat detail & menu yang memakainya</p>
+            </div>
+            <label class="search">
+              <span data-icon="search" data-size="16"></span>
+              <span class="sr-only">Cari bahan</span>
+              <input type="search" id="q" placeholder="Cari bahan…" autocomplete="off">
+            </label>
+          </div>
+          <div class="toolbar">
+            <div class="chips" id="chips" role="group" aria-label="Saring menurut status"></div>
+            <label class="sort">Urutkan
+              <select class="select" id="sort">
+                <option value="status">Status</option>
+                <option value="name">Nama (A–Z)</option>
+                <option value="low">Sisa terendah</option>
+              </select>
+            </label>
+          </div>
+          <div class="table-wrap" id="tblWrap">
+            <table class="table stok-table">
+              <thead>
+                <tr>
+                  <th scope="col">Bahan</th>
+                  <th scope="col">Sisa stok</th>
+                  <th scope="col" class="col-min"><span title="Batas minimum">Batas min.</span></th>
+                  <th scope="col">Status</th>
+                  <th scope="col" class="num">Aksi</th>
+                </tr>
+              </thead>
+              <tbody id="rows"></tbody>
+            </table>
+          </div>
+          <div class="empty" id="tblEmpty" hidden>
+            <div class="em" aria-hidden="true">🔍</div>
+            <h3>Tidak ada bahan yang cocok</h3>
+            <p>Coba kata lain atau tampilkan semua bahan.</p>
+            <button type="button" class="btn btn-sm" id="btnReset" style="margin-top:14px">Tampilkan semua</button>
+          </div>
+          <div class="card-foot tbl-foot">
+            <span id="tblCount"></span>
+            <span class="legend"><i aria-hidden="true"></i>Garis tipis pada bar = batas minimum</span>
+          </div>
+        </section>
+
+        <!-- Riwayat pergerakan stok -->
+        <section class="card hist" aria-labelledby="histTitle">
+          <div class="card-head">
+            <div>
+              <h2 id="histTitle">Pergerakan stok</h2>
+              <p>Bahan masuk & keluar terbaru</p>
+            </div>
+            <button type="button" class="btn btn-ghost btn-sm" id="btnSim" title="Mengurangi stok seolah ada 1 pesanan baru"><span data-icon="zap" data-size="15"></span>Simulasikan penjualan</button>
+          </div>
+          <div class="hist-tools">
+            <div class="seg block" role="group" aria-label="Saring pergerakan">
+              <button type="button" data-mv="ALL" aria-pressed="true">Semua</button>
+              <button type="button" data-mv="IN" aria-pressed="false">Masuk</button>
+              <button type="button" data-mv="OUT" aria-pressed="false">Keluar</button>
+            </div>
+          </div>
+          <div class="hist-list" id="hist" tabindex="0" aria-label="Daftar pergerakan stok"></div>
+          <div class="card-foot hist-foot"><span data-icon="refresh" data-size="15"></span>Stok keluar tercatat otomatis dari setiap pesanan.</div>
+        </section>
+      </div>
+    </main>
+  </div>
+</div>
+
+<!-- ===== Drawer: detail bahan ===== -->
+<aside class="drawer" id="ingDrawer" role="dialog" aria-modal="true" aria-labelledby="dTitle">
+  <div class="drawer-head">
+    <div>
+      <span class="eyebrow">Detail bahan</span>
+      <h2 id="dTitle">Bahan</h2>
+      <p id="dSub"></p>
+    </div>
+    <button type="button" class="icon-btn" data-close aria-label="Tutup detail"><span data-icon="x"></span></button>
+  </div>
+  <div class="drawer-body" id="dBody"></div>
+  <div class="drawer-foot">
+    <div class="row">
+      <button type="button" class="btn btn-primary" id="dCatat"><span data-icon="download"></span>Catat bahan masuk</button>
+    </div>
+  </div>
+</aside>
+
+<!-- ===== Modal: catat bahan masuk ===== -->
+<section class="modal" id="catatModal" role="dialog" aria-modal="true" aria-labelledby="catatTitle">
+  <div class="modal-head">
+    <div>
+      <h2 id="catatTitle">Catat Bahan Masuk</h2>
+      <p>Tambahkan stok saat bahan datang dari pemasok atau hasil belanja.</p>
+    </div>
+    <button type="button" class="icon-btn" data-close aria-label="Tutup"><span data-icon="x"></span></button>
+  </div>
+  <form class="modal-body" id="catatForm" novalidate>
+    <div class="form-grid">
+      <div class="field span-2">
+        <label for="cIng">Bahan</label>
+        <select class="select" id="cIng"></select>
+      </div>
+      <div class="field">
+        <label for="cQty">Jumlah masuk</label>
+        <div class="affix">
+          <input id="cQty" type="number" min="0" step="any" inputmode="decimal" placeholder="0" aria-describedby="cQtyHint cQtyErr">
+          <span id="cUnit">ml</span>
+        </div>
+        <div class="quick" id="cQuick" role="group" aria-label="Jumlah cepat"></div>
+        <small id="cQtyHint"></small>
+        <p class="err" id="cQtyErr" hidden></p>
+      </div>
+      <div class="field">
+        <label for="cDate">Tanggal masuk</label>
+        <input class="input" type="date" id="cDate" aria-describedby="cDateErr">
+        <p class="err" id="cDateErr" hidden></p>
+      </div>
+      <div class="field span-2">
+        <label for="cNote">Catatan / pemasok <span class="opt">(opsional)</span></label>
+        <input class="input" id="cNote" list="noteList" maxlength="80" autocomplete="off" placeholder="mis. Pemasok susu — CV Sapi Murni">
+        <datalist id="noteList"></datalist>
+      </div>
+      <div class="span-2 preview" id="cPreview" aria-live="polite"></div>
+    </div>
+  </form>
+  <div class="modal-foot">
+    <button type="button" class="btn btn-ghost" data-close>Batal</button>
+    <span class="grow"></span>
+    <button type="button" class="btn" id="cSaveMore">Simpan &amp; catat lagi</button>
+    <button type="submit" class="btn btn-primary" form="catatForm">Simpan</button>
+  </div>
+</section>
+
+<!-- ===== Modal: tambah bahan (pemilik) ===== -->
+<section class="modal" id="addModal" role="dialog" aria-modal="true" aria-labelledby="addTitle">
+  <div class="modal-head">
+    <div>
+      <h2 id="addTitle">Tambah Bahan</h2>
+      <p>Daftarkan bahan baru yang ingin dipantau stoknya.</p>
+    </div>
+    <button type="button" class="icon-btn" data-close aria-label="Tutup"><span data-icon="x"></span></button>
+  </div>
+  <form class="modal-body" id="addForm" novalidate>
+    <div class="form-grid">
+      <div class="field span-2">
+        <label for="aName">Nama bahan</label>
+        <input class="input" id="aName" maxlength="40" autocomplete="off" placeholder="mis. Sirup vanila" autofocus aria-describedby="aNameErr">
+        <p class="err" id="aNameErr" hidden></p>
+      </div>
+      <div class="field">
+        <label for="aUnit">Satuan</label>
+        <select class="select" id="aUnit">
+          <option value="gram">gram (g)</option>
+          <option value="ml">mililiter (ml)</option>
+          <option value="pcs">pcs (buah / potong)</option>
+          <option value="botol">botol</option>
+        </select>
+      </div>
+      <div class="field">
+        <label for="aStock">Stok awal</label>
+        <div class="affix">
+          <input id="aStock" type="number" min="0" step="any" inputmode="decimal" placeholder="0" aria-describedby="aStockErr">
+          <span class="unit-lbl">gram</span>
+        </div>
+        <p class="err" id="aStockErr" hidden></p>
+      </div>
+      <div class="field span-2">
+        <label for="aMin">Batas minimum</label>
+        <div class="affix">
+          <input id="aMin" type="number" min="0" step="any" inputmode="decimal" placeholder="0" aria-describedby="aMinHelp aMinErr">
+          <span class="unit-lbl">gram</span>
+        </div>
+        <p class="err" id="aMinErr" hidden></p>
+        <div class="helper" id="aMinHelp"><span data-icon="bell" data-size="15"></span><span>Saat sisa stok sama dengan atau di bawah angka ini, bahan ditandai <strong>Menipis</strong> dan peringatan muncul di layar kasir & pemilik.</span></div>
+      </div>
+      <div class="span-2 status-line" id="aPreview" aria-live="polite"></div>
+    </div>
+  </form>
+  <div class="modal-foot">
+    <span class="hint grow">Bahan baru belum terhubung ke resep menu, jadi belum berkurang otomatis saat ada penjualan.</span>
+    <button type="button" class="btn btn-ghost" data-close>Batal</button>
+    <button type="submit" class="btn btn-primary" form="addForm">Tambah</button>
+  </div>
+</section>
+
+<!-- ===== Modal: ubah bahan (pemilik) ===== -->
+<section class="modal sm" id="editModal" role="dialog" aria-modal="true" aria-labelledby="editTitle">
+  <div class="modal-head">
+    <div>
+      <h2 id="editTitle">Ubah Bahan</h2>
+      <p id="editSub">Atur batas minimum & satuan.</p>
+    </div>
+    <button type="button" class="icon-btn" data-close aria-label="Tutup"><span data-icon="x"></span></button>
+  </div>
+  <form class="modal-body" id="editForm" novalidate>
+    <div class="form-grid" style="grid-template-columns:minmax(0,1fr)">
+      <div class="field">
+        <label for="eName">Nama bahan</label>
+        <input class="input" id="eName" maxlength="40" autocomplete="off" aria-describedby="eNameErr">
+        <p class="err" id="eNameErr" hidden></p>
+      </div>
+      <div class="field">
+        <label for="eUnit">Satuan</label>
+        <select class="select" id="eUnit">
+          <option value="gram">gram (g)</option>
+          <option value="ml">mililiter (ml)</option>
+          <option value="pcs">pcs (buah / potong)</option>
+          <option value="botol">botol</option>
+        </select>
+        <small class="unit-warn" id="eUnitWarn" hidden>Angka stok & resep tidak ikut dikonversi. Ganti satuan hanya jika sebelumnya salah pilih.</small>
+      </div>
+      <div class="field">
+        <label for="eMin">Batas minimum</label>
+        <div class="affix">
+          <input id="eMin" type="number" min="0" step="any" inputmode="decimal" autofocus aria-describedby="eMinHelp eMinErr">
+          <span class="unit-lbl" id="eUnitLbl">gram</span>
+        </div>
+        <p class="err" id="eMinErr" hidden></p>
+        <small id="eMinHelp">Bahan ditandai <strong>Menipis</strong> saat sisa stok sama dengan atau di bawah angka ini.</small>
+      </div>
+      <div class="status-line" id="ePreview" aria-live="polite"></div>
+    </div>
+  </form>
+  <div class="modal-foot">
+    <button type="button" class="btn btn-ghost" data-close>Batal</button>
+    <button type="submit" class="btn btn-primary" form="editForm">Simpan</button>
+  </div>
+</section>
+
+<script src="assets/app.js"></script>
+<script>
+(function () {
+  if (document.body.dataset.locked === 'true') return; // app.js mengganti .main bila peran tidak berhak
+
+  /* ---------- Util halaman ---------- */
+  const OWNER = currentRole() === 'OWNER';
+  const ME = currentUser();
+  const DAY = 864e5;
+  const r2 = n => Math.round(n * 100) / 100;
+  const pad = n => String(n).padStart(2, '0');
+  const isoDay = d => { const x = new Date(d); return x.getFullYear() + '-' + pad(x.getMonth() + 1) + '-' + pad(x.getDate()); };
+  const sameDay = (a, b) => isoDay(a) === isoDay(b);
+  const when = d => sameDay(d, Date.now()) ? hhmm(d)
+    : sameDay(d, Date.now() - DAY) ? 'Kemarin ' + hhmm(d)
+    : tgl(d, { day:'numeric', month:'short' }) + ' ' + hhmm(d);
+  const dayLabel = d => sameDay(d, Date.now()) ? 'Hari ini'
+    : sameDay(d, Date.now() - DAY) ? 'Kemarin'
+    : tgl(d, { weekday:'long', day:'numeric', month:'short' });
+  const joinList = a => a.length < 2 ? (a[0] || '') : a.slice(0, -1).join(', ') + ' & ' + a[a.length - 1];
+  const byName = (a, b) => a.name.localeCompare(b.name, 'id');
+  const TONE = { AMAN:'', MENIPIS:'warn', HABIS:'danger' };
+  const RANK = { HABIS:0, MENIPIS:1, AMAN:2 };
+  const UNIT_NAME = { gram:'gram', ml:'ml', pcs:'pcs', botol:'botol' };
+  const UNIT_HINT = { gram:'Isi dalam gram · 1 kg = 1.000 g', ml:'Isi dalam ml · 1 L = 1.000 ml', pcs:'Isi jumlah buah / potong', botol:'Isi jumlah botol' };
+  const QUICK = { gram:[500, 1000, 5000], ml:[1000, 2000, 5000], pcs:[6, 12, 24], botol:[12, 24, 48] };
+  const badge = st => `<span class="badge ${STOCK_BADGE[st][0]}"><span class="dot"></span>${STOCK_BADGE[st][1]}</span>`;
+  const ratio = i => i.min_stock > 0 ? i.stock_qty / i.min_stock : (i.stock_qty > 0 ? 99 : 0);
+  const scaleMax = i => Math.max(i.min_stock * 2.5, i.stock_qty, 1);
+  const pct = (v, max) => Math.max(0, Math.min(100, v / max * 100)).toFixed(1);
+  const staffFirst = id => ((STAFF.find(s => s.id === id) || {}).name || '').split(' ')[0];
+
+  // Ikon statis: <span data-icon="nama" data-size="16">
+  $$('[data-icon]').forEach(el => { el.outerHTML = icon(el.dataset.icon, +el.dataset.size || 18); });
+
+  /* ---------- Data tiruan: stock_movements (skema PRD §6) — 3 hari terakhir ---------- */
+  const STOCK_MOVEMENTS = [];
+  let mvSeq = 0;
+  function addMove(ingredient_id, qty, type, note, created_at, extra) {
+    const mv = Object.assign({ id:'sm' + (++mvSeq), ingredient_id, qty:r2(qty), type, note, created_at }, extra || {});
+    STOCK_MOVEMENTS.push(mv);
+    return mv;
+  }
+  const minsAgo = n => Date.now() - n * 60e3;
+  const at = (daysAgo, h, m) => {
+    const d = new Date(); d.setDate(d.getDate() - daysAgo); d.setHours(h, m, 0, 0);
+    return Math.min(d.getTime(), Date.now() - (daysAgo ? 0 : 30 * 60e3));
+  };
+  const dimas = STAFF.find(s => s.id === 'u3');
+  // [waktu, bahan, jumlah, catatan, dicatat oleh]
+  [
+    [at(0, 7, 10), 'i15', 12, 'Belanja pasar pagi', 'u2'],
+    [at(0, 7, 10), 'i7', 10, 'Belanja pasar pagi', 'u2'],
+    [dimas ? dimas.last_login + 20 * 60e3 : at(1, 15, 40), 'i2', 5000, 'Pemasok susu — CV Sapi Murni', 'u3'],
+    [at(1, 9, 5), 'i1', 1000, 'Roastery Kopi Merapi', 'u1'],
+    [at(1, 8, 30), 'i10', 2000, 'Pemasok ayam — Pak Darto', 'u3'],
+    [at(2, 7, 0), 'i9', 10000, 'Belanja pasar pagi', 'u1'],
+    [at(2, 8, 15), 'i17', 12, 'Titipan Bakery Roti Kita', 'u2'],
+    [at(2, 13, 20), 'i19', 24, 'Distributor air mineral', 'u2'],
+  ].forEach(([ts, ing, q, note, by]) => addMove(ing, q, 'IN', note, ts, { by }));
+
+  /** Penjualan → satu baris OUT per bahan (jumlah dijumlahkan bila dipakai beberapa menu) */
+  function recordSale(ts, code, lines, extra) {
+    const per = {};
+    lines.forEach(([menuId, q]) => recipeOf(menuId).forEach(r => { per[r.ingredient_id] = (per[r.ingredient_id] || 0) + r.qty_used * q; }));
+    const note = `Penjualan ${code} · ` + lines.map(([id, q]) => `${q}× ${menuById[id].name}`).join(', ');
+    return Object.keys(per).map(ingId => addMove(ingId, per[ingId], 'OUT', note, ts, extra));
+  }
+  [
+    [minsAgo(9),    'A-026', [['d1', 2]]],
+    [minsAgo(23),   'A-025', [['d3', 1], ['s1', 1]]],
+    [minsAgo(41),   'A-024', [['m1', 1], ['d4', 1]]],
+    [minsAgo(78),   'A-022', [['d1', 2], ['s4', 1]]],
+    [at(1, 19, 42), 'A-048', [['m2', 1], ['d2', 1]]],
+    [at(1, 18, 5),  'A-045', [['s2', 2]]],
+    [at(1, 12, 31), 'A-031', [['m3', 1], ['d5', 1]]],
+    [at(2, 20, 12), 'A-052', [['d6', 1]]],
+    [at(2, 19, 48), 'A-050', [['m5', 1]]],
+    [at(2, 11, 26), 'A-018', [['d1', 2], ['s3', 1]]],
+  ].forEach(([ts, code, lines]) => recordSale(ts, code, lines));
+
+  /* ---------- Menu habis otomatis bila bahan tidak cukup ---------- */
+  const menuBlocked = m => recipeOf(m.id).some(r => { const i = ingById[r.ingredient_id]; return !i || i.stock_qty < r.qty_used; });
+  const blockedMenus = () => MENUS.filter(m => recipeOf(m.id).length && menuBlocked(m));
+  const autoOff = new Set(MENUS.filter(m => !m.is_available && menuBlocked(m)).map(m => m.id));
+  function syncMenus() {
+    const off = [], on = [];
+    MENUS.forEach(m => {
+      if (!recipeOf(m.id).length) return;
+      const blocked = menuBlocked(m);
+      if (blocked && m.is_available) { m.is_available = false; autoOff.add(m.id); off.push(m); }
+      else if (!blocked && !m.is_available && autoOff.has(m.id)) { m.is_available = true; autoOff.delete(m.id); on.push(m); }
+    });
+    return { off, on };
+  }
+  syncMenus();
+
+  /* ---------- State ---------- */
+  const state = { filter:'ALL', q:'', sort:'status', mv:'ALL' };
+  let drawerId = null, editId = null, pulseAlert = false;
+  const flash = new Set(), flashMv = new Set();
+  let simSeq = Math.max(Number(store.get(KEYS.seq, 26)) || 26, 26);
+
+  /* ---------- Render ---------- */
+  function renderAll() {
+    $('#subtitle').textContent = `Diperbarui ${hhmm(Date.now())} · stok berkurang otomatis dari setiap penjualan`;
+    renderAlert();
+    renderKpis();
+    renderChips();
+    renderTable();
+    renderHist();
+    if (drawerId && isOpen('ingDrawer')) renderDrawer();
+    setNavCount('stok', lowStock().length, 'warn');
+  }
+
+  function renderAlert() {
+    const box = $('#alertBox');
+    const low = lowStock();
+    if (!low.length) {
+      box.innerHTML = `<div class="alert ok">${icon('check', 20)}<div class="grow"><strong>Semua bahan aman.</strong> Tidak ada bahan yang menyentuh batas minimum.</div></div>`;
+      return;
+    }
+    const men = low.filter(i => stockStatus(i) === 'MENIPIS').sort((a, b) => ratio(a) - ratio(b));
+    const hab = low.filter(i => stockStatus(i) === 'HABIS').sort(byName);
+    const head = men.length && hab.length ? `${men.length} bahan menipis & ${hab.length} habis`
+      : men.length ? `${men.length} bahan menipis` : `${hab.length} bahan habis`;
+    const names = list => joinList(list.map(i => `<button type="button" class="lnk" data-open="${i.id}">${esc(i.name)}</button>`));
+    const blocked = blockedMenus();
+    box.innerHTML = `<div class="alert warn${pulseAlert ? ' pulse' : ''}">
+      ${icon('alert', 20)}
+      <div class="grow">
+        <strong class="al-title">${head}</strong>
+        <p>${men.length ? `Menipis: ${names(men)}.` : ''} ${hab.length ? `Habis: ${names(hab)}.` : ''}</p>
+        ${blocked.length ? `<p><strong>${esc(joinList(blocked.map(m => m.name)))}</strong> sedang habis — pelanggan belum bisa memesannya sampai bahan masuk.</p>` : ''}
+      </div>
+      <button type="button" class="btn btn-sm" data-in="${(hab[0] || men[0]).id}">${icon('download', 14)}Catat bahan masuk</button>
+    </div>`;
+    pulseAlert = false;
+  }
+
+  function renderKpis() {
+    const all = INGREDIENTS.length;
+    const men = INGREDIENTS.filter(i => stockStatus(i) === 'MENIPIS').length;
+    const hab = INGREDIENTS.filter(i => stockStatus(i) === 'HABIS').length;
+    const ins = STOCK_MOVEMENTS.filter(m => m.type === 'IN' && m.created_at >= Date.now() - 7 * DAY);
+    const last = ins.reduce((a, m) => Math.max(a, m.created_at), 0);
+    const blocked = blockedMenus().length;
+    const kpi = (ico, tone, label, value, sub) =>
+      `<div class="kpi"><small><span class="kpi-ico ${tone}">${icon(ico, 16)}</span>${label}</small><strong>${value}</strong><div class="sub">${sub}</div></div>`;
+    $('#kpis').innerHTML = [
+      kpi('box', '', 'Total bahan', all, `${all - men - hab} dalam batas aman`),
+      kpi('alert', 'warn', 'Menipis', men, men ? 'di bawah batas minimum' : 'tidak ada'),
+      kpi('x', 'danger', 'Habis', hab, blocked ? `${blocked} menu tidak bisa dipesan` : 'semua menu bisa dipesan'),
+      kpi('download', 'ok', 'Bahan masuk 7 hari', ins.length + '×', last ? 'terakhir ' + ago(last) : 'belum ada catatan'),
+    ].join('');
+  }
+
+  const FILTERS = [['ALL', 'Semua'], ['MENIPIS', 'Menipis'], ['HABIS', 'Habis'], ['AMAN', 'Aman']];
+  function renderChips() {
+    const count = k => k === 'ALL' ? INGREDIENTS.length : INGREDIENTS.filter(i => stockStatus(i) === k).length;
+    $('#chips').innerHTML = FILTERS.map(([k, l]) =>
+      `<button type="button" class="chip" data-filter="${k}" aria-pressed="${state.filter === k}">${l} <em>${count(k)}</em></button>`).join('');
+  }
+
+  function visibleIngs() {
+    const q = state.q.trim().toLowerCase();
+    const list = INGREDIENTS.filter(i => (state.filter === 'ALL' || stockStatus(i) === state.filter) && (!q || i.name.toLowerCase().includes(q)));
+    if (state.sort === 'name') list.sort(byName);
+    else if (state.sort === 'low') list.sort((a, b) => ratio(a) - ratio(b) || byName(a, b));
+    else list.sort((a, b) => RANK[stockStatus(a)] - RANK[stockStatus(b)] || ratio(a) - ratio(b) || byName(a, b));
+    return list;
+  }
+
+  function rowHTML(i) {
+    const st = stockStatus(i);
+    const uses = menusUsing(i.id).length;
+    const max = scaleMax(i);
+    return `<tr class="clickable${flash.has(i.id) ? ' flash' : ''}" data-id="${i.id}">
+      <td><div class="ing-txt">
+        <button type="button" class="ing-btn" data-open="${i.id}">${esc(i.name)}</button>
+        <small>${uses ? `Dipakai di ${uses} menu` : 'Belum dipakai di menu'}</small>
+      </div></td>
+      <td><div class="meter">
+        <strong class="tnum">${fmtQty(i.stock_qty, i.unit)}</strong>
+        <div class="progress ${TONE[st]}" aria-hidden="true"><i style="width:${pct(i.stock_qty, max)}%"></i><b style="left:${pct(i.min_stock, max)}%"></b></div>
+        <small class="meter-min">Batas ${fmtQty(i.min_stock, i.unit)}</small>
+      </div></td>
+      <td class="col-min tnum muted">${fmtQty(i.min_stock, i.unit)}</td>
+      <td>${badge(st)}</td>
+      <td class="num"><div class="row-actions">
+        <button type="button" class="btn btn-sm" data-in="${i.id}">${icon('plus', 14)}Masuk<span class="sr-only"> — ${esc(i.name)}</span></button>
+        ${OWNER ? `<button type="button" class="icon-btn sm" data-edit="${i.id}" aria-label="Ubah ${esc(i.name)}" title="Ubah batas minimum & satuan">${icon('edit', 15)}</button>` : ''}
+      </div></td>
+    </tr>`;
+  }
+
+  function renderTable() {
+    const list = visibleIngs();
+    $('#rows').innerHTML = list.map(rowHTML).join('');
+    $('#tblWrap').hidden = !list.length;
+    $('#tblEmpty').hidden = list.length > 0;
+    $('#tblCount').textContent = list.length === INGREDIENTS.length
+      ? `${list.length} bahan` : `Menampilkan ${list.length} dari ${INGREDIENTS.length} bahan`;
+    flash.clear();
+  }
+
+  function renderHist() {
+    const list = STOCK_MOVEMENTS.filter(m => state.mv === 'ALL' || m.type === state.mv)
+      .sort((a, b) => b.created_at - a.created_at);
+    // Satu penjualan = satu entri (beberapa bahan sekaligus)
+    const groups = [];
+    list.forEach(m => {
+      const g = groups[groups.length - 1];
+      if (m.type === 'OUT' && g && g.type === 'OUT' && g.note === m.note && g.created_at === m.created_at) g.items.push(m);
+      else groups.push({ type:m.type, note:m.note, created_at:m.created_at, sim:!!m.sim, items:[m] });
+    });
+    let html = '', lastDay = '';
+    groups.forEach(g => {
+      const d = isoDay(g.created_at);
+      if (d !== lastDay) { html += `<h3 class="mv-day">${dayLabel(g.created_at)}</h3>`; lastDay = d; }
+      html += mvHTML(g);
+    });
+    $('#hist').innerHTML = html || `<div class="empty"><div class="em" aria-hidden="true">📦</div><h3>Belum ada pergerakan</h3><p>Catatan bahan masuk dan penjualan akan muncul di sini.</p></div>`;
+    flashMv.clear();
+  }
+
+  function mvHTML(g) {
+    const isNew = g.items.some(m => flashMv.has(m.id));
+    if (g.type === 'IN') {
+      const m = g.items[0], ing = ingById[m.ingredient_id];
+      if (!ing) return '';
+      const meta = [m.note || 'Tanpa catatan', m.by ? 'dicatat ' + staffFirst(m.by) : ''].filter(Boolean).join(' · ');
+      return `<div class="mv${isNew ? ' flash' : ''}">
+        <span class="mv-ico in" aria-hidden="true">+</span>
+        <div class="mv-txt"><button type="button" class="mv-name" data-open="${ing.id}">${esc(ing.name)}</button><small>${esc(meta)}</small></div>
+        <div class="mv-end"><span class="mv-qty in">+${fmtQty(m.qty, ing.unit)}</span><span class="mv-time">${hhmm(m.created_at)}</span></div>
+      </div>`;
+    }
+    const parts = g.items.map(m => {
+      const ing = ingById[m.ingredient_id];
+      return ing ? `${esc(ing.name)} <b>−${fmtQty(m.qty, ing.unit)}</b>` : '';
+    }).filter(Boolean).join(' · ');
+    return `<div class="mv${isNew ? ' flash' : ''}">
+      <span class="mv-ico out" aria-hidden="true">−</span>
+      <div class="mv-txt"><strong>${esc(g.note)}</strong><small>${parts}</small></div>
+      <div class="mv-end"><span class="mv-time">${hhmm(g.created_at)}</span>${g.sim ? '<span class="tag-sim">Simulasi</span>' : ''}</div>
+    </div>`;
+  }
+
+  /* ---------- Drawer detail bahan ---------- */
+  function openDrawer(id) {
+    if (!ingById[id]) return;
+    drawerId = id;
+    renderDrawer();
+    openLayer('ingDrawer');
+  }
+  function renderDrawer() {
+    const i = ingById[drawerId];
+    if (!i) return;
+    const st = stockStatus(i);
+    const max = scaleMax(i);
+    const uses = RECIPE_ITEMS.filter(r => r.ingredient_id === i.id && menuById[r.menu_id]);
+    $('#dTitle').textContent = i.name;
+    $('#dSub').textContent = `Satuan ${UNIT_NAME[i.unit] || i.unit} · ${uses.length ? 'dipakai di ' + uses.length + ' menu' : 'belum dipakai di menu'}`;
+
+    const diff = r2(i.stock_qty - i.min_stock);
+    const hit = uses.map(r => menuById[r.menu_id]).filter(menuBlocked);
+    const msg = st === 'HABIS'
+      ? `<div class="note danger">${icon('alert', 16)}<span>Stok habis. ${hit.length ? esc(joinList(hit.map(m => m.name))) + ' tidak bisa dipesan sampai bahan masuk.' : 'Catat bahan masuk saat barang datang.'}</span></div>`
+      : st === 'MENIPIS'
+      ? `<div class="note warn">${icon('alert', 16)}<span>${diff < 0 ? `Kurang ${fmtQty(-diff, i.unit)} dari batas minimum` : 'Sudah menyentuh batas minimum'} — sebaiknya belanja hari ini.</span></div>`
+      : `<div class="note ok">${icon('check', 16)}<span>Masih aman, ${fmtQty(diff, i.unit)} di atas batas minimum.</span></div>`;
+
+    const usesHTML = uses.length ? `<ul class="uses">${uses.map(r => {
+      const m = menuById[r.menu_id];
+      const n = Math.floor(i.stock_qty / r.qty_used + 1e-9);
+      const tile = (catById[m.category_id] || {}).tile || '#F3E9DD';
+      return `<li>
+        <span class="thumb" style="--tile:${tile}" aria-hidden="true">${esc(m.image_url)}</span>
+        <div class="grow"><strong>${esc(m.name)}</strong><small>${fmtQty(r.qty_used, i.unit)} per porsi</small></div>
+        <div class="est${n ? '' : ' none'}">${n ? `<span>Cukup untuk <strong>± ${n.toLocaleString('id-ID')} porsi</strong></span>` : '<strong>Tidak cukup 1 porsi</strong>'}
+          ${menuBlocked(m) ? '<span class="badge danger">Tidak bisa dipesan</span>' : ''}</div>
+      </li>`;
+    }).join('')}</ul>`
+      : `<p class="faint">Bahan ini belum dipakai di resep menu mana pun, jadi tidak berkurang otomatis saat ada penjualan.</p>`;
+
+    const mv = STOCK_MOVEMENTS.filter(m => m.ingredient_id === i.id).sort((a, b) => b.created_at - a.created_at).slice(0, 8);
+    const mvList = mv.length ? `<ul class="dmv">${mv.map(m => {
+      const isIn = m.type === 'IN';
+      return `<li>
+        <span class="mv-ico ${isIn ? 'in' : 'out'}" aria-hidden="true">${isIn ? '+' : '−'}</span>
+        <div class="grow"><strong class="${isIn ? 'pos' : ''}">${isIn ? '+' : '−'}${fmtQty(m.qty, i.unit)}</strong><small>${esc(m.note || 'Tanpa catatan')}</small></div>
+        <span class="mv-time">${when(m.created_at)}</span>
+      </li>`;
+    }).join('')}</ul>` : `<p class="faint">Belum ada pergerakan dalam 3 hari terakhir.</p>`;
+
+    $('#dBody').innerHTML = `
+      <div class="stock-hero">
+        <div class="row between"><span class="eyebrow">Sisa stok sekarang</span>${badge(st)}</div>
+        <div class="big tnum">${fmtQty(i.stock_qty, i.unit)}</div>
+        <div class="progress ${TONE[st]}" aria-hidden="true"><i style="width:${pct(i.stock_qty, max)}%"></i><b style="left:${pct(i.min_stock, max)}%"></b></div>
+        <div class="row between hero-meta">
+          <span>Batas minimum <strong class="tnum">${fmtQty(i.min_stock, i.unit)}</strong></span>
+          ${OWNER ? `<button type="button" class="lnk" data-edit="${i.id}">Ubah batas</button>` : ''}
+        </div>
+      </div>
+      ${msg}
+      <h3 class="sec-title">Dipakai di</h3>
+      ${usesHTML}
+      <h3 class="sec-title">Pergerakan terakhir</h3>
+      ${mvList}`;
+  }
+
+  /* ---------- Modal: catat bahan masuk ---------- */
+  const cSel = $('#cIng'), cQty = $('#cQty'), cNote = $('#cNote'), cDate = $('#cDate');
+
+  function setErr(id, msg) {
+    const input = $('#' + id), err = $('#' + id + 'Err');
+    if (err) { err.textContent = msg; err.hidden = !msg; }
+    if (input) { if (msg) input.setAttribute('aria-invalid', 'true'); else input.removeAttribute('aria-invalid'); }
+  }
+  function setAutofocus(modalId, el) {
+    $$('#' + modalId + ' [autofocus]').forEach(x => x.removeAttribute('autofocus'));
+    el.setAttribute('autofocus', '');
+  }
+
+  function fillIngSelect(selected) {
+    const opt = i => {
+      const st = stockStatus(i);
+      return `<option value="${i.id}">${esc(i.name)} — sisa ${fmtQty(i.stock_qty, i.unit)}${st !== 'AMAN' ? ' · ' + STOCK_BADGE[st][1].toLowerCase() : ''}</option>`;
+    };
+    const low = INGREDIENTS.filter(i => stockStatus(i) !== 'AMAN').sort((a, b) => RANK[stockStatus(a)] - RANK[stockStatus(b)] || byName(a, b));
+    const ok = INGREDIENTS.filter(i => stockStatus(i) === 'AMAN').sort(byName);
+    cSel.innerHTML = (low.length ? `<optgroup label="Perlu restock">${low.map(opt).join('')}</optgroup>` : '')
+      + (ok.length ? `<optgroup label="Stok aman">${ok.map(opt).join('')}</optgroup>` : '');
+    cSel.value = selected && ingById[selected] ? selected : (low[0] || ok[0]).id;
+    const notes = [...new Set(STOCK_MOVEMENTS.filter(m => m.type === 'IN' && m.note).map(m => m.note))];
+    $('#noteList').innerHTML = notes.map(n => `<option value="${esc(n)}"></option>`).join('');
+  }
+
+  function openCatat(id) {
+    fillIngSelect(id);
+    cQty.value = '';
+    cNote.value = '';
+    cDate.value = cDate.max = isoDay(Date.now());
+    setErr('cQty', ''); setErr('cDate', '');
+    setAutofocus('catatModal', id ? cQty : cSel);
+    updateCatat();
+    openLayer('catatModal');
+  }
+
+  function updateCatat() {
+    const i = ingById[cSel.value];
+    if (!i) return;
+    const q = parseFloat(cQty.value);
+    $('#cUnit').textContent = UNIT_NAME[i.unit] || i.unit;
+    $('#cQtyHint').textContent = UNIT_HINT[i.unit] || '';
+    $('#cQuick').innerHTML = (QUICK[i.unit] || []).map(v =>
+      `<button type="button" class="chip sm" data-quick="${v}" aria-pressed="${q === v}">${fmtQty(v, i.unit)}</button>`).join('');
+    const st0 = stockStatus(i);
+    if (!(q > 0)) {
+      $('#cPreview').innerHTML = `<div><span class="pv-lbl">Stok</span>
+        <div class="pv-flow tnum">${fmtQty(i.stock_qty, i.unit)} <span class="pv-arrow">→</span><span class="faint">…</span></div></div>
+        <div class="pv-badges">${badge(st0)}</div>
+        <p class="pv-note" style="color:var(--ink-3)">Isi jumlah untuk melihat stok setelah dicatat.</p>`;
+      return;
+    }
+    const after = r2(i.stock_qty + q);
+    const st1 = stockStatus({ stock_qty:after, min_stock:i.min_stock });
+    const stockOf = (ingId) => ingId === i.id ? after : ((ingById[ingId] || {}).stock_qty || 0);
+    const back = menusUsing(i.id).filter(m => m && autoOff.has(m.id) && recipeOf(m.id).every(r => stockOf(r.ingredient_id) >= r.qty_used));
+    $('#cPreview').innerHTML = `<div><span class="pv-lbl">Stok</span>
+        <div class="pv-flow tnum">${fmtQty(i.stock_qty, i.unit)} <span class="pv-arrow">→</span>${fmtQty(after, i.unit)}</div></div>
+      <div class="pv-badges">${badge(st0)}${st1 !== st0 ? `<span aria-hidden="true">→</span><span class="sr-only">menjadi</span>${badge(st1)}` : ''}</div>
+      ${back.length ? `<p class="pv-note">✓ ${esc(joinList(back.map(m => m.name)))} bisa dipesan lagi</p>` : ''}
+      ${st1 === 'MENIPIS' ? `<p class="pv-note warn">Masih di bawah batas minimum (${fmtQty(i.min_stock, i.unit)}).</p>` : ''}`;
+  }
+
+  function saveCatat(again) {
+    const i = ingById[cSel.value];
+    if (!i) return;
+    const q = parseFloat(cQty.value);
+    const today = isoDay(Date.now());
+    const dv = cDate.value || today;
+    let bad = null;
+    if (!(q > 0)) { setErr('cQty', 'Isi jumlah bahan yang masuk (lebih dari 0).'); bad = bad || cQty; }
+    else if (q > 1e6) { setErr('cQty', 'Jumlahnya terlalu besar — cek lagi satuannya.'); bad = bad || cQty; }
+    else setErr('cQty', '');
+    if (dv > today) { setErr('cDate', 'Tanggal tidak boleh setelah hari ini.'); bad = bad || cDate; }
+    else setErr('cDate', '');
+    if (bad) { bad.focus(); return; }
+
+    let ts = Date.now();
+    if (dv !== today) {
+      const [y, mo, d] = dv.split('-').map(Number);
+      const n = new Date();
+      ts = new Date(y, mo - 1, d, n.getHours(), n.getMinutes()).getTime();
+    }
+    i.stock_qty = r2(i.stock_qty + q);
+    const mv = addMove(i.id, q, 'IN', cNote.value.trim().replace(/\s+/g, ' '), ts, { by:ME.id });
+    flashMv.add(mv.id);
+    flash.add(i.id);
+    const { on } = syncMenus();
+    renderAll();
+    toast(`${i.name} +${fmtQty(q, i.unit)} tercatat · sisa ${fmtQty(i.stock_qty, i.unit)}` + (on.length ? ` · ${on[0].name} bisa dipesan lagi` : ''));
+    if (again) {
+      fillIngSelect(i.id);
+      cQty.value = '';
+      cNote.value = '';
+      updateCatat();
+      cSel.focus();
+    } else {
+      closeLayer('catatModal');
+    }
+  }
+
+  /* ---------- Modal: tambah bahan ---------- */
+  const aName = $('#aName'), aUnit = $('#aUnit'), aStock = $('#aStock'), aMin = $('#aMin');
+  function openAdd() {
+    if (!OWNER) return;
+    aName.value = ''; aUnit.value = 'gram'; aStock.value = ''; aMin.value = '';
+    ['aName', 'aStock', 'aMin'].forEach(id => setErr(id, ''));
+    updateAdd();
+    openLayer('addModal');
+  }
+  function updateAdd() {
+    $$('#addModal .unit-lbl').forEach(el => { el.textContent = UNIT_NAME[aUnit.value]; });
+    const s = aStock.value === '' ? 0 : parseFloat(aStock.value);
+    const m = parseFloat(aMin.value);
+    $('#aPreview').innerHTML = (s >= 0 && m >= 0)
+      ? `<span>Status awal:</span>${badge(stockStatus({ stock_qty:s, min_stock:m }))}<span class="faint">sisa ${fmtQty(s, aUnit.value)}, batas ${fmtQty(m, aUnit.value)}</span>`
+      : '<span class="faint">Isi stok awal & batas minimum untuk melihat status awal.</span>';
+  }
+  function saveAdd() {
+    const name = aName.value.trim().replace(/\s+/g, ' ');
+    const unit = aUnit.value;
+    const stock = aStock.value === '' ? 0 : parseFloat(aStock.value);
+    const min = parseFloat(aMin.value);
+    let bad = null;
+    if (!name) { setErr('aName', 'Isi nama bahan dulu.'); bad = bad || aName; }
+    else if (INGREDIENTS.some(x => x.name.toLowerCase() === name.toLowerCase())) { setErr('aName', 'Bahan dengan nama ini sudah ada.'); bad = bad || aName; }
+    else setErr('aName', '');
+    if (!(stock >= 0)) { setErr('aStock', 'Stok awal tidak boleh minus.'); bad = bad || aStock; } else setErr('aStock', '');
+    if (!(min >= 0)) { setErr('aMin', 'Isi batas minimum (boleh 0).'); bad = bad || aMin; } else setErr('aMin', '');
+    if (bad) { bad.focus(); return; }
+
+    const id = 'i' + (Math.max(0, ...INGREDIENTS.map(x => parseInt(x.id.slice(1), 10) || 0)) + 1);
+    const ing = { id, name, unit, stock_qty:r2(stock), min_stock:r2(min) };
+    INGREDIENTS.push(ing);
+    ingById[id] = ing;
+    if (stock > 0) flashMv.add(addMove(id, stock, 'IN', 'Stok awal', Date.now(), { by:ME.id }).id);
+    flash.add(id);
+    state.filter = 'ALL'; state.q = ''; $('#q').value = '';
+    renderAll();
+    closeLayer('addModal');
+    toast(`${name} ditambahkan · status ${STOCK_BADGE[stockStatus(ing)][1].toLowerCase()}`);
+  }
+
+  /* ---------- Modal: ubah bahan ---------- */
+  const eName = $('#eName'), eUnit = $('#eUnit'), eMin = $('#eMin');
+  function openEdit(id) {
+    const i = ingById[id];
+    if (!i || !OWNER) return;
+    editId = id;
+    $('#editSub').textContent = `${i.name} · sisa ${fmtQty(i.stock_qty, i.unit)}`;
+    eName.value = i.name;
+    eUnit.value = i.unit;
+    eMin.value = i.min_stock;
+    setErr('eName', ''); setErr('eMin', '');
+    updateEdit();
+    openLayer('editModal');
+  }
+  function updateEdit() {
+    const i = ingById[editId];
+    if (!i) return;
+    const unit = eUnit.value;
+    $('#eUnitLbl').textContent = UNIT_NAME[unit];
+    $('#eUnitWarn').hidden = unit === i.unit;
+    const min = parseFloat(eMin.value);
+    $('#ePreview').innerHTML = min >= 0
+      ? `<span>Dengan batas ini, sisa ${fmtQty(i.stock_qty, unit)} berstatus</span>${badge(stockStatus({ stock_qty:i.stock_qty, min_stock:min }))}`
+      : '';
+  }
+  function saveEdit() {
+    const i = ingById[editId];
+    if (!i) return;
+    const name = eName.value.trim().replace(/\s+/g, ' ');
+    const min = parseFloat(eMin.value);
+    let bad = null;
+    if (!name) { setErr('eName', 'Nama bahan tidak boleh kosong.'); bad = bad || eName; }
+    else if (INGREDIENTS.some(x => x !== i && x.name.toLowerCase() === name.toLowerCase())) { setErr('eName', 'Bahan dengan nama ini sudah ada.'); bad = bad || eName; }
+    else setErr('eName', '');
+    if (!(min >= 0)) { setErr('eMin', 'Isi batas minimum (boleh 0).'); bad = bad || eMin; } else setErr('eMin', '');
+    if (bad) { bad.focus(); return; }
+    const before = stockStatus(i);
+    i.name = name;
+    i.unit = eUnit.value;
+    i.min_stock = r2(min);
+    if (stockStatus(i) !== before) pulseAlert = true;
+    flash.add(i.id);
+    renderAll();
+    closeLayer('editModal');
+    toast(`${name} disimpan · batas minimum ${fmtQty(i.min_stock, i.unit)}`);
+  }
+
+  /* ---------- Simulasi penjualan (stok berkurang otomatis) ---------- */
+  function simulateSale() {
+    const cands = MENUS.filter(m => m.is_available && recipeOf(m.id).length && !menuBlocked(m));
+    if (!cands.length) { toast('Tidak ada menu yang bisa dijual — bahan utama habis'); return; }
+    const w = m => (typeof MENU_WEIGHT === 'object' && MENU_WEIGHT[m.id]) || 1;
+    let x = Math.random() * cands.reduce((a, m) => a + w(m), 0);
+    const menu = cands.find(m => (x -= w(m)) < 0) || cands[0];
+    let qty = Math.random() < .25 ? 2 : 1;
+    if (recipeOf(menu.id).some(r => ingById[r.ingredient_id].stock_qty < r.qty_used * qty)) qty = 1;
+
+    const code = 'A-' + String(++simSeq).padStart(3, '0');
+    const crossed = [];
+    const before = Object.fromEntries(recipeOf(menu.id).map(r => [r.ingredient_id, stockStatus(ingById[r.ingredient_id])]));
+    recipeOf(menu.id).forEach(r => {
+      const ing = ingById[r.ingredient_id];
+      ing.stock_qty = Math.max(0, r2(ing.stock_qty - r.qty_used * qty));
+    });
+    const moves = recordSale(Date.now(), code, [[menu.id, qty]], { sim:true });
+    moves.forEach(mv => {
+      flashMv.add(mv.id);
+      flash.add(mv.ingredient_id);
+      const ing = ingById[mv.ingredient_id];
+      const st = stockStatus(ing);
+      if (st !== before[ing.id]) crossed.push({ ing, st });
+    });
+    const { off } = syncMenus();
+    if (crossed.length || off.length) pulseAlert = true;
+    renderAll();
+
+    const sold = `Terjual ${qty}× ${menu.name}`;
+    const hab = crossed.find(c => c.st === 'HABIS');
+    const men = crossed.find(c => c.st === 'MENIPIS');
+    if (hab) toast(`${sold} — ${hab.ing.name.toLowerCase()} habis! ${off.length ? off.length + ' menu ditandai habis' : ''}`.trim());
+    else if (off.length) toast(`${sold} — ${off.map(m => m.name).join(', ')} kini tidak bisa dipesan`);
+    else if (men) toast(`⚠ ${sold} — ${men.ing.name.toLowerCase()} kini menipis`);
+    else {
+      const main = moves.reduce((a, b) => b.qty > a.qty ? b : a);
+      const ing = ingById[main.ingredient_id];
+      toast(`${sold} — ${ing.name.toLowerCase()} −${fmtQty(main.qty, ing.unit)}`);
+    }
+  }
+
+  /* ---------- Peristiwa ---------- */
+  document.addEventListener('click', e => {
+    const b = e.target.closest('[data-open],[data-in],[data-edit],[data-filter],[data-mv],[data-quick]');
+    if (!b) {
+      const tr = e.target.closest('#rows tr[data-id]');
+      if (tr) openDrawer(tr.dataset.id);
+      return;
+    }
+    if (b.hasAttribute('data-open')) openDrawer(b.dataset.open);
+    else if (b.hasAttribute('data-in')) openCatat(b.dataset.in);
+    else if (b.hasAttribute('data-edit')) openEdit(b.dataset.edit);
+    else if (b.hasAttribute('data-filter')) { state.filter = b.dataset.filter; renderChips(); renderTable(); }
+    else if (b.hasAttribute('data-mv')) {
+      state.mv = b.dataset.mv;
+      $$('[data-mv]').forEach(x => x.setAttribute('aria-pressed', String(x === b)));
+      renderHist();
+    }
+    else if (b.hasAttribute('data-quick')) {
+      cQty.value = b.dataset.quick;
+      setErr('cQty', '');
+      updateCatat();
+      cQty.focus();
+    }
+  });
+
+  const btnAdd = $('#btnAdd');
+  btnAdd.hidden = !OWNER;
+  btnAdd.addEventListener('click', openAdd);
+  $('#btnCatat').addEventListener('click', () => openCatat(''));
+  $('#btnSim').addEventListener('click', simulateSale);
+  $('#dCatat').addEventListener('click', () => openCatat(drawerId));
+  $('#q').addEventListener('input', e => { state.q = e.target.value; renderTable(); });
+  $('#sort').addEventListener('change', e => { state.sort = e.target.value; renderTable(); });
+  $('#btnReset').addEventListener('click', () => { state.q = ''; state.filter = 'ALL'; $('#q').value = ''; renderChips(); renderTable(); });
+
+  cSel.addEventListener('change', () => { setErr('cQty', ''); updateCatat(); });
+  cQty.addEventListener('input', () => { if (parseFloat(cQty.value) > 0) setErr('cQty', ''); updateCatat(); });
+  cDate.addEventListener('change', () => setErr('cDate', ''));
+  $('#catatForm').addEventListener('submit', e => { e.preventDefault(); saveCatat(false); });
+  $('#cSaveMore').addEventListener('click', () => saveCatat(true));
+
+  [aUnit, aStock, aMin].forEach(el => el.addEventListener('input', updateAdd));
+  aName.addEventListener('input', () => setErr('aName', ''));
+  $('#addForm').addEventListener('submit', e => { e.preventDefault(); saveAdd(); });
+
+  [eUnit, eMin].forEach(el => el.addEventListener('input', updateEdit));
+  eName.addEventListener('input', () => setErr('eName', ''));
+  $('#editForm').addEventListener('submit', e => { e.preventDefault(); saveEdit(); });
+
+  renderAll();
+  // Perbarui label "x jam lalu" di KPI tiap menit
+  setInterval(renderKpis, 60e3);
+})();
+</script>
+</body>
+</html>

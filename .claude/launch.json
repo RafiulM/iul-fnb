@@ -1,0 +1,58 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "desainpakeai",
+      "runtimeExecutable": "python3",
+      "runtimeArgs": [
+        "-m",
+        "http.server",
+        "4173",
+        "--bind",
+        "127.0.0.1",
+        "--directory",
+        "desainpakeai"
+      ],
+      "port": 4173
+    },
+    {
+      "name": "dpai-export",
+      "runtimeExecutable": "python3",
+      "runtimeArgs": [
+        "-m",
+        "http.server",
+        "4174",
+        "--bind",
+        "127.0.0.1",
+        "--directory",
+        "/tmp/dpai/out"
+      ],
+      "port": 4174
+    },
+    {
+      "name": "starter-dev",
+      "runtimeExecutable": "env",
+      "runtimeArgs": [
+        "-u",
+        "PORT",
+        "pnpm",
+        "dev"
+      ],
+      "port": 3010
+    },
+    {
+      "name": "thumbnail",
+      "runtimeExecutable": "python3",
+      "runtimeArgs": [
+        "-m",
+        "http.server",
+        "4175",
+        "--bind",
+        "127.0.0.1",
+        "--directory",
+        "thumbnail"
+      ],
+      "port": 4175
+    }
+  ]
+}

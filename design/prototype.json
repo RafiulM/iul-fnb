@@ -1,0 +1,191 @@
+{
+  "pages": [
+    {
+      "id": "pelanggan",
+      "file": "src/pages/pelanggan.page.html",
+      "name": "Menu Pelanggan (QR)",
+      "route": "/pelanggan",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      }
+    },
+    {
+      "id": "login",
+      "file": "src/pages/login.page.html",
+      "name": "Masuk",
+      "route": "/login",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      }
+    },
+    {
+      "id": "kasir",
+      "file": "src/pages/kasir.page.html",
+      "name": "Pesanan",
+      "route": "/kasir",
+      "layout": "staf",
+      "viewport": {
+        "width": 1440,
+        "height": 960
+      }
+    },
+    {
+      "id": "stok",
+      "file": "src/pages/stok.page.html",
+      "name": "Stok Bahan",
+      "route": "/stok",
+      "layout": "staf",
+      "viewport": {
+        "width": 1440,
+        "height": 960
+      }
+    },
+    {
+      "id": "menu-meja",
+      "file": "src/pages/menu-meja.page.html",
+      "name": "Menu & Meja",
+      "route": "/menu-meja",
+      "layout": "staf",
+      "viewport": {
+        "width": 1440,
+        "height": 960
+      }
+    },
+    {
+      "id": "penjualan",
+      "file": "src/pages/penjualan.page.html",
+      "name": "Penjualan",
+      "route": "/penjualan",
+      "layout": "staf",
+      "viewport": {
+        "width": 1440,
+        "height": 960
+      }
+    },
+    {
+      "id": "staf",
+      "file": "src/pages/staf.page.html",
+      "name": "Akun & Staf",
+      "route": "/staf",
+      "layout": "staf",
+      "viewport": {
+        "width": 1440,
+        "height": 960
+      }
+    },
+    {
+      "id": "pengaturan",
+      "file": "src/pages/pengaturan.page.html",
+      "name": "Pengaturan Kafe",
+      "route": "/pengaturan",
+      "layout": "staf",
+      "viewport": {
+        "width": 1440,
+        "height": 960
+      }
+    },
+    {
+      "id": "pelanggan-menu",
+      "file": "src/pages/pelanggan-menu.page.html",
+      "name": "Detail Menu",
+      "route": "/pelanggan/menu",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      }
+    },
+    {
+      "id": "pelanggan-keranjang",
+      "file": "src/pages/pelanggan-keranjang.page.html",
+      "name": "Keranjang",
+      "route": "/pelanggan/keranjang",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      }
+    },
+    {
+      "id": "pelanggan-status",
+      "file": "src/pages/pelanggan-status.page.html",
+      "name": "Status Pesanan",
+      "route": "/pelanggan/status",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      }
+    },
+    {
+      "id": "pelanggan-tidak-valid",
+      "file": "src/pages/pelanggan-tidak-valid.page.html",
+      "name": "QR Tidak Valid",
+      "route": "/pelanggan/tidak-valid",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      }
+    },
+    {
+      "id": "pelanggan-tutup",
+      "file": "src/pages/pelanggan-tutup.page.html",
+      "name": "Kafe Tutup",
+      "route": "/pelanggan/tutup",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      }
+    },
+    {
+      "id": "kasir-manual",
+      "file": "src/pages/kasir-manual.page.html",
+      "name": "Pesanan Manual",
+      "route": "/kasir/manual",
+      "layout": "staf",
+      "viewport": {
+        "width": 1440,
+        "height": 960
+      }
+    },
+    {
+      "id": "kasir-bayar",
+      "file": "src/pages/kasir-bayar.page.html",
+      "name": "Pembayaran",
+      "route": "/kasir/bayar",
+      "layout": "staf",
+      "viewport": {
+        "width": 1440,
+        "height": 960
+      }
+    },
+    {
+      "id": "riwayat",
+      "file": "src/pages/riwayat.page.html",
+      "name": "Riwayat Transaksi",
+      "route": "/riwayat",
+      "layout": "staf",
+      "viewport": {
+        "width": 1440,
+        "height": 960
+      }
+    }
+  ],
+  "title": "Tidak ada judul Prototype",
+  "styles": [
+    "src/styles/tokens.css"
+  ],
+  "layouts": [
+    {
+      "id": "staf",
+      "file": "src/layouts/staf.layout.html",
+      "slots": [
+        "title",
+        "headerActions",
+        "content"
+      ]
+    }
+  ],
+  "runtime": "single-html@1",
+  "components": [],
+  "schemaVersion": 1
+}

@@ -1,0 +1,1109 @@
+<!-- dpai:page {"scoped":true,"typography":true} -->
+<style>
+  .p-stok { display: grid; gap: var(--space-6); align-content: start; font-family: var(--font-ui); }
+  .sk-context { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-3); margin: calc(var(--space-4) * -1) 0 0; font: 400 var(--text-body-sm) / var(--leading-body-sm) var(--font-ui); color: var(--color-text-muted); }
+  .sk-sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+  .sk-grow { flex: 1; min-width: 0; }
+  :is(.l-staf-input, .l-staf-select, .l-staf-btn, .l-staf-iconbtn, .l-staf-seg button, .sk-name, .sk-mv-name, .sk-lnk, .sk-quick button, .sk-hist-list):focus-visible { outline: 2px solid var(--color-focus-ring); outline-offset: 3px; }
+
+  /* Peringatan stok */
+  .sk-alert { align-items: flex-start; }
+  .sk-alert > div { flex: 1; min-width: 0; }
+  .sk-alert > .l-staf-btn { flex: none; align-self: center; background: var(--color-surface); }
+  .sk-al-title { display: block; font: 600 var(--text-body-md) / 1.35 var(--font-ui); letter-spacing: -0.32px; }
+  .sk-alert p { margin: 2px 0 0; }
+  .sk-lnk { padding: 0; border: 0; background: none; color: inherit; font: inherit; font-weight: 600; text-decoration: underline; text-decoration-color: var(--color-border-strong); text-underline-offset: 3px; cursor: pointer; transition: text-decoration-color var(--duration-fast) var(--ease-standard); }
+  .sk-lnk:hover { text-decoration-color: currentColor; }
+  .sk-alert[data-pulse] { animation: sk-pulse var(--duration-base) var(--ease-standard); }
+  @keyframes sk-pulse { from { opacity: .4; transform: translateY(-6px); } }
+
+  /* Ringkasan */
+  .sk-metrics { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: var(--space-3); }
+  .sk-metrics [data-tone] > span { display: flex; align-items: center; gap: var(--space-2); }
+  .sk-metrics [data-tone] > span::before { content: ""; flex: none; width: 8px; height: 8px; border-radius: var(--radius-pill); background: var(--sk-tone); }
+  .sk-metrics [data-tone="warning"] { --sk-tone: var(--color-warning); }
+  .sk-metrics [data-tone="danger"] { --sk-tone: var(--color-danger); }
+
+  .sk-grid { display: grid; grid-template-columns: minmax(0, 2.2fr) minmax(300px, 1fr); gap: var(--space-4); align-items: start; }
+
+  /* Work Ledger: daftar bahan */
+  .sk-ledger { container: sk-ledger / inline-size; }
+  .sk-ledger .l-staf-card-head .l-staf-search { width: 260px; min-width: 0; max-width: 100%; }
+  .sk-toolbar { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: var(--space-3); padding: var(--space-4) var(--spacing-20); }
+  .sk-sort { display: flex; align-items: center; gap: var(--space-2); font: 600 var(--text-body-sm) / 1 var(--font-ui); color: var(--color-text-muted); }
+  .sk-sort .l-staf-select { width: auto; min-width: 168px; min-height: 40px; padding-block: 6px; font-size: var(--text-body-sm); }
+  .sk-table-wrap { border-block-start: var(--border-hairline) solid var(--color-border); }
+  .sk-ledger .sk-table th, .sk-ledger .sk-table td { padding-inline: 12px; }
+  .sk-ledger .sk-table th:first-child, .sk-ledger .sk-table td:first-child { padding-inline-start: var(--spacing-20); }
+  .sk-ledger .sk-table th:last-child, .sk-ledger .sk-table td:last-child { padding-inline-end: var(--spacing-20); }
+  .sk-table tbody tr { cursor: pointer; }
+  .sk-table td:first-child { position: relative; }
+  .sk-table tbody tr[data-current] { background: var(--color-surface-subtle); }
+  .sk-table tbody tr[data-current] td:first-child::before { content: ""; position: absolute; inset-block: 12px; inset-inline-start: 0; width: 3px; border-radius: 0 var(--radius-pill) var(--radius-pill) 0; background: var(--color-accent); }
+  .sk-ledger .sk-table .sk-end { text-align: end; }
+  .sk-name { display: block; max-width: 100%; padding: 0; border: 0; background: none; color: var(--color-text); font: 600 var(--text-body-sm) / 1.35 var(--font-ui); letter-spacing: -0.14px; text-align: start; cursor: pointer; border-radius: 4px; transition: color var(--duration-fast) var(--ease-standard); }
+  .sk-name:hover { color: var(--color-accent-text); }
+  .sk-sub { display: block; margin-top: 2px; font: 400 var(--text-label-sm) / var(--leading-label-sm) var(--font-ui); color: var(--color-text-muted); }
+
+  .sk-meter { display: grid; gap: 6px; min-width: 120px; max-width: 180px; }
+  .sk-meter strong { font: 600 var(--text-body-sm) / 1.2 var(--font-ui); font-variant-numeric: tabular-nums; white-space: nowrap; }
+  .sk-meter-min { display: none; font: 500 var(--text-label-sm) / 1.2 var(--font-ui); color: var(--color-text-muted); font-variant-numeric: tabular-nums; }
+  .sk-bar { position: relative; display: block; height: 6px; border-radius: var(--radius-pill); background: var(--color-surface-muted); }
+  .sk-bar i { position: absolute; inset-block: 0; inset-inline-start: 0; border-radius: inherit; background: var(--color-border-strong); }
+  .sk-bar[data-tone="warning"] i { background: var(--color-warning); }
+  .sk-bar[data-tone="danger"] { background: color-mix(in srgb, var(--color-danger) 14%, var(--color-surface)); }
+  .sk-bar b { position: absolute; inset-block: -4px; width: 2px; margin-inline-start: -1px; border-radius: 1px; background: var(--color-text); box-shadow: 0 0 0 1.5px var(--color-surface); }
+  .sk-acts { display: inline-flex; align-items: center; justify-content: flex-end; gap: 6px; }
+  .sk-acts .l-staf-iconbtn { width: 36px; height: 36px; }
+  .sk-acts .l-staf-iconbtn iconify-icon { font-size: 16px; }
+
+  .sk-foot { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: var(--space-2) var(--space-4); padding: var(--space-3) var(--spacing-20); border-block-start: var(--border-hairline) solid var(--color-border); font: 500 var(--text-label-sm) / var(--leading-label-sm) var(--font-ui); color: var(--color-text-muted); }
+  .sk-legend { display: inline-flex; align-items: center; gap: var(--space-2); }
+  .sk-legend i { display: inline-block; width: 2px; height: 12px; border-radius: 1px; background: var(--color-text); }
+  .sk-ledger .l-staf-empty { border-block-start: var(--border-hairline) solid var(--color-border); }
+
+  @container sk-ledger (max-width: 700px) {
+    .sk-col-min { display: none; }
+    .sk-meter-min { display: block; }
+  }
+  @container sk-ledger (max-width: 540px) {
+    .sk-table thead { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
+    .sk-table, .sk-table tbody { display: block; }
+    .sk-ledger .sk-table tbody tr { position: relative; display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; gap: var(--space-3); padding: var(--space-4) var(--spacing-20); border-block-end: var(--border-hairline) solid var(--color-border); }
+    .sk-ledger .sk-table tbody tr:last-child { border-block-end: 0; }
+    .sk-ledger .sk-table tbody td:nth-child(n) { display: block; padding: 0; border: 0; position: static; }
+    .sk-ledger .sk-table tbody td.sk-col-min { display: none; }
+    .sk-toolbar .l-staf-seg { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); width: 100%; }
+    .sk-ledger .sk-table tbody td:nth-child(1) { grid-area: 1 / 1; }
+    .sk-ledger .sk-table tbody td:nth-child(4) { grid-area: 1 / 2; justify-self: end; }
+    .sk-ledger .sk-table tbody td:nth-child(2) { grid-area: 2 / 1; }
+    .sk-ledger .sk-table tbody td:nth-child(5) { grid-area: 2 / 2; align-self: end; }
+    .sk-meter { max-width: 200px; }
+  }
+
+  /* Riwayat pergerakan */
+  .sk-hist { position: sticky; top: var(--space-4); display: flex; flex-direction: column; min-height: 0; }
+  .sk-hist .l-staf-card-head { align-items: center; }
+  .sk-hist .l-staf-card-head .l-staf-btn { margin-inline: -10px; padding-inline: 10px; }
+  .sk-hist-tools { padding: var(--space-4) var(--spacing-20) var(--space-1); }
+  .sk-hist-list { max-height: calc(100vh - 300px); min-height: 220px; padding: 0 var(--spacing-20) var(--space-2); overflow-y: auto; overscroll-behavior: contain; scrollbar-width: thin; border-radius: var(--radius-compact); }
+  .sk-day { position: sticky; top: 0; z-index: 1; margin: 0; padding: var(--space-4) 0 var(--space-1); background: var(--color-surface); font: 600 var(--text-label-sm) / var(--leading-label-sm) var(--font-ui); color: var(--color-text-muted); }
+  .sk-mv { position: relative; display: flex; align-items: flex-start; gap: var(--space-3); padding: var(--space-3) 0; border-block-end: var(--border-hairline) dashed var(--color-border); }
+  .sk-mv:last-child { border-block-end: 0; }
+  .sk-mv[data-fresh]::before { content: ""; position: absolute; inset-block: 12px; inset-inline-start: -14px; width: 3px; border-radius: var(--radius-pill); background: var(--color-accent); }
+  .sk-mvi { flex: none; display: grid; place-items: center; width: 28px; height: 28px; border: var(--border-hairline) solid var(--color-border); border-radius: var(--radius-pill); background: var(--color-surface-subtle); color: var(--color-text-muted); }
+  .sk-mvi[data-dir="in"] { border-color: color-mix(in srgb, var(--color-positive) 40%, transparent); color: var(--color-positive); }
+  .sk-mv-txt { flex: 1; min-width: 0; }
+  .sk-mv-txt strong, .sk-mv-name { display: block; font: 600 var(--text-body-sm) / 1.35 var(--font-ui); letter-spacing: -0.14px; color: var(--color-text); }
+  .sk-mv-name { padding: 0; border: 0; background: none; text-align: start; cursor: pointer; border-radius: 4px; transition: color var(--duration-fast) var(--ease-standard); }
+  .sk-mv-name:hover { color: var(--color-accent-text); }
+  .sk-mv-txt small { display: block; margin-top: 2px; font: 400 var(--text-label-sm) / 1.45 var(--font-ui); color: var(--color-text-muted); }
+  .sk-mv-txt small b { font-weight: 600; color: var(--color-text-soft); white-space: nowrap; }
+  .sk-mv-end { flex: none; display: grid; justify-items: end; gap: 4px; text-align: end; }
+  .sk-mv-qty { font: 600 var(--text-body-sm) / 1.2 var(--font-ui); font-variant-numeric: tabular-nums; white-space: nowrap; }
+  .sk-mv-time { font: 500 var(--text-label-sm) / 1.2 var(--font-ui); color: var(--color-text-muted); font-variant-numeric: tabular-nums; white-space: nowrap; }
+  .sk-mv-end .l-staf-chip { padding: 1px 8px; }
+  .sk-hist-foot { display: flex; align-items: center; gap: var(--space-2); padding: var(--space-3) var(--spacing-20); border-block-start: var(--border-hairline) solid var(--color-border); font: 500 var(--text-label-sm) / var(--leading-label-sm) var(--font-ui); color: var(--color-text-muted); }
+  .sk-hist-foot iconify-icon { flex: none; font-size: 15px; color: var(--color-positive); }
+
+  /* Drawer detail bahan */
+  .sk-eyebrow { display: block; font: 600 var(--text-label-sm) / var(--leading-label-sm) var(--font-ui); color: var(--color-text-muted); }
+  .sk-hero { padding: var(--space-4) var(--spacing-20); border: var(--border-hairline) solid var(--color-border); border-radius: var(--radius-image); background: var(--color-surface-subtle); }
+  .sk-hero-top { display: flex; align-items: center; justify-content: space-between; gap: var(--space-3); }
+  .sk-big { margin: var(--space-2) 0 var(--space-4); font: 400 var(--text-heading-md) / 1.1 var(--font-ui); letter-spacing: var(--tracking-heading); font-variant-numeric: tabular-nums; }
+  .sk-hero .sk-bar { height: 10px; }
+  .sk-hero .sk-bar b { inset-block: -5px; }
+  .sk-hero-meta { display: flex; align-items: center; justify-content: space-between; gap: var(--space-3); margin-top: var(--space-4); font: 400 var(--text-body-sm) / 1.4 var(--font-ui); color: var(--color-text-muted); }
+  .sk-hero-meta strong { color: var(--color-text); font-weight: 600; font-variant-numeric: tabular-nums; }
+  .sk-hero-meta .sk-lnk { color: var(--color-text); }
+  .sk-note { margin-top: var(--space-3); }
+  .l-staf-alert[data-tone="danger"] { border-color: var(--color-danger); background: color-mix(in srgb, var(--color-danger) 8%, var(--color-surface)); }
+  .l-staf-alert[data-tone="danger"] > iconify-icon { color: var(--color-danger); }
+  .sk-sec { margin: var(--space-6) 0 var(--space-3); font: 600 var(--text-label-sm) / var(--leading-label-sm) var(--font-ui); color: var(--color-text-muted); }
+  .sk-uses { display: grid; gap: var(--space-2); margin: 0; padding: 0; list-style: none; }
+  .sk-uses li { display: flex; align-items: center; gap: var(--space-3); padding: var(--space-2) var(--space-3) var(--space-2) var(--space-2); border: var(--border-hairline) solid var(--color-border); border-radius: var(--radius-image); }
+  .sk-uses .l-staf-thumb { width: 40px; height: 40px; font-size: 20px; }
+  .sk-uses strong { display: block; font: 600 var(--text-body-sm) / 1.3 var(--font-ui); }
+  .sk-uses small { display: block; font: 400 var(--text-label-sm) / var(--leading-label-sm) var(--font-ui); color: var(--color-text-muted); }
+  .sk-est { flex: none; display: grid; justify-items: end; gap: 4px; text-align: end; font: 400 var(--text-label-sm) / 1.35 var(--font-ui); color: var(--color-text-muted); }
+  .sk-est strong { display: inline; font: 600 var(--text-body-sm) / 1.3 var(--font-ui); color: var(--color-text); font-variant-numeric: tabular-nums; }
+  .sk-dmv { margin: 0; padding: 0; list-style: none; }
+  .sk-dmv li { display: flex; align-items: flex-start; gap: var(--space-3); padding: 10px 0; border-block-end: var(--border-hairline) dashed var(--color-border); }
+  .sk-dmv li:last-child { border-block-end: 0; }
+  .sk-dmv strong { display: block; font: 600 var(--text-body-sm) / 1.3 var(--font-ui); font-variant-numeric: tabular-nums; }
+  .sk-dmv small { display: block; font: 400 var(--text-label-sm) / 1.4 var(--font-ui); color: var(--color-text-muted); }
+  .sk-faint { margin: 0; font: 400 var(--text-body-sm) / 1.5 var(--font-ui); color: var(--color-text-muted); }
+  .sk-drawer-foot { justify-content: stretch; }
+
+  /* Form & dialog */
+  .sk-form { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--space-4); }
+  .sk-span { grid-column: 1 / -1; }
+  .sk-opt { font-weight: 400; color: var(--color-text-muted); }
+  .l-staf-affix:has(input[aria-invalid="true"]) { border-color: var(--color-danger); }
+  .l-staf-affix > input { width: 0; }
+  .sk-quick { display: flex; flex-wrap: wrap; gap: 6px; }
+  .sk-quick button { display: inline-flex; align-items: center; min-height: 30px; padding: 4px 12px; border: var(--border-hairline) solid var(--color-border-strong); border-radius: var(--radius-pill); background: var(--color-surface); color: var(--color-text); font: 500 var(--text-label-sm) / 1 var(--font-ui); font-variant-numeric: tabular-nums; cursor: pointer; transition: border-color var(--duration-fast) var(--ease-standard); }
+  .sk-quick button:hover { border-color: var(--color-text); }
+  .sk-quick button[aria-pressed="true"] { border-color: var(--color-primary); box-shadow: inset 0 0 0 1px var(--color-primary); }
+  .sk-preview { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: var(--space-2) var(--space-4); padding: var(--space-4); border: var(--border-hairline) dashed var(--color-border-strong); border-radius: var(--radius-image); background: var(--color-surface-subtle); }
+  .sk-pv-lbl { display: block; font: 600 var(--text-label-sm) / var(--leading-label-sm) var(--font-ui); color: var(--color-text-muted); }
+  .sk-pv-flow { margin-top: 2px; font: 500 var(--text-heading-sm) / 1.2 var(--font-ui); letter-spacing: -0.66px; font-variant-numeric: tabular-nums; }
+  .sk-pv-arrow { margin-inline: 8px; font-weight: 400; color: var(--color-text-muted); }
+  .sk-pv-wait { color: var(--color-text-faint); }
+  .sk-pv-chips { display: flex; align-items: center; gap: 6px; color: var(--color-text-muted); }
+  .sk-pv-note { flex-basis: 100%; display: flex; align-items: center; gap: 6px; margin: 0; font: 500 var(--text-label-sm) / 1.4 var(--font-ui); color: var(--color-text); }
+  .sk-pv-note iconify-icon { flex: none; color: var(--color-positive); }
+  .sk-pv-note[data-tone="warning"] { color: var(--color-warning-text); }
+  .sk-pv-note[data-tone="warning"] iconify-icon { color: var(--color-warning-text); }
+  .sk-pv-note[data-tone="muted"] { color: var(--color-text-muted); font-weight: 400; }
+  .sk-status-line { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-2); font: 400 var(--text-body-sm) / 1.4 var(--font-ui); color: var(--color-text-muted); }
+  .sk-unit-warn { margin: 0; font: 500 var(--text-label-sm) / var(--leading-label-sm) var(--font-ui); color: var(--color-warning-text); }
+  .sk-foot-hint { flex: 1 1 220px; }
+  .sk-helper { padding-block: 10px; font-size: var(--text-label-sm); line-height: 1.45; }
+
+  @media (max-width: 1180px) {
+    .sk-grid { grid-template-columns: minmax(0, 1fr); }
+    .sk-hist { position: static; }
+    .sk-hist-list { max-height: 560px; }
+  }
+  @media (max-width: 1100px) {
+    .sk-metrics { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  }
+  @media (max-width: 720px) {
+    :scope > .l-staf-btn { flex: 1 1 auto; }
+    .sk-context { margin-top: 0; }
+  }
+  @media (max-width: 640px) {
+    .sk-alert { flex-wrap: wrap; }
+    .sk-alert > div { flex-basis: calc(100% - 40px); }
+    .sk-alert > .l-staf-btn { margin-inline-start: 30px; }
+    .sk-ledger .l-staf-card-head .l-staf-search { width: 100%; }
+    .sk-sort { width: 100%; }
+    .sk-sort .l-staf-select { flex: 1; }
+  }
+  @media (max-width: 560px) {
+    .sk-form { grid-template-columns: minmax(0, 1fr); }
+    [data-part="catat"] .l-staf-dialog-foot { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    [data-part="catat"] .l-staf-dialog-foot .sk-grow { display: none; }
+    [data-part="catat"] .l-staf-dialog-foot [type="submit"] { grid-column: 1 / -1; order: -1; }
+    [data-part="catat"] .l-staf-dialog-foot .l-staf-btn { padding-inline: var(--space-3); }
+    .sk-uses li { display: grid; grid-template-columns: 40px minmax(0, 1fr); column-gap: var(--space-3); row-gap: 6px; }
+    .sk-est { grid-column: 2; justify-items: start; text-align: start; }
+    .sk-metrics .l-staf-metric { padding: var(--space-4); }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .sk-alert[data-pulse] { animation: none; }
+  }
+</style>
+
+<template data-slot="header-actions">
+  <button class="l-staf-btn" type="button" data-action="add" hidden><iconify-icon icon="lucide:plus" aria-hidden="true"></iconify-icon>Tambah bahan</button>
+  <button class="l-staf-btn" data-variant="primary" type="button" data-action="catat"><iconify-icon icon="lucide:download" aria-hidden="true"></iconify-icon>Catat bahan masuk</button>
+</template>
+
+<template data-slot="content">
+  <main aria-label="Stok Bahan" class="p-stok" data-node-id="stok">
+    <p class="sk-context" data-node-id="stok.context"><span data-part="updated">Stok berkurang otomatis dari setiap penjualan</span></p>
+
+    <div data-part="alert" data-node-id="stok.alert"></div>
+
+    <section class="sk-metrics" aria-label="Ringkasan stok" data-part="metrics" data-node-id="stok.metrics"></section>
+
+    <div class="sk-grid" data-node-id="stok.grid">
+      <!-- Work Ledger: daftar bahan -->
+      <section class="l-staf-card sk-ledger" aria-labelledby="stok-ledger-title" data-node-id="stok.ledger">
+        <div class="l-staf-card-head">
+          <div>
+            <h2 id="stok-ledger-title">Daftar bahan</h2>
+            <p>Klik bahan untuk melihat detail &amp; menu yang memakainya</p>
+          </div>
+          <label class="l-staf-search">
+            <iconify-icon icon="lucide:search" aria-hidden="true"></iconify-icon>
+            <input type="search" placeholder="Cari bahan…" aria-label="Cari bahan" autocomplete="off" data-part="q">
+          </label>
+        </div>
+        <div class="sk-toolbar">
+          <div class="l-staf-seg" role="group" aria-label="Saring menurut status" data-part="filters"></div>
+          <div class="sk-sort">
+            <label for="stok-sort">Urutkan</label>
+            <select class="l-staf-select" id="stok-sort" data-part="sort">
+              <option value="status">Status</option>
+              <option value="name">Nama (A–Z)</option>
+              <option value="low">Sisa terendah</option>
+            </select>
+          </div>
+        </div>
+        <div class="l-staf-table-wrap sk-table-wrap" data-part="table-wrap">
+          <table class="l-staf-table sk-table">
+            <thead>
+              <tr>
+                <th scope="col">Bahan</th>
+                <th scope="col">Sisa stok</th>
+                <th scope="col" class="sk-col-min l-staf-num"><span title="Batas minimum">Batas min.</span></th>
+                <th scope="col">Status</th>
+                <th scope="col" class="sk-end">Aksi</th>
+              </tr>
+            </thead>
+            <tbody data-part="rows"></tbody>
+          </table>
+        </div>
+        <div class="l-staf-empty" data-part="empty" hidden>
+          <iconify-icon icon="lucide:search-x" aria-hidden="true"></iconify-icon>
+          <strong>Tidak ada bahan yang cocok</strong>
+          <span>Coba kata lain atau tampilkan semua bahan.</span>
+          <button type="button" class="l-staf-btn" data-size="sm" data-reset style="margin-top:var(--space-2)">Tampilkan semua</button>
+        </div>
+        <div class="sk-foot">
+          <span data-part="count"></span>
+          <span class="sk-legend"><i aria-hidden="true"></i>Garis tipis pada bar = batas minimum</span>
+        </div>
+      </section>
+
+      <!-- Riwayat pergerakan stok -->
+      <section class="l-staf-card sk-hist" aria-labelledby="stok-hist-title" data-node-id="stok.history">
+        <div class="l-staf-card-head">
+          <div>
+            <h2 id="stok-hist-title">Pergerakan stok</h2>
+            <p>Bahan masuk &amp; keluar terbaru</p>
+          </div>
+          <button type="button" class="l-staf-btn" data-variant="ghost" data-size="sm" data-part="sim" title="Prototipe: mengurangi stok seolah ada 1 pesanan baru"><iconify-icon icon="lucide:zap" aria-hidden="true"></iconify-icon>Simulasikan penjualan</button>
+        </div>
+        <div class="sk-hist-tools">
+          <div class="l-staf-seg" data-block role="group" aria-label="Saring pergerakan">
+            <button type="button" data-mv="ALL" aria-pressed="true">Semua</button>
+            <button type="button" data-mv="IN" aria-pressed="false">Masuk</button>
+            <button type="button" data-mv="OUT" aria-pressed="false">Keluar</button>
+          </div>
+        </div>
+        <div class="sk-hist-list" role="region" tabindex="0" aria-label="Daftar pergerakan stok" data-part="hist"></div>
+        <div class="sk-hist-foot"><iconify-icon icon="lucide:refresh-cw" aria-hidden="true"></iconify-icon>Stok keluar tercatat otomatis dari setiap pesanan.</div>
+      </section>
+    </div>
+
+    <!-- Drawer: detail bahan -->
+    <dialog class="l-staf-dialog" data-kind="drawer" aria-labelledby="stok-d-title" data-part="drawer" data-node-id="stok.drawer">
+      <div class="l-staf-dialog-head">
+        <div>
+          <span class="sk-eyebrow">Detail bahan</span>
+          <h2 id="stok-d-title" data-part="d-title">Bahan</h2>
+          <p data-part="d-sub"></p>
+        </div>
+        <button class="l-staf-iconbtn" type="button" data-close aria-label="Tutup detail"><iconify-icon icon="lucide:x" aria-hidden="true"></iconify-icon></button>
+      </div>
+      <div class="l-staf-dialog-body" data-part="d-body"></div>
+      <div class="l-staf-dialog-foot sk-drawer-foot">
+        <button class="l-staf-btn" data-variant="primary" data-block type="button" data-part="d-catat"><iconify-icon icon="lucide:download" aria-hidden="true"></iconify-icon>Catat bahan masuk</button>
+      </div>
+    </dialog>
+
+    <!-- Dialog: catat bahan masuk -->
+    <dialog class="l-staf-dialog" aria-labelledby="stok-c-title" data-part="catat" data-node-id="stok.catat">
+      <div class="l-staf-dialog-head">
+        <div>
+          <h2 id="stok-c-title">Catat bahan masuk</h2>
+          <p>Tambahkan stok saat bahan datang dari pemasok atau hasil belanja.</p>
+        </div>
+        <button class="l-staf-iconbtn" type="button" data-close aria-label="Tutup"><iconify-icon icon="lucide:x" aria-hidden="true"></iconify-icon></button>
+      </div>
+      <form class="l-staf-dialog-body" id="stok-c-form" novalidate data-part="c-form">
+        <div class="sk-form">
+          <div class="l-staf-field sk-span">
+            <label for="stok-c-ing">Bahan</label>
+            <select class="l-staf-select" id="stok-c-ing" data-part="c-ing"></select>
+          </div>
+          <div class="l-staf-field">
+            <label for="stok-c-qty">Jumlah masuk</label>
+            <div class="l-staf-affix">
+              <input id="stok-c-qty" type="number" min="0" step="any" inputmode="decimal" placeholder="0" aria-describedby="stok-c-qty-hint stok-c-qty-err" data-part="c-qty">
+              <span data-part="c-unit">ml</span>
+            </div>
+            <div class="sk-quick" role="group" aria-label="Jumlah cepat" data-part="c-quick"></div>
+            <p class="l-staf-hint" id="stok-c-qty-hint" data-part="c-hint"></p>
+            <p class="l-staf-error" id="stok-c-qty-err" data-part="c-qty-err" hidden></p>
+          </div>
+          <div class="l-staf-field">
+            <label for="stok-c-date">Tanggal masuk</label>
+            <input class="l-staf-input" type="date" id="stok-c-date" aria-describedby="stok-c-date-err" data-part="c-date">
+            <p class="l-staf-error" id="stok-c-date-err" data-part="c-date-err" hidden></p>
+          </div>
+          <div class="l-staf-field sk-span">
+            <label for="stok-c-note">Catatan / pemasok <span class="sk-opt">(opsional)</span></label>
+            <input class="l-staf-input" id="stok-c-note" list="stok-note-list" maxlength="80" autocomplete="off" placeholder="mis. Pemasok susu — CV Sapi Murni" data-part="c-note">
+            <datalist id="stok-note-list" data-part="c-notes"></datalist>
+          </div>
+          <div class="sk-span sk-preview" aria-live="polite" data-part="c-preview"></div>
+        </div>
+      </form>
+      <div class="l-staf-dialog-foot">
+        <button class="l-staf-btn" data-variant="ghost" type="button" data-close>Batal</button>
+        <span class="sk-grow"></span>
+        <button class="l-staf-btn" type="button" data-part="c-more">Simpan &amp; catat lagi</button>
+        <button class="l-staf-btn" data-variant="primary" type="submit" form="stok-c-form">Simpan</button>
+      </div>
+    </dialog>
+
+    <!-- Dialog: tambah bahan (pemilik) -->
+    <dialog class="l-staf-dialog" aria-labelledby="stok-a-title" data-part="add" data-node-id="stok.add">
+      <div class="l-staf-dialog-head">
+        <div>
+          <h2 id="stok-a-title">Tambah bahan</h2>
+          <p>Daftarkan bahan baru yang ingin dipantau stoknya.</p>
+        </div>
+        <button class="l-staf-iconbtn" type="button" data-close aria-label="Tutup"><iconify-icon icon="lucide:x" aria-hidden="true"></iconify-icon></button>
+      </div>
+      <form class="l-staf-dialog-body" id="stok-a-form" novalidate data-part="a-form">
+        <div class="sk-form">
+          <div class="l-staf-field sk-span">
+            <label for="stok-a-name">Nama bahan</label>
+            <input class="l-staf-input" id="stok-a-name" maxlength="40" autocomplete="off" placeholder="mis. Sirup vanila" autofocus aria-describedby="stok-a-name-err" data-part="a-name">
+            <p class="l-staf-error" id="stok-a-name-err" data-part="a-name-err" hidden></p>
+          </div>
+          <div class="l-staf-field">
+            <label for="stok-a-unit">Satuan</label>
+            <select class="l-staf-select" id="stok-a-unit" data-part="a-unit">
+              <option value="gram">gram (g)</option>
+              <option value="ml">mililiter (ml)</option>
+              <option value="pcs">pcs (buah / potong)</option>
+              <option value="botol">botol</option>
+            </select>
+          </div>
+          <div class="l-staf-field">
+            <label for="stok-a-stock">Stok awal</label>
+            <div class="l-staf-affix">
+              <input id="stok-a-stock" type="number" min="0" step="any" inputmode="decimal" placeholder="0" aria-describedby="stok-a-stock-err" data-part="a-stock">
+              <span data-unit-lbl>gram</span>
+            </div>
+            <p class="l-staf-error" id="stok-a-stock-err" data-part="a-stock-err" hidden></p>
+          </div>
+          <div class="l-staf-field sk-span">
+            <label for="stok-a-min">Batas minimum</label>
+            <div class="l-staf-affix">
+              <input id="stok-a-min" type="number" min="0" step="any" inputmode="decimal" placeholder="0" aria-describedby="stok-a-min-help stok-a-min-err" data-part="a-min">
+              <span data-unit-lbl>gram</span>
+            </div>
+            <p class="l-staf-error" id="stok-a-min-err" data-part="a-min-err" hidden></p>
+            <div class="l-staf-alert sk-helper" data-tone="neutral" id="stok-a-min-help"><iconify-icon icon="lucide:bell" aria-hidden="true"></iconify-icon><span>Saat sisa stok sama dengan atau di bawah angka ini, bahan ditandai <strong>Menipis</strong> dan peringatan muncul di layar kasir &amp; pemilik.</span></div>
+          </div>
+          <div class="sk-span sk-status-line" aria-live="polite" data-part="a-preview"></div>
+        </div>
+      </form>
+      <div class="l-staf-dialog-foot">
+        <p class="l-staf-hint sk-foot-hint">Bahan baru belum terhubung ke resep menu, jadi belum berkurang otomatis saat ada penjualan.</p>
+        <button class="l-staf-btn" data-variant="ghost" type="button" data-close>Batal</button>
+        <button class="l-staf-btn" data-variant="primary" type="submit" form="stok-a-form">Tambah</button>
+      </div>
+    </dialog>
+
+    <!-- Dialog: ubah bahan (pemilik) -->
+    <dialog class="l-staf-dialog" data-size="sm" aria-labelledby="stok-e-title" data-part="edit" data-node-id="stok.edit">
+      <div class="l-staf-dialog-head">
+        <div>
+          <h2 id="stok-e-title">Ubah bahan</h2>
+          <p data-part="e-sub">Atur batas minimum &amp; satuan.</p>
+        </div>
+        <button class="l-staf-iconbtn" type="button" data-close aria-label="Tutup"><iconify-icon icon="lucide:x" aria-hidden="true"></iconify-icon></button>
+      </div>
+      <form class="l-staf-dialog-body" id="stok-e-form" novalidate data-part="e-form">
+        <div class="sk-form" style="grid-template-columns:minmax(0,1fr)">
+          <div class="l-staf-field">
+            <label for="stok-e-name">Nama bahan</label>
+            <input class="l-staf-input" id="stok-e-name" maxlength="40" autocomplete="off" aria-describedby="stok-e-name-err" data-part="e-name">
+            <p class="l-staf-error" id="stok-e-name-err" data-part="e-name-err" hidden></p>
+          </div>
+          <div class="l-staf-field">
+            <label for="stok-e-unit">Satuan</label>
+            <select class="l-staf-select" id="stok-e-unit" aria-describedby="stok-e-unit-warn" data-part="e-unit">
+              <option value="gram">gram (g)</option>
+              <option value="ml">mililiter (ml)</option>
+              <option value="pcs">pcs (buah / potong)</option>
+              <option value="botol">botol</option>
+            </select>
+            <p class="sk-unit-warn" id="stok-e-unit-warn" data-part="e-unit-warn" hidden>Angka stok &amp; resep tidak ikut dikonversi. Ganti satuan hanya jika sebelumnya salah pilih.</p>
+          </div>
+          <div class="l-staf-field">
+            <label for="stok-e-min">Batas minimum</label>
+            <div class="l-staf-affix">
+              <input id="stok-e-min" type="number" min="0" step="any" inputmode="decimal" autofocus aria-describedby="stok-e-min-help stok-e-min-err" data-part="e-min">
+              <span data-part="e-unit-lbl">gram</span>
+            </div>
+            <p class="l-staf-error" id="stok-e-min-err" data-part="e-min-err" hidden></p>
+            <p class="l-staf-hint" id="stok-e-min-help">Bahan ditandai <strong>Menipis</strong> saat sisa stok sama dengan atau di bawah angka ini.</p>
+          </div>
+          <div class="sk-status-line" aria-live="polite" data-part="e-preview"></div>
+        </div>
+      </form>
+      <div class="l-staf-dialog-foot">
+        <button class="l-staf-btn" data-variant="ghost" type="button" data-close>Batal</button>
+        <button class="l-staf-btn" data-variant="primary" type="submit" form="stok-e-form">Simpan</button>
+      </div>
+    </dialog>
+
+    <div class="l-staf-toast" popover="manual" role="status" data-part="toast"></div>
+  </main>
+</template>
+
+<script>
+  /* ===== Data tiruan (struktur mengikuti skema PRD §6, sama dengan halaman lain) ===== */
+  const MENUS = [
+    ["m1", "makanan", "Nasi Goreng Kampung", 32000, "🍳", true], ["m2", "makanan", "Ayam Geprek Sambal Matah", 35000, "🍗", true],
+    ["m3", "makanan", "Mie Goreng Jawa", 30000, "🍜", true], ["m4", "makanan", "Rice Bowl Chicken Teriyaki", 36000, "🍱", true],
+    ["m5", "makanan", "Nasi Ayam Bakar Madu", 38000, "🍖", false], ["d1", "minuman", "Kopi Susu Gula Aren", 22000, "☕", true],
+    ["d2", "minuman", "Es Americano", 20000, "🧊", true], ["d3", "minuman", "Matcha Latte", 28000, "🍵", true],
+    ["d4", "minuman", "Es Teh Manis", 10000, "🥤", true], ["d5", "minuman", "Lemon Tea", 15000, "🍋", true],
+    ["d6", "minuman", "Jus Alpukat", 25000, "🥑", false], ["s1", "lainnya", "Kentang Goreng", 20000, "🍟", true],
+    ["s2", "lainnya", "Pisang Goreng Keju", 18000, "🍌", true], ["s3", "lainnya", "Roti Bakar Cokelat Keju", 22000, "🍞", true],
+    ["s4", "lainnya", "Croissant Butter", 24000, "🥐", true], ["s5", "lainnya", "Air Mineral", 8000, "💧", true],
+  ].map(([id, category_id, name, price, image_url, is_available]) => ({ id, category_id, name, price, image_url, is_available }));
+  const menuById = Object.fromEntries(MENUS.map((m) => [m.id, m]));
+  const MENU_WEIGHT = { m1: 9, m2: 7, m3: 5, m4: 5, m5: 3, d1: 12, d2: 6, d3: 5, d4: 8, d5: 4, d6: 2, s1: 8, s2: 4, s3: 4, s4: 3, s5: 4 };
+  const SEED_INGREDIENTS = [
+    ["i1", "Biji kopi espresso", "gram", 1850, 1000], ["i2", "Susu segar", "ml", 4200, 5000], ["i3", "Gula aren cair", "ml", 900, 800],
+    ["i4", "Bubuk matcha", "gram", 120, 200], ["i5", "Teh melati", "gram", 650, 300], ["i6", "Gula pasir", "gram", 3200, 1000],
+    ["i7", "Lemon", "pcs", 14, 10], ["i8", "Alpukat", "pcs", 0, 6], ["i9", "Beras", "gram", 12000, 5000],
+    ["i10", "Ayam fillet", "gram", 3200, 2000], ["i11", "Ayam potong (bakar)", "pcs", 0, 8], ["i12", "Telur", "pcs", 42, 30],
+    ["i13", "Mie kuning", "gram", 2400, 1500], ["i14", "Kentang beku", "gram", 1100, 2000], ["i15", "Pisang kepok", "pcs", 18, 12],
+    ["i16", "Roti tawar tebal", "pcs", 10, 8], ["i17", "Croissant beku", "pcs", 16, 10], ["i18", "Keju cheddar", "gram", 600, 300],
+    ["i19", "Air mineral 600 ml", "botol", 36, 24], ["i20", "Minyak goreng", "ml", 8000, 5000],
+  ].map(([id, name, unit, stock_qty, min_stock]) => ({ id, name, unit, stock_qty, min_stock }));
+  const RECIPE_ITEMS = [
+    ["m1", "i9", 150], ["m1", "i12", 1], ["m1", "i10", 50], ["m1", "i20", 20],
+    ["m2", "i10", 150], ["m2", "i9", 150], ["m2", "i20", 60],
+    ["m3", "i13", 120], ["m3", "i12", 1], ["m3", "i20", 20],
+    ["m4", "i10", 120], ["m4", "i9", 150],
+    ["m5", "i11", 1], ["m5", "i9", 150],
+    ["d1", "i1", 18], ["d1", "i2", 150], ["d1", "i3", 25],
+    ["d2", "i1", 18],
+    ["d3", "i4", 6], ["d3", "i2", 180],
+    ["d4", "i5", 5], ["d4", "i6", 20],
+    ["d5", "i5", 5], ["d5", "i7", 1],
+    ["d6", "i8", 1], ["d6", "i2", 50],
+    ["s1", "i14", 150], ["s1", "i20", 40],
+    ["s2", "i15", 2], ["s2", "i18", 20], ["s2", "i20", 40],
+    ["s3", "i16", 2], ["s3", "i18", 20],
+    ["s4", "i17", 1],
+    ["s5", "i19", 1],
+  ].map(([menu_id, ingredient_id, qty_used], i) => ({ id: "r" + (i + 1), menu_id, ingredient_id, qty_used }));
+  const STAFF = [{ id: "u1", name: "Iul Rahman" }, { id: "u2", name: "Rina Kartika" }, { id: "u3", name: "Dimas Pratama" }, { id: "u4", name: "Sari Wulandari" }];
+  const KEYS = { role: "iulfnb:role", seq: "iulfnb:seq" };
+
+  /* ===== Util ===== */
+  const $ = (part) => root.querySelector(`[data-part="${part}"]`);
+  const $$ = (sel, el = root) => [...el.querySelectorAll(sel)];
+  const esc = (s) => String(s ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+  const hhmm = (d) => new Date(d).toLocaleTimeString("id-ID", { hour: "2-digit", minute: "2-digit" });
+  const tgl = (d, opt) => new Date(d).toLocaleDateString("id-ID", opt);
+  const minsSince = (d) => Math.max(0, Math.floor((Date.now() - new Date(d)) / 60000));
+  const ago = (d) => { const m = minsSince(d); return m < 1 ? "baru saja" : m < 60 ? m + " mnt lalu" : m < 1440 ? Math.floor(m / 60) + " jam lalu" : Math.floor(m / 1440) + " hari lalu"; };
+  const icon = (name, size = 18) => `<iconify-icon icon="lucide:${name}" aria-hidden="true" style="font-size:${size}px"></iconify-icon>`;
+  const store = {
+    get(k, d) { try { const v = localStorage.getItem(k); return v == null ? d : JSON.parse(v); } catch { return d; } },
+    set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch {} },
+  };
+  const DAY = 864e5;
+  const r2 = (n) => Math.round(n * 100) / 100;
+  const pad = (n) => String(n).padStart(2, "0");
+  const isoDay = (d) => { const x = new Date(d); return x.getFullYear() + "-" + pad(x.getMonth() + 1) + "-" + pad(x.getDate()); };
+  const sameDay = (a, b) => isoDay(a) === isoDay(b);
+  const when = (d) => sameDay(d, Date.now()) ? hhmm(d) : sameDay(d, Date.now() - DAY) ? "Kemarin " + hhmm(d) : tgl(d, { day: "numeric", month: "short" }) + " " + hhmm(d);
+  const dayLabel = (d) => sameDay(d, Date.now()) ? "Hari ini" : sameDay(d, Date.now() - DAY) ? "Kemarin" : tgl(d, { weekday: "long", day: "numeric", month: "short" });
+  const joinList = (a) => a.length < 2 ? (a[0] || "") : a.slice(0, -1).join(", ") + " & " + a[a.length - 1];
+  const byName = (a, b) => a.name.localeCompare(b.name, "id");
+  /** 1850 gram → "1,85 kg", 4200 ml → "4,2 L" */
+  function fmtQty(q, unit) {
+    const n = (v) => v.toLocaleString("id-ID", { maximumFractionDigits: 2 });
+    if (unit === "gram" && Math.abs(q) >= 1000) return n(q / 1000) + " kg";
+    if (unit === "ml" && Math.abs(q) >= 1000) return n(q / 1000) + " L";
+    return n(q) + " " + ({ gram: "g", ml: "ml", pcs: "pcs", botol: "botol" }[unit] || unit);
+  }
+
+  const STATUS = { AMAN: ["Aman", "positive"], MENIPIS: ["Menipis", "warning"], HABIS: ["Habis", "danger"] };
+  const RANK = { HABIS: 0, MENIPIS: 1, AMAN: 2 };
+  const UNIT_NAME = { gram: "gram", ml: "ml", pcs: "pcs", botol: "botol" };
+  const UNIT_HINT = { gram: "Isi dalam gram · 1 kg = 1.000 g", ml: "Isi dalam ml · 1 L = 1.000 ml", pcs: "Isi jumlah buah / potong", botol: "Isi jumlah botol" };
+  const QUICK = { gram: [500, 1000, 5000], ml: [1000, 2000, 5000], pcs: [6, 12, 24], botol: [12, 24, 48] };
+  /** 'HABIS' | 'MENIPIS' | 'AMAN' */
+  const stockStatus = (i) => i.stock_qty <= 0 ? "HABIS" : i.stock_qty <= i.min_stock ? "MENIPIS" : "AMAN";
+  const chip = (st, label) => `<span class="l-staf-chip" data-tone="${STATUS[st][1]}">${label || STATUS[st][0]}</span>`;
+  const ratio = (i) => i.min_stock > 0 ? i.stock_qty / i.min_stock : (i.stock_qty > 0 ? 99 : 0);
+  const scaleMax = (i) => Math.max(i.min_stock * 2.5, i.stock_qty, 1);
+  const pct = (v, max) => Math.max(0, Math.min(100, v / max * 100)).toFixed(1);
+
+  /* ===== State (bertahan saat pindah halaman) ===== */
+  const S = root.stokState ??= {
+    seeded: false,
+    ings: SEED_INGREDIENTS.map((i) => ({ ...i })),
+    avail: Object.fromEntries(MENUS.map((m) => [m.id, m.is_available])),
+    autoOff: new Set(),
+    moves: [], mvSeq: 0,
+    filter: "ALL", q: "", sort: "status", mv: "ALL",
+    current: null, drawerId: null, editId: null,
+    simSeq: 26, pulse: false,
+  };
+  const ing = (id) => S.ings.find((i) => i.id === id);
+  const recipeOf = (menuId) => RECIPE_ITEMS.filter((r) => r.menu_id === menuId);
+  const menusUsing = (ingId) => RECIPE_ITEMS.filter((r) => r.ingredient_id === ingId).map((r) => menuById[r.menu_id]);
+  const lowStock = () => S.ings.filter((i) => stockStatus(i) !== "AMAN");
+  const staffFirst = (id) => (STAFF.find((s) => s.id === id)?.name || "").split(" ")[0];
+
+  function addMove(ingredient_id, qty, type, note, created_at, extra) {
+    const mv = { id: "sm" + (++S.mvSeq), ingredient_id, qty: r2(qty), type, note, created_at, ...(extra || {}) };
+    S.moves.push(mv);
+    return mv;
+  }
+  /** Penjualan → satu baris OUT per bahan (dijumlahkan bila dipakai beberapa menu) */
+  function recordSale(ts, code, lines, extra) {
+    const per = {};
+    lines.forEach(([menuId, q]) => recipeOf(menuId).forEach((r) => { per[r.ingredient_id] = (per[r.ingredient_id] || 0) + r.qty_used * q; }));
+    const note = `Penjualan ${code} · ` + lines.map(([id, q]) => `${q}× ${menuById[id].name}`).join(", ");
+    return Object.keys(per).map((ingId) => addMove(ingId, per[ingId], "OUT", note, ts, extra));
+  }
+
+  /* Menu otomatis habis bila bahan tidak cukup */
+  const menuBlocked = (m) => recipeOf(m.id).some((r) => { const i = ing(r.ingredient_id); return !i || i.stock_qty < r.qty_used; });
+  const blockedMenus = () => MENUS.filter((m) => recipeOf(m.id).length && menuBlocked(m));
+  function syncMenus() {
+    const off = [], on = [];
+    MENUS.forEach((m) => {
+      if (!recipeOf(m.id).length) return;
+      const blocked = menuBlocked(m);
+      if (blocked && S.avail[m.id]) { S.avail[m.id] = false; S.autoOff.add(m.id); off.push(m); }
+      else if (!blocked && !S.avail[m.id] && S.autoOff.has(m.id)) { S.avail[m.id] = true; S.autoOff.delete(m.id); on.push(m); }
+    });
+    return { off, on };
+  }
+
+  /* Data tiruan stock_movements — 3 hari terakhir (dibuat sekali) */
+  if (!S.seeded) {
+    S.seeded = true;
+    const now = Date.now();
+    const minsAgo = (n) => now - n * 60e3;
+    const at = (daysAgo, h, m) => { const d = new Date(now); d.setDate(d.getDate() - daysAgo); d.setHours(h, m, 0, 0); return Math.min(d.getTime(), now - (daysAgo ? 0 : 30 * 60e3)); };
+    const dimasLogin = now - 26 * 3600e3;
+    // [waktu, bahan, jumlah, catatan, dicatat oleh]
+    [
+      [at(0, 7, 10), "i15", 12, "Belanja pasar pagi", "u2"],
+      [at(0, 7, 10), "i7", 10, "Belanja pasar pagi", "u2"],
+      [dimasLogin + 20 * 60e3, "i2", 5000, "Pemasok susu — CV Sapi Murni", "u3"],
+      [at(1, 9, 5), "i1", 1000, "Roastery Kopi Merapi", "u1"],
+      [at(1, 8, 30), "i10", 2000, "Pemasok ayam — Pak Darto", "u3"],
+      [at(2, 7, 0), "i9", 10000, "Belanja pasar pagi", "u1"],
+      [at(2, 8, 15), "i17", 12, "Titipan Bakery Roti Kita", "u2"],
+      [at(2, 13, 20), "i19", 24, "Distributor air mineral", "u2"],
+    ].forEach(([ts, id, q, note, by]) => addMove(id, q, "IN", note, ts, { by }));
+    [
+      [minsAgo(9), "A-026", [["d1", 2]]],
+      [minsAgo(23), "A-025", [["d3", 1], ["s1", 1]]],
+      [minsAgo(41), "A-024", [["m1", 1], ["d4", 1]]],
+      [minsAgo(78), "A-022", [["d1", 2], ["s4", 1]]],
+      [at(1, 19, 42), "A-048", [["m2", 1], ["d2", 1]]],
+      [at(1, 18, 5), "A-045", [["s2", 2]]],
+      [at(1, 12, 31), "A-031", [["m3", 1], ["d5", 1]]],
+      [at(2, 20, 12), "A-052", [["d6", 1]]],
+      [at(2, 19, 48), "A-050", [["m5", 1]]],
+      [at(2, 11, 26), "A-018", [["d1", 2], ["s3", 1]]],
+    ].forEach(([ts, code, lines]) => recordSale(ts, code, lines));
+    S.autoOff = new Set(MENUS.filter((m) => !S.avail[m.id] && menuBlocked(m)).map((m) => m.id));
+    syncMenus();
+    S.simSeq = Math.max(Number(store.get(KEYS.seq, 26)) || 26, 26);
+  }
+
+  /* Peran: kasir tidak bisa menambah / mengubah bahan */
+  const OWNER = store.get(KEYS.role, "OWNER") !== "CASHIER";
+  const ME = STAFF.find((s) => s.id === (OWNER ? "u1" : "u2"));
+
+  /* ===== Toast & dialog ===== */
+  const toastEl = $("toast");
+  let toastTimer;
+  function toast(msg) {
+    toastEl.textContent = msg;
+    try { if (toastEl.matches(":popover-open")) toastEl.hidePopover(); toastEl.showPopover(); } catch {}
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => { try { toastEl.hidePopover(); } catch {} }, 2600);
+  }
+  onCleanup(() => clearTimeout(toastTimer));
+  const open = (part) => { const d = $(part); if (!d.open) d.showModal(); };
+  const close = (part) => { const d = $(part); if (d.open) d.close(); };
+  for (const d of $$("dialog")) {
+    d.addEventListener("click", (e) => {
+      if (e.target === d) d.close();
+      if (e.target.closest("[data-close]")) d.close();
+    }, { signal });
+  }
+  onCleanup(() => { for (const d of $$("dialog")) if (d.open) d.close(); });
+
+  /* Penanda pergerakan baru (sinyal oranye sementara) */
+  const freshMv = new Set();
+  const freshTimers = [];
+  function markFresh(mv) {
+    freshMv.add(mv.id);
+    freshTimers.push(setTimeout(() => { freshMv.delete(mv.id); renderHist(); }, 6000));
+  }
+  onCleanup(() => { freshTimers.forEach(clearTimeout); freshMv.clear(); });
+
+  /* ===== Render ===== */
+  function renderAll() {
+    renderContext();
+    renderAlert();
+    renderMetrics();
+    renderFilters();
+    renderTable();
+    renderHist();
+    if ($("drawer").open) renderDrawer();
+  }
+  function renderContext() {
+    $("updated").textContent = `Diperbarui ${hhmm(Date.now())} · stok berkurang otomatis dari setiap penjualan`;
+  }
+
+  function renderAlert() {
+    const box = $("alert");
+    const low = lowStock();
+    if (!low.length) {
+      box.innerHTML = `<div class="l-staf-alert sk-alert" data-tone="positive">${icon("circle-check", 20)}<div><strong class="sk-al-title">Semua bahan aman.</strong><p>Tidak ada bahan yang menyentuh batas minimum.</p></div></div>`;
+      S.pulse = false;
+      return;
+    }
+    const men = low.filter((i) => stockStatus(i) === "MENIPIS").sort((a, b) => ratio(a) - ratio(b));
+    const hab = low.filter((i) => stockStatus(i) === "HABIS").sort(byName);
+    const head = men.length && hab.length ? `${men.length} bahan menipis & ${hab.length} habis` : men.length ? `${men.length} bahan menipis` : `${hab.length} bahan habis`;
+    const names = (list) => joinList(list.map((i) => `<button type="button" class="sk-lnk" data-open="${i.id}">${esc(i.name)}</button>`));
+    const blocked = blockedMenus();
+    box.innerHTML = `<div class="l-staf-alert sk-alert" data-tone="warning"${S.pulse ? " data-pulse" : ""}>
+      ${icon("triangle-alert", 20)}
+      <div>
+        <strong class="sk-al-title">${head}</strong>
+        <p>${men.length ? `Menipis: ${names(men)}.` : ""} ${hab.length ? `Habis: ${names(hab)}.` : ""}</p>
+        ${blocked.length ? `<p><strong>${esc(joinList(blocked.map((m) => m.name)))}</strong> sedang habis — pelanggan belum bisa memesannya sampai bahan masuk.</p>` : ""}
+      </div>
+      <button type="button" class="l-staf-btn" data-size="sm" data-in="${(hab[0] || men[0]).id}">${icon("download", 16)}Catat bahan masuk</button>
+    </div>`;
+    S.pulse = false;
+  }
+
+  function renderMetrics() {
+    const all = S.ings.length;
+    const men = S.ings.filter((i) => stockStatus(i) === "MENIPIS").length;
+    const hab = S.ings.filter((i) => stockStatus(i) === "HABIS").length;
+    const ins = S.moves.filter((m) => m.type === "IN" && m.created_at >= Date.now() - 7 * DAY);
+    const last = ins.reduce((a, m) => Math.max(a, m.created_at), 0);
+    const blocked = blockedMenus().length;
+    const items = [
+      ["Total bahan", all, `${all - men - hab} dalam batas aman`, ""],
+      ["Menipis", men, men ? "di bawah batas minimum" : "tidak ada", men ? "warning" : ""],
+      ["Habis", hab, blocked ? `${blocked} menu tidak bisa dipesan` : "semua menu bisa dipesan", hab ? "danger" : ""],
+      ["Bahan masuk 7 hari", ins.length + "×", last ? "terakhir " + ago(last) : "belum ada catatan", ""],
+    ];
+    $("metrics").innerHTML = items.map(([label, val, sub, tone]) =>
+      `<div class="l-staf-metric"${tone ? ` data-tone="${tone}"` : ""}><span>${label}</span><strong>${val}</strong><small>${sub}</small></div>`).join("");
+  }
+
+  const FILTERS = [["ALL", "Semua"], ["MENIPIS", "Menipis"], ["HABIS", "Habis"], ["AMAN", "Aman"]];
+  function renderFilters() {
+    const count = (k) => k === "ALL" ? S.ings.length : S.ings.filter((i) => stockStatus(i) === k).length;
+    $("filters").innerHTML = FILTERS.map(([k, l]) => `<button type="button" data-filter="${k}" aria-pressed="${S.filter === k}">${l}<small>${count(k)}</small></button>`).join("");
+  }
+
+  function visibleIngs() {
+    const q = S.q.trim().toLowerCase();
+    const list = S.ings.filter((i) => (S.filter === "ALL" || stockStatus(i) === S.filter) && (!q || i.name.toLowerCase().includes(q)));
+    if (S.sort === "name") list.sort(byName);
+    else if (S.sort === "low") list.sort((a, b) => ratio(a) - ratio(b) || byName(a, b));
+    else list.sort((a, b) => RANK[stockStatus(a)] - RANK[stockStatus(b)] || ratio(a) - ratio(b) || byName(a, b));
+    return list;
+  }
+  const barHTML = (i, st) => {
+    const max = scaleMax(i);
+    return `<span class="sk-bar" data-tone="${STATUS[st][1]}" aria-hidden="true"><i style="width:${pct(i.stock_qty, max)}%"></i><b style="left:${pct(i.min_stock, max)}%"></b></span>`;
+  };
+  function rowHTML(i) {
+    const st = stockStatus(i), uses = menusUsing(i.id).length, cur = S.current === i.id;
+    return `<tr data-id="${i.id}"${cur ? ' data-current aria-current="true"' : ""}>
+      <td><button type="button" class="sk-name" data-open="${i.id}">${esc(i.name)}</button><span class="sk-sub">${uses ? `Dipakai di ${uses} menu` : "Belum dipakai di menu"}</span></td>
+      <td><div class="sk-meter"><strong>${fmtQty(i.stock_qty, i.unit)}</strong>${barHTML(i, st)}<span class="sk-meter-min">Batas ${fmtQty(i.min_stock, i.unit)}</span></div></td>
+      <td class="sk-col-min l-staf-num">${fmtQty(i.min_stock, i.unit)}</td>
+      <td>${chip(st)}</td>
+      <td class="sk-end"><div class="sk-acts">
+        <button type="button" class="l-staf-btn" data-size="sm" data-in="${i.id}">${icon("plus", 16)}Masuk<span class="sk-sr"> — ${esc(i.name)}</span></button>
+        ${OWNER ? `<button type="button" class="l-staf-iconbtn" data-edit="${i.id}" aria-label="Ubah ${esc(i.name)}" title="Ubah batas minimum & satuan">${icon("pencil", 16)}</button>` : ""}
+      </div></td>
+    </tr>`;
+  }
+  function renderTable() {
+    const list = visibleIngs();
+    $("rows").innerHTML = list.map(rowHTML).join("");
+    $("table-wrap").hidden = !list.length;
+    $("empty").hidden = list.length > 0;
+    $("count").textContent = list.length === S.ings.length ? `${list.length} bahan` : `Menampilkan ${list.length} dari ${S.ings.length} bahan`;
+  }
+
+  function renderHist() {
+    const el = $("hist"), top = el.scrollTop;
+    const list = S.moves.filter((m) => S.mv === "ALL" || m.type === S.mv).sort((a, b) => b.created_at - a.created_at);
+    // Satu penjualan = satu entri (beberapa bahan sekaligus)
+    const groups = [];
+    list.forEach((m) => {
+      const g = groups[groups.length - 1];
+      if (m.type === "OUT" && g && g.type === "OUT" && g.note === m.note && g.created_at === m.created_at) g.items.push(m);
+      else groups.push({ type: m.type, note: m.note, created_at: m.created_at, sim: !!m.sim, items: [m] });
+    });
+    let html = "", lastDay = "";
+    groups.forEach((g) => {
+      const d = isoDay(g.created_at);
+      if (d !== lastDay) { html += `<h3 class="sk-day">${dayLabel(g.created_at)}</h3>`; lastDay = d; }
+      html += mvHTML(g);
+    });
+    el.innerHTML = html || `<div class="l-staf-empty">${icon("package", 28)}<strong>Belum ada pergerakan</strong>Catatan bahan masuk dan penjualan akan muncul di sini.</div>`;
+    el.scrollTop = top;
+    $$("[data-mv]").forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.mv === S.mv)));
+  }
+  function mvHTML(g) {
+    const fresh = g.items.some((m) => freshMv.has(m.id)) ? " data-fresh" : "";
+    if (g.type === "IN") {
+      const m = g.items[0], i = ing(m.ingredient_id);
+      if (!i) return "";
+      const meta = [m.note || "Tanpa catatan", m.by ? "dicatat " + staffFirst(m.by) : ""].filter(Boolean).join(" · ");
+      return `<div class="sk-mv"${fresh}>
+        <span class="sk-mvi" data-dir="in" aria-hidden="true">${icon("plus", 14)}</span>
+        <div class="sk-mv-txt"><button type="button" class="sk-mv-name" data-open="${i.id}">${esc(i.name)}</button><small>${esc(meta)}</small></div>
+        <div class="sk-mv-end"><span class="sk-mv-qty"><span class="sk-sr">Masuk </span>+${fmtQty(m.qty, i.unit)}</span><span class="sk-mv-time">${hhmm(m.created_at)}</span></div>
+      </div>`;
+    }
+    const parts = g.items.map((m) => { const i = ing(m.ingredient_id); return i ? `${esc(i.name)} <b>−${fmtQty(m.qty, i.unit)}</b>` : ""; }).filter(Boolean).join(" · ");
+    return `<div class="sk-mv"${fresh}>
+      <span class="sk-mvi" data-dir="out" aria-hidden="true">${icon("minus", 14)}</span>
+      <div class="sk-mv-txt"><strong>${esc(g.note)}</strong><small><span class="sk-sr">Keluar: </span>${parts}</small></div>
+      <div class="sk-mv-end"><span class="sk-mv-time">${hhmm(g.created_at)}</span>${g.sim ? '<span class="l-staf-chip" data-tone="plain">Simulasi</span>' : ""}</div>
+    </div>`;
+  }
+
+  /* ===== Drawer detail bahan ===== */
+  function openDrawer(id) {
+    if (!ing(id)) return;
+    S.drawerId = id;
+    S.current = id;
+    renderTable();
+    renderDrawer();
+    open("drawer");
+  }
+  function renderDrawer() {
+    const i = ing(S.drawerId);
+    if (!i) return;
+    const st = stockStatus(i);
+    const uses = RECIPE_ITEMS.filter((r) => r.ingredient_id === i.id && menuById[r.menu_id]);
+    $("d-title").textContent = i.name;
+    $("d-sub").textContent = `Satuan ${UNIT_NAME[i.unit] || i.unit} · ${uses.length ? "dipakai di " + uses.length + " menu" : "belum dipakai di menu"}`;
+    const diff = r2(i.stock_qty - i.min_stock);
+    const hit = uses.map((r) => menuById[r.menu_id]).filter(menuBlocked);
+    const note = (tone, ic, html) => `<div class="l-staf-alert sk-note" data-tone="${tone}">${icon(ic, 18)}<span>${html}</span></div>`;
+    const msg = st === "HABIS"
+      ? note("danger", "triangle-alert", `Stok habis. ${hit.length ? esc(joinList(hit.map((m) => m.name))) + " tidak bisa dipesan sampai bahan masuk." : "Catat bahan masuk saat barang datang."}`)
+      : st === "MENIPIS"
+      ? note("warning", "triangle-alert", `${diff < 0 ? `Kurang ${fmtQty(-diff, i.unit)} dari batas minimum` : "Sudah menyentuh batas minimum"} — sebaiknya belanja hari ini.`)
+      : note("positive", "circle-check", `Masih aman, ${fmtQty(diff, i.unit)} di atas batas minimum.`);
+    const usesHTML = uses.length ? `<ul class="sk-uses">${uses.map((r) => {
+      const m = menuById[r.menu_id];
+      const n = Math.floor(i.stock_qty / r.qty_used + 1e-9);
+      return `<li>
+        <span class="l-staf-thumb" aria-hidden="true">${m.image_url}</span>
+        <div class="sk-grow"><strong>${esc(m.name)}</strong><small>${fmtQty(r.qty_used, i.unit)} per porsi</small></div>
+        <div class="sk-est">${n ? `<span>Cukup untuk <strong>± ${n.toLocaleString("id-ID")} porsi</strong></span>` : "<strong>Tidak cukup 1 porsi</strong>"}
+          ${menuBlocked(m) ? chip("HABIS", "Tidak bisa dipesan") : ""}</div>
+      </li>`;
+    }).join("")}</ul>` : `<p class="sk-faint">Bahan ini belum dipakai di resep menu mana pun, jadi tidak berkurang otomatis saat ada penjualan.</p>`;
+    const mv = S.moves.filter((m) => m.ingredient_id === i.id).sort((a, b) => b.created_at - a.created_at).slice(0, 8);
+    const mvList = mv.length ? `<ul class="sk-dmv">${mv.map((m) => {
+      const isIn = m.type === "IN";
+      return `<li>
+        <span class="sk-mvi" data-dir="${isIn ? "in" : "out"}" aria-hidden="true">${icon(isIn ? "plus" : "minus", 14)}</span>
+        <div class="sk-grow"><strong><span class="sk-sr">${isIn ? "Masuk" : "Keluar"} </span>${isIn ? "+" : "−"}${fmtQty(m.qty, i.unit)}</strong><small>${esc(m.note || "Tanpa catatan")}</small></div>
+        <span class="sk-mv-time">${when(m.created_at)}</span>
+      </li>`;
+    }).join("")}</ul>` : `<p class="sk-faint">Belum ada pergerakan dalam 3 hari terakhir.</p>`;
+    $("d-body").innerHTML = `
+      <div class="sk-hero">
+        <div class="sk-hero-top"><span class="sk-eyebrow">Sisa stok sekarang</span>${chip(st)}</div>
+        <div class="sk-big">${fmtQty(i.stock_qty, i.unit)}</div>
+        ${barHTML(i, st)}
+        <div class="sk-hero-meta">
+          <span>Batas minimum <strong>${fmtQty(i.min_stock, i.unit)}</strong></span>
+          ${OWNER ? `<button type="button" class="sk-lnk" data-edit="${i.id}">Ubah batas</button>` : ""}
+        </div>
+      </div>
+      ${msg}
+      <h3 class="sk-sec">Dipakai di</h3>
+      ${usesHTML}
+      <h3 class="sk-sec">Pergerakan terakhir</h3>
+      ${mvList}`;
+  }
+
+  /* ===== Dialog: catat bahan masuk ===== */
+  function setErr(part, msg) {
+    const input = $(part), err = $(part + "-err");
+    if (err) { err.textContent = msg; err.hidden = !msg; }
+    if (input) { if (msg) input.setAttribute("aria-invalid", "true"); else input.removeAttribute("aria-invalid"); }
+  }
+  function fillIngSelect(selected) {
+    const opt = (i) => { const st = stockStatus(i); return `<option value="${i.id}">${esc(i.name)} — sisa ${fmtQty(i.stock_qty, i.unit)}${st !== "AMAN" ? " · " + STATUS[st][0].toLowerCase() : ""}</option>`; };
+    const low = S.ings.filter((i) => stockStatus(i) !== "AMAN").sort((a, b) => RANK[stockStatus(a)] - RANK[stockStatus(b)] || byName(a, b));
+    const ok = S.ings.filter((i) => stockStatus(i) === "AMAN").sort(byName);
+    const sel = $("c-ing");
+    sel.innerHTML = (low.length ? `<optgroup label="Perlu restock">${low.map(opt).join("")}</optgroup>` : "") + (ok.length ? `<optgroup label="Stok aman">${ok.map(opt).join("")}</optgroup>` : "");
+    sel.value = selected && ing(selected) ? selected : (low[0] || ok[0]).id;
+    const notes = [...new Set(S.moves.filter((m) => m.type === "IN" && m.note).map((m) => m.note))];
+    $("c-notes").innerHTML = notes.map((n) => `<option value="${esc(n)}"></option>`).join("");
+  }
+  function openCatat(id) {
+    fillIngSelect(id);
+    $("c-qty").value = "";
+    $("c-note").value = "";
+    $("c-date").value = $("c-date").max = isoDay(Date.now());
+    setErr("c-qty", ""); setErr("c-date", "");
+    $("c-ing").toggleAttribute("autofocus", !id);
+    $("c-qty").toggleAttribute("autofocus", !!id);
+    updateCatat();
+    open("catat");
+  }
+  function updateCatat() {
+    const i = ing($("c-ing").value);
+    if (!i) return;
+    const q = parseFloat($("c-qty").value);
+    $("c-unit").textContent = UNIT_NAME[i.unit] || i.unit;
+    $("c-hint").textContent = UNIT_HINT[i.unit] || "";
+    $("c-quick").innerHTML = (QUICK[i.unit] || []).map((v) => `<button type="button" data-quick="${v}" aria-pressed="${q === v}">${fmtQty(v, i.unit)}</button>`).join("");
+    const st0 = stockStatus(i);
+    if (!(q > 0)) {
+      $("c-preview").innerHTML = `<div><span class="sk-pv-lbl">Stok</span><div class="sk-pv-flow">${fmtQty(i.stock_qty, i.unit)}<span class="sk-pv-arrow" aria-hidden="true">→</span><span class="sk-pv-wait">…</span></div></div>
+        <div class="sk-pv-chips">${chip(st0)}</div>
+        <p class="sk-pv-note" data-tone="muted">Isi jumlah untuk melihat stok setelah dicatat.</p>`;
+      return;
+    }
+    const after = r2(i.stock_qty + q);
+    const st1 = stockStatus({ stock_qty: after, min_stock: i.min_stock });
+    const stockOf = (id) => id === i.id ? after : (ing(id)?.stock_qty || 0);
+    const back = menusUsing(i.id).filter((m) => m && S.autoOff.has(m.id) && recipeOf(m.id).every((r) => stockOf(r.ingredient_id) >= r.qty_used));
+    $("c-preview").innerHTML = `<div><span class="sk-pv-lbl">Stok</span><div class="sk-pv-flow">${fmtQty(i.stock_qty, i.unit)}<span class="sk-pv-arrow" aria-hidden="true">→</span><span class="sk-sr"> menjadi </span>${fmtQty(after, i.unit)}</div></div>
+      <div class="sk-pv-chips">${chip(st0)}${st1 !== st0 ? `<span aria-hidden="true">→</span><span class="sk-sr">menjadi</span>${chip(st1)}` : ""}</div>
+      ${back.length ? `<p class="sk-pv-note">${icon("circle-check", 15)}${esc(joinList(back.map((m) => m.name)))} bisa dipesan lagi</p>` : ""}
+      ${st1 === "MENIPIS" ? `<p class="sk-pv-note" data-tone="warning">${icon("triangle-alert", 15)}Masih di bawah batas minimum (${fmtQty(i.min_stock, i.unit)}).</p>` : ""}`;
+  }
+  function saveCatat(again) {
+    const i = ing($("c-ing").value);
+    if (!i) return;
+    const qEl = $("c-qty"), dEl = $("c-date");
+    const q = parseFloat(qEl.value);
+    const today = isoDay(Date.now());
+    const dv = dEl.value || today;
+    let bad = null;
+    if (!(q > 0)) { setErr("c-qty", "Isi jumlah bahan yang masuk (lebih dari 0)."); bad = bad || qEl; }
+    else if (q > 1e6) { setErr("c-qty", "Jumlahnya terlalu besar — cek lagi satuannya."); bad = bad || qEl; }
+    else setErr("c-qty", "");
+    if (dv > today) { setErr("c-date", "Tanggal tidak boleh setelah hari ini."); bad = bad || dEl; }
+    else setErr("c-date", "");
+    if (bad) { bad.focus(); return; }
+
+    let ts = Date.now();
+    if (dv !== today) {
+      const [y, mo, d] = dv.split("-").map(Number);
+      const n = new Date();
+      ts = new Date(y, mo - 1, d, n.getHours(), n.getMinutes()).getTime();
+    }
+    const before = stockStatus(i);
+    i.stock_qty = r2(i.stock_qty + q);
+    markFresh(addMove(i.id, q, "IN", $("c-note").value.trim().replace(/\s+/g, " "), ts, { by: ME.id }));
+    S.current = i.id;
+    if (stockStatus(i) !== before) S.pulse = true;
+    const { on } = syncMenus();
+    renderAll();
+    toast(`${i.name} +${fmtQty(q, i.unit)} tercatat · sisa ${fmtQty(i.stock_qty, i.unit)}` + (on.length ? ` · ${on[0].name} bisa dipesan lagi` : ""));
+    if (again) {
+      fillIngSelect(i.id);
+      qEl.value = "";
+      $("c-note").value = "";
+      updateCatat();
+      $("c-ing").focus();
+    } else close("catat");
+  }
+
+  /* ===== Dialog: tambah bahan (pemilik) ===== */
+  function openAdd() {
+    if (!OWNER) return;
+    $("a-name").value = ""; $("a-unit").value = "gram"; $("a-stock").value = ""; $("a-min").value = "";
+    ["a-name", "a-stock", "a-min"].forEach((p) => setErr(p, ""));
+    updateAdd();
+    open("add");
+  }
+  function updateAdd() {
+    const unit = $("a-unit").value;
+    $$("[data-part='add'] [data-unit-lbl]").forEach((el) => { el.textContent = UNIT_NAME[unit]; });
+    const s = $("a-stock").value === "" ? 0 : parseFloat($("a-stock").value);
+    const m = parseFloat($("a-min").value);
+    $("a-preview").innerHTML = (s >= 0 && m >= 0)
+      ? `<span>Status awal:</span>${chip(stockStatus({ stock_qty: s, min_stock: m }))}<span>sisa ${fmtQty(s, unit)}, batas ${fmtQty(m, unit)}</span>`
+      : "<span>Isi stok awal &amp; batas minimum untuk melihat status awal.</span>";
+  }
+  function saveAdd() {
+    const name = $("a-name").value.trim().replace(/\s+/g, " ");
+    const unit = $("a-unit").value;
+    const stock = $("a-stock").value === "" ? 0 : parseFloat($("a-stock").value);
+    const min = parseFloat($("a-min").value);
+    let bad = null;
+    if (!name) { setErr("a-name", "Isi nama bahan dulu."); bad = bad || $("a-name"); }
+    else if (S.ings.some((x) => x.name.toLowerCase() === name.toLowerCase())) { setErr("a-name", "Bahan dengan nama ini sudah ada."); bad = bad || $("a-name"); }
+    else setErr("a-name", "");
+    if (!(stock >= 0)) { setErr("a-stock", "Stok awal tidak boleh minus."); bad = bad || $("a-stock"); } else setErr("a-stock", "");
+    if (!(min >= 0)) { setErr("a-min", "Isi batas minimum (boleh 0)."); bad = bad || $("a-min"); } else setErr("a-min", "");
+    if (bad) { bad.focus(); return; }
+
+    const id = "i" + (Math.max(0, ...S.ings.map((x) => parseInt(x.id.slice(1), 10) || 0)) + 1);
+    const it = { id, name, unit, stock_qty: r2(stock), min_stock: r2(min) };
+    S.ings.push(it);
+    if (stock > 0) markFresh(addMove(id, stock, "IN", "Stok awal", Date.now(), { by: ME.id }));
+    S.current = id;
+    S.filter = "ALL"; S.q = ""; $("q").value = "";
+    if (stockStatus(it) !== "AMAN") S.pulse = true;
+    renderAll();
+    close("add");
+    toast(`${name} ditambahkan · status ${STATUS[stockStatus(it)][0].toLowerCase()}`);
+  }
+
+  /* ===== Dialog: ubah bahan (pemilik) ===== */
+  function openEdit(id) {
+    const i = ing(id);
+    if (!i || !OWNER) return;
+    S.editId = id;
+    $("e-sub").textContent = `${i.name} · sisa ${fmtQty(i.stock_qty, i.unit)}`;
+    $("e-name").value = i.name;
+    $("e-unit").value = i.unit;
+    $("e-min").value = i.min_stock;
+    setErr("e-name", ""); setErr("e-min", "");
+    updateEdit();
+    open("edit");
+  }
+  function updateEdit() {
+    const i = ing(S.editId);
+    if (!i) return;
+    const unit = $("e-unit").value;
+    $("e-unit-lbl").textContent = UNIT_NAME[unit];
+    $("e-unit-warn").hidden = unit === i.unit;
+    const min = parseFloat($("e-min").value);
+    $("e-preview").innerHTML = min >= 0 ? `<span>Dengan batas ini, sisa ${fmtQty(i.stock_qty, unit)} berstatus</span>${chip(stockStatus({ stock_qty: i.stock_qty, min_stock: min }))}` : "";
+  }
+  function saveEdit() {
+    const i = ing(S.editId);
+    if (!i) return;
+    const name = $("e-name").value.trim().replace(/\s+/g, " ");
+    const min = parseFloat($("e-min").value);
+    let bad = null;
+    if (!name) { setErr("e-name", "Nama bahan tidak boleh kosong."); bad = bad || $("e-name"); }
+    else if (S.ings.some((x) => x !== i && x.name.toLowerCase() === name.toLowerCase())) { setErr("e-name", "Bahan dengan nama ini sudah ada."); bad = bad || $("e-name"); }
+    else setErr("e-name", "");
+    if (!(min >= 0)) { setErr("e-min", "Isi batas minimum (boleh 0)."); bad = bad || $("e-min"); } else setErr("e-min", "");
+    if (bad) { bad.focus(); return; }
+    const before = stockStatus(i);
+    i.name = name;
+    i.unit = $("e-unit").value;
+    i.min_stock = r2(min);
+    if (stockStatus(i) !== before) S.pulse = true;
+    S.current = i.id;
+    renderAll();
+    close("edit");
+    toast(`${name} disimpan · batas minimum ${fmtQty(i.min_stock, i.unit)}`);
+  }
+
+  /* ===== Simulasi penjualan (stok berkurang otomatis, prototipe) ===== */
+  function simulateSale() {
+    const cands = MENUS.filter((m) => S.avail[m.id] && recipeOf(m.id).length && !menuBlocked(m));
+    if (!cands.length) { toast("Tidak ada menu yang bisa dijual — bahan utama habis"); return; }
+    const w = (m) => MENU_WEIGHT[m.id] || 1;
+    let x = Math.random() * cands.reduce((a, m) => a + w(m), 0);
+    const menu = cands.find((m) => (x -= w(m)) < 0) || cands[0];
+    let qty = Math.random() < .25 ? 2 : 1;
+    if (recipeOf(menu.id).some((r) => ing(r.ingredient_id).stock_qty < r.qty_used * qty)) qty = 1;
+
+    S.simSeq = Math.max(S.simSeq, Number(store.get(KEYS.seq, 26)) || 26) + 1;
+    const code = "A-" + String(S.simSeq).padStart(3, "0");
+    const before = Object.fromEntries(recipeOf(menu.id).map((r) => [r.ingredient_id, stockStatus(ing(r.ingredient_id))]));
+    recipeOf(menu.id).forEach((r) => { const i = ing(r.ingredient_id); i.stock_qty = Math.max(0, r2(i.stock_qty - r.qty_used * qty)); });
+    const moves = recordSale(Date.now(), code, [[menu.id, qty]], { sim: true });
+    const crossed = [];
+    moves.forEach((mv) => {
+      markFresh(mv);
+      const i = ing(mv.ingredient_id), st = stockStatus(i);
+      if (st !== before[i.id]) crossed.push({ ing: i, st });
+    });
+    const main = moves.reduce((a, b) => (b.qty / (ing(b.ingredient_id).min_stock || 1)) > (a.qty / (ing(a.ingredient_id).min_stock || 1)) ? b : a);
+    S.current = (crossed.find((c) => c.st === "HABIS") || crossed[0])?.ing.id || main.ingredient_id;
+    const { off } = syncMenus();
+    if (crossed.length || off.length) S.pulse = true;
+    renderAll();
+
+    const sold = `Terjual ${qty}× ${menu.name}`;
+    const hab = crossed.find((c) => c.st === "HABIS");
+    const men = crossed.find((c) => c.st === "MENIPIS");
+    if (hab) toast(`${sold} — ${hab.ing.name.toLowerCase()} habis! ${off.length ? off.length + " menu ditandai habis" : ""}`.trim());
+    else if (off.length) toast(`${sold} — ${off.map((m) => m.name).join(", ")} kini tidak bisa dipesan`);
+    else if (men) toast(`${sold} — ${men.ing.name.toLowerCase()} kini menipis`);
+    else {
+      const big = moves.reduce((a, b) => b.qty > a.qty ? b : a), bi = ing(big.ingredient_id);
+      toast(`${sold} — ${bi.name.toLowerCase()} −${fmtQty(big.qty, bi.unit)}`);
+    }
+  }
+
+  /* ===== Event ===== */
+  root.addEventListener("click", (e) => {
+    const b = e.target.closest("button");
+    if (b) {
+      const d = b.dataset;
+      if (d.open) return openDrawer(d.open);
+      if (d.in) return openCatat(d.in);
+      if (d.edit) return openEdit(d.edit);
+      if (d.filter) { S.filter = d.filter; renderFilters(); renderTable(); return; }
+      if (d.mv) { S.mv = d.mv; renderHist(); return; }
+      if (d.quick) { $("c-qty").value = d.quick; setErr("c-qty", ""); updateCatat(); $("c-qty").focus(); return; }
+      if ("reset" in d) { S.q = ""; S.filter = "ALL"; $("q").value = ""; renderFilters(); renderTable(); return; }
+      if (d.part === "sim") return simulateSale();
+      if (d.part === "d-catat") return openCatat(S.drawerId);
+      if (d.part === "c-more") return saveCatat(true);
+      return;
+    }
+    const tr = e.target.closest("tr[data-id]");
+    if (tr && $("rows").contains(tr)) openDrawer(tr.dataset.id);
+  }, { signal });
+  root.addEventListener("input", (e) => {
+    const p = e.target.dataset.part;
+    if (p === "q") { S.q = e.target.value; renderTable(); }
+    else if (p === "c-qty") { if (parseFloat(e.target.value) > 0) setErr("c-qty", ""); updateCatat(); }
+    else if (p === "a-name") setErr("a-name", "");
+    else if (p === "a-stock" || p === "a-min") { if (e.target.value === "" ? p === "a-stock" : parseFloat(e.target.value) >= 0) setErr(p, ""); updateAdd(); }
+    else if (p === "e-name") setErr("e-name", "");
+    else if (p === "e-min") { if (parseFloat(e.target.value) >= 0) setErr("e-min", ""); updateEdit(); }
+  }, { signal });
+  root.addEventListener("change", (e) => {
+    const p = e.target.dataset.part;
+    if (p === "sort") { S.sort = e.target.value; renderTable(); }
+    else if (p === "c-ing") { setErr("c-qty", ""); updateCatat(); }
+    else if (p === "c-date") setErr("c-date", "");
+    else if (p === "a-unit") updateAdd();
+    else if (p === "e-unit") updateEdit();
+  }, { signal });
+  root.addEventListener("submit", (e) => {
+    const p = e.target.dataset.part;
+    if (p !== "c-form" && p !== "a-form" && p !== "e-form") return;
+    e.preventDefault();
+    if (p === "c-form") saveCatat(false);
+    else if (p === "a-form") saveAdd();
+    else saveEdit();
+  }, { signal });
+
+  const addBtn = actions?.querySelector('[data-action="add"]');
+  if (addBtn) addBtn.hidden = !OWNER;
+  addBtn?.addEventListener("click", openAdd, { signal });
+  actions?.querySelector('[data-action="catat"]')?.addEventListener("click", () => openCatat(""), { signal });
+
+  /* ===== Mulai ===== */
+  $("q").value = S.q;
+  $("sort").value = S.sort;
+  renderAll();
+  // Perbarui label "x jam lalu" & jam pembaruan tiap menit
+  const tick = setInterval(() => { renderContext(); renderMetrics(); }, 60e3);
+  onCleanup(() => clearInterval(tick));
+</script>

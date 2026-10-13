@@ -5,7 +5,7 @@ test("the web origin can call the API with cookies; other origins cannot read it
   page,
 }) => {
   await signUp(page.request, "Cors Check");
-  await page.goto("/app");
+  await page.goto("/kasir");
   const fromWebApp = await page.evaluate(async (api) => {
     const response = await fetch(`${api}/api/notes`, {
       credentials: "include",

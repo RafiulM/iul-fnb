@@ -8,6 +8,9 @@ dist
 pnpm-lock.yaml
 apps/api/drizzle/meta
 apps/web/src/routeTree.gen.ts
+apps/qr-menu/src/routeTree.gen.ts
+design
+desainpakeai
 playwright-report
 test-results
 *.tsbuildinfo

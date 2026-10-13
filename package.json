@@ -22,6 +22,7 @@
     "format:check": "prettier --check .",
     "db:generate": "pnpm --filter @starter/api run db:generate",
     "db:migrate": "pnpm --filter @starter/api run db:migrate",
+    "db:seed": "pnpm --filter @starter/api run db:seed --",
     "db:studio": "pnpm --filter @starter/api run db:studio",
     "db:up": "node scripts/database.mjs up",
     "db:down": "node scripts/database.mjs down",

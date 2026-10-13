@@ -1,0 +1,1 @@
+ALTER TABLE "cafe_settings" ADD COLUMN "cashier_permissions" jsonb DEFAULT '{"pos":true,"payment":true,"stock_view":true,"stock_in":true,"menu":false,"tables":false,"report":false,"staff":false,"settings":false}'::jsonb NOT NULL;

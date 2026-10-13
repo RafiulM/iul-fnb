@@ -1,3 +1,4 @@
+import { networkInterfaces } from "node:os";
 import { z } from "zod";
 
 // Environment values are loaded by Node (`--env-file-if-exists` in the package
@@ -42,6 +43,12 @@ const schema = z.object({
   WEB_URL: origin(
     "Use the web app's origin, e.g. http://localhost:3000.",
   ).default("http://localhost:3000"),
+  // The customer QR Menu app (apps/qr-menu). It calls only the cookie-less
+  // /api/public endpoints, so it gets CORS without credentials. Falls back to
+  // VITE_QR_MENU_URL, the value the web apps read.
+  QR_MENU_URL: origin(
+    "Use the QR Menu app's origin, e.g. http://localhost:3001.",
+  ).default(process.env.VITE_QR_MENU_URL || "http://localhost:3001"),
   TRUSTED_ORIGINS: z
     .string()
     .optional()
@@ -86,6 +93,24 @@ if (!parsed.success) {
 
 const values = parsed.data;
 
+const LOOPBACK = new Set(["localhost", "127.0.0.1", "[::1]"]);
+
+// In development the Kasir app prints this machine's LAN address into table
+// QR codes (see apps/web/vite.config.ts), so phones on the same network open
+// the QR Menu from that origin. Allow it on the cookie-less public endpoints.
+function lanQrMenuOrigins(qrMenuUrl: string) {
+  const url = new URL(qrMenuUrl);
+  if (values.NODE_ENV !== "development" || !LOOPBACK.has(url.hostname))
+    return [];
+  return Object.values(networkInterfaces())
+    .flat()
+    .filter((entry) => entry?.family === "IPv4" && !entry.internal)
+    .map((entry) => {
+      url.hostname = entry!.address;
+      return url.origin;
+    });
+}
+
 export const env = {
   ...values,
   PORT: values.PORT ?? (Number(new URL(values.BETTER_AUTH_URL).port) || 4000),
@@ -94,6 +119,15 @@ export const env = {
   // Browser origins allowed to call the API with cookies.
   trustedOrigins: [
     ...new Set([
+      new URL(values.WEB_URL).origin,
+      ...values.TRUSTED_ORIGINS.map((value) => new URL(value).origin),
+    ]),
+  ],
+  // Browser origins allowed to call the public (customer) endpoints.
+  publicOrigins: [
+    ...new Set([
+      new URL(values.QR_MENU_URL).origin,
+      ...lanQrMenuOrigins(values.QR_MENU_URL),
       new URL(values.WEB_URL).origin,
       ...values.TRUSTED_ORIGINS.map((value) => new URL(value).origin),
     ]),

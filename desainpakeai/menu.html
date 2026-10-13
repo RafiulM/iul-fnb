@@ -1,0 +1,1553 @@
+<!doctype html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Menu & Meja — Kedai Senja | IUL FnB</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/staf.css">
+<style>
+/* ==========================================================================
+   CSS khusus halaman Menu & Meja (PRD Fase 2 — Kelola Menu & Meja)
+   ========================================================================== */
+[hidden]{display:none!important}
+[data-ico]{display:inline-grid;place-items:center;flex:none}
+.topbar p{font-variant-numeric:tabular-nums}
+
+/* ---------- Tab halaman ---------- */
+.tabbar button svg{opacity:.7}
+.tabbar button[aria-selected="true"] svg{opacity:1;color:var(--accent)}
+.tabbar em{font-style:normal;font-size:11.5px;font-weight:800;color:var(--ink-3);background:#F1ECE6;padding:1px 8px;border-radius:999px;font-variant-numeric:tabular-nums}
+.tabbar button[aria-selected="true"] em{background:var(--accent-soft);color:var(--accent-ink)}
+.panel{display:grid;gap:16px;align-content:start;min-width:0}
+
+/* ---------- Toolbar menu ---------- */
+.toolbar{display:flex;align-items:center;gap:10px 12px;flex-wrap:wrap}
+.toolbar .search{flex:0 1 320px}
+.toolbar .meta{margin-left:auto;font-size:12.5px;font-weight:600;color:var(--ink-3)}
+.chip .dot{width:9px;height:9px;border-radius:50%;background:var(--tile);box-shadow:inset 0 0 0 1px rgba(42,27,18,.18)}
+#menuAlert:empty{display:none}
+.alert .btn{flex:none}
+
+/* ---------- Grid kartu menu ---------- */
+.mlist{display:grid;gap:28px}
+.msec{display:grid;gap:12px}
+.msec-h{display:flex;align-items:center;gap:10px}
+.msec-ico{flex:none;width:30px;height:30px;border-radius:9px;background:var(--tile);display:grid;place-items:center;font-size:16px;line-height:1;box-shadow:inset 0 0 0 1px rgba(42,27,18,.06)}
+.msec-h h2{font-size:16px;font-weight:800;letter-spacing:-.01em}
+.msec-h span{font-size:12.5px;font-weight:600;color:var(--ink-3)}
+.mgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(228px,1fr));gap:16px}
+
+.mcard{position:relative;display:flex;flex-direction:column;min-width:0;background:var(--surface);border:1px solid var(--line);border-radius:20px;box-shadow:var(--shadow-sm);transition:box-shadow .2s,border-color .2s,transform .2s var(--ease),background .2s}
+.mcard:hover{box-shadow:var(--shadow);border-color:var(--line-2);transform:translateY(-2px)}
+.mc-main{all:unset;box-sizing:border-box;display:flex;flex-direction:column;flex:1;cursor:pointer;padding:10px 10px 0;border-radius:20px 20px 0 0}
+.mc-main:focus-visible{outline:2px solid var(--accent);outline-offset:-2px}
+.mc-tile{position:relative;display:grid;place-items:center;height:120px;border-radius:14px;background:var(--tile,#F3E9DD);font-size:58px;line-height:1;user-select:none;overflow:hidden;transition:filter .2s,opacity .2s}
+.mc-tile .emo{transition:transform .3s var(--ease)}
+.mcard:hover .mc-tile .emo{transform:scale(1.07) rotate(-4deg)}
+.mc-sold{position:absolute;top:9px;right:9px}
+.mc-body{display:flex;flex-direction:column;gap:3px;padding:12px 6px 14px;flex:1;min-width:0}
+.mc-tags{display:flex;gap:4px;flex-wrap:wrap;margin-bottom:3px}
+.mc-tags .badge{font-size:10.5px;padding:2px 8px}
+.mc-name{font-size:15px;font-weight:700;line-height:1.3;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.mc-desc{font-size:12.5px;color:var(--ink-2);line-height:1.45;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.mc-bottom{margin-top:auto;padding-top:8px;display:grid;gap:8px}
+.mc-price{font-weight:800;font-size:15px;font-variant-numeric:tabular-nums}
+.mc-warn{display:flex;align-items:flex-start;gap:6px;font-size:12px;font-weight:700;line-height:1.35;color:var(--warn);background:var(--warn-soft);border-radius:10px;padding:6px 8px}
+.mc-warn svg{flex:none;margin-top:1px}
+.mc-foot{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:10px 12px 10px 14px;border-top:1px solid var(--line)}
+.avail{display:inline-flex;align-items:center;gap:10px;font-weight:700;font-size:13px;cursor:pointer;user-select:none}
+.mcard.off{background:var(--surface-2)}
+.mcard.off .mc-tile{filter:grayscale(1);opacity:.5}
+.mcard.off .mc-name,.mcard.off .mc-price{color:var(--ink-3)}
+.mcard.off .mc-desc{color:var(--ink-3)}
+.mcard.off .avail-txt,.tcard.off .avail-txt{color:var(--ink-3)}
+
+.add-tile{all:unset;box-sizing:border-box;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;min-height:200px;padding:16px;border:1.5px dashed var(--line-2);border-radius:20px;color:var(--ink-2);text-align:center;cursor:pointer;transition:border-color .15s,background .15s,color .15s}
+.add-tile:hover{border-color:var(--accent);background:rgba(210,85,42,.04);color:var(--accent-ink)}
+.add-tile:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.add-tile .plus{width:44px;height:44px;border-radius:14px;background:var(--accent-soft);color:var(--accent-ink);display:grid;place-items:center;margin-bottom:6px;transition:transform .2s var(--ease)}
+.add-tile:hover .plus{transform:scale(1.08)}
+.add-tile strong{font-size:14px;font-weight:700}
+.add-tile small{font-size:12px;color:var(--ink-3);font-weight:500}
+
+.empty.card{grid-column:1 / -1}
+.empty-act{margin-top:16px;display:flex;justify-content:center;gap:8px}
+.flash{animation:flash .9s var(--ease) 2}
+
+/* ---------- Tab kategori ---------- */
+.cat-layout{display:grid;grid-template-columns:minmax(0,1fr) 360px;gap:18px;align-items:start}
+.cat-col{display:grid;gap:14px;min-width:0}
+.cat-list{list-style:none;display:grid;gap:8px}
+.cat-row{display:flex;align-items:center;gap:12px;padding:10px 10px 10px 12px;border:1px solid var(--line);border-radius:16px;background:var(--surface);transition:border-color .15s,background .15s}
+.cat-row:hover{border-color:var(--line-2);background:var(--surface-2)}
+.cat-pos{flex:none;width:26px;height:26px;border-radius:8px;background:#F1ECE6;color:var(--ink-2);font-size:12px;font-weight:800;display:grid;place-items:center}
+.cat-sw{flex:none;width:44px;height:44px;border-radius:12px;background:var(--tile);display:grid;place-items:center;font-size:22px;line-height:1;box-shadow:inset 0 0 0 1px rgba(42,27,18,.07)}
+.cat-info{flex:1;min-width:0}
+.cat-info strong{display:block;font-size:14.5px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.cat-info small{font-size:12.5px;color:var(--ink-3);font-weight:600}
+.cat-acts{display:flex;gap:6px;align-items:center}
+.vsep{width:1px;height:20px;background:var(--line);margin:0 2px}
+.icon-btn:disabled,.icon-btn[aria-disabled="true"]{opacity:.38;cursor:not-allowed}
+.icon-btn:disabled:hover,.icon-btn[aria-disabled="true"]:hover{background:var(--surface);color:var(--ink-2)}
+.icon-btn.danger:not([aria-disabled="true"]):hover{color:var(--danger);background:var(--danger-soft);border-color:#F4C7C3}
+.cat-empty{padding:28px 12px;text-align:center;color:var(--ink-2);font-size:13.5px}
+.add-row{all:unset;box-sizing:border-box;display:flex;align-items:center;justify-content:center;gap:8px;width:100%;margin-top:10px;padding:12px;border:1.5px dashed var(--line-2);border-radius:16px;color:var(--ink-2);font-weight:700;font-size:13.5px;cursor:pointer;transition:border-color .15s,color .15s,background .15s}
+.add-row:hover{border-color:var(--accent);color:var(--accent-ink);background:rgba(210,85,42,.04)}
+.add-row:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.card-foot .hint{display:flex;gap:8px;align-items:flex-start}
+.card-foot .hint svg{flex:none;margin-top:1px}
+.preview-card{position:sticky;top:18px}
+.preview-card .card-body{display:grid;justify-items:center;gap:14px}
+.pv-note{font-size:12px;color:var(--ink-3);text-align:center;line-height:1.5;max-width:290px}
+
+/* Ponsel tiruan — gaya disalin dari halaman-utama.html, diperkecil */
+.phone{position:relative;width:288px;height:548px;border-radius:46px;background:#1B110B;padding:9px;box-shadow:0 26px 50px rgba(42,27,18,.22),inset 0 0 0 2px #3A2A1F}
+.phone::before{content:"";position:absolute;top:19px;left:50%;transform:translateX(-50%);width:82px;height:22px;border-radius:999px;background:#1B110B;z-index:3}
+.ph-screen{position:relative;height:100%;border-radius:37px;overflow:hidden auto;background:var(--bg);scrollbar-width:none;overscroll-behavior:contain}
+.ph-screen::-webkit-scrollbar{display:none}
+.ph-hero{background:radial-gradient(120% 90% at 100% 0%,#4B3324 0%,rgba(75,51,36,0) 60%),var(--espresso);color:#F6EDE3;padding:44px 14px 34px;border-radius:0 0 22px 22px}
+.ph-top{display:flex;justify-content:space-between;align-items:center;gap:8px}
+.ph-brand{display:flex;gap:8px;align-items:center;min-width:0}
+.ph-logo{flex:none;width:32px;height:32px;border-radius:10px;background:var(--accent);display:grid;place-items:center;font-weight:800;font-size:11px;color:#fff;box-shadow:inset 0 -2px 0 rgba(0,0,0,.15)}
+.ph-brand strong{display:block;font-size:13px;font-weight:800;line-height:1.2}
+.ph-brand small{display:block;font-size:9.5px;color:#C9B6A4;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ph-chip{flex:none;background:var(--bg);color:var(--espresso);border-radius:10px;padding:4px 8px 3px;text-align:center;line-height:1.05}
+.ph-chip span{display:block;font-size:7px;font-weight:800;text-transform:uppercase;letter-spacing:.1em;color:var(--ink-2)}
+.ph-chip strong{font-size:15px;font-weight:800}
+.ph-hello{font-size:10.5px;color:#C9B6A4;font-weight:600;margin-top:16px}
+.ph-greet{font-size:16px;font-weight:800;letter-spacing:-.02em;line-height:1.2;margin-top:1px}
+.ph-search{position:relative;z-index:2;margin:-18px 12px 0;height:36px;border-radius:12px;background:#fff;border:1px solid var(--line);box-shadow:var(--shadow);display:flex;align-items:center;gap:7px;padding:0 10px;color:var(--ink-3);font-size:11px}
+.ph-tabs{position:sticky;top:0;z-index:2;display:flex;gap:6px;overflow-x:auto;padding:12px 12px 9px;background:linear-gradient(var(--bg) 82%,rgba(248,243,236,0));scrollbar-width:none}
+.ph-tabs::-webkit-scrollbar{display:none}
+.ph-tab{flex:none;border:1px solid var(--line);background:#fff;color:var(--ink-2);font-weight:600;font-size:11px;padding:6px 10px;border-radius:999px;display:inline-flex;gap:4px;align-items:center;transition:background .2s,color .2s,border-color .2s}
+.ph-tab em{font-style:normal;font-size:9.5px;color:var(--ink-3);font-weight:700}
+.ph-tab[aria-selected="true"],.ph-tab.sel{background:var(--espresso);border-color:var(--espresso);color:#fff}
+.ph-tab[aria-selected="true"] em,.ph-tab.sel em{color:#C9B6A4}
+.ph-sec{padding:2px 12px 6px}
+.ph-sec h4{display:flex;justify-content:space-between;align-items:baseline;gap:8px;font-size:13px;font-weight:800;margin:4px 2px 8px}
+.ph-sec h4 span{font-size:9.5px;color:var(--ink-3);font-weight:600}
+.ph-item{display:flex;gap:9px;align-items:center;background:#fff;border:1px solid var(--line);border-radius:13px;padding:7px;margin-bottom:7px}
+.ph-thumb{flex:none;width:44px;height:44px;border-radius:10px;background:var(--tile);display:grid;place-items:center;font-size:22px;line-height:1}
+.ph-txt{flex:1;min-width:0}
+.ph-txt b{display:block;font-size:11.5px;font-weight:700;line-height:1.25;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ph-txt i{display:block;font-style:normal;font-size:11px;font-weight:800;margin-top:2px}
+.ph-add{flex:none;width:24px;height:24px;border-radius:8px;background:var(--accent);color:#fff;display:grid;place-items:center}
+.ph-so{flex:none;font-size:9.5px;font-weight:700;color:var(--ink-2);background:#F1ECE6;padding:3px 7px;border-radius:999px}
+.ph-item.so .ph-thumb{filter:grayscale(1);opacity:.5}
+.ph-item.so .ph-txt b,.ph-item.so .ph-txt i{color:var(--ink-3)}
+.ph-more{font-size:10px;color:var(--ink-3);text-align:center;font-weight:600;padding:0 0 4px}
+.ph-empty{text-align:center;padding:30px 16px;font-size:11.5px;color:var(--ink-2)}
+
+/* ---------- Tab meja ---------- */
+.tbar{display:flex;align-items:center;gap:10px 14px;flex-wrap:wrap}
+.tnote{margin-left:auto;display:inline-flex;gap:6px;align-items:center;font-size:12.5px;color:var(--ink-3);font-weight:600}
+.tgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:16px}
+.tcard{display:flex;flex-direction:column;min-width:0;background:var(--surface);border:1px solid var(--line);border-radius:20px;box-shadow:var(--shadow-sm);transition:box-shadow .2s,border-color .2s,background .2s}
+.tcard:hover{box-shadow:var(--shadow);border-color:var(--line-2)}
+.tc-top{display:flex;justify-content:space-between;gap:12px;padding:16px 16px 16px 18px}
+.tc-info{min-width:0;display:flex;flex-direction:column}
+.tc-label{font-size:11px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-3)}
+.tc-no{font-size:44px;font-weight:800;letter-spacing:-.04em;line-height:1;margin-top:4px;font-variant-numeric:tabular-nums;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.tc-area{font-size:12.5px;color:var(--ink-2);font-weight:600;margin-top:6px}
+.tc-badges{display:flex;gap:6px;flex-wrap:wrap;margin-top:10px}
+.tc-qr{all:unset;flex:none;align-self:flex-start;padding:6px;border:1px solid var(--line);border-radius:14px;background:#fff;cursor:pointer;line-height:0;transition:border-color .15s,box-shadow .15s,transform .15s var(--ease)}
+.tc-qr:hover{border-color:var(--line-2);box-shadow:var(--shadow-sm);transform:scale(1.03)}
+.tc-qr:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.tc-foot{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-top:auto;padding:10px 12px 10px 14px;border-top:1px solid var(--line)}
+.tcard.off{background:var(--surface-2)}
+.tcard.off .tc-no{color:var(--ink-3)}
+.tcard.off .tc-qr svg{opacity:.28}
+.add-tile.tall{min-height:186px}
+
+/* ---------- Modal umum ---------- */
+.mform{display:flex;flex-direction:column;flex:1 1 auto;min-height:0}
+.mform > .modal-head,.mform > .modal-foot{flex:none}
+.err{display:flex;gap:6px;align-items:flex-start;color:var(--danger);font-size:12px;font-weight:700;line-height:1.4}
+.err svg{flex:none;margin-top:1px}
+.select[aria-invalid="true"],.textarea[aria-invalid="true"]{border-color:var(--danger);box-shadow:0 0 0 3px var(--danger-soft)}
+.affix.invalid{border-color:var(--danger);box-shadow:0 0 0 3px var(--danger-soft)}
+.field .opt{font-weight:500;color:var(--ink-3)}
+.field .count{justify-self:end}
+fieldset{border:0;padding:0;margin:0;min-width:0}
+fieldset > legend{padding:0;margin-bottom:8px}
+.btn-solid-danger{background:var(--danger);border-color:var(--danger);color:#fff}
+.btn-solid-danger:hover{background:#97201A;border-color:#97201A}
+.modal.stacked{box-shadow:0 0 0 200vmax rgba(24,15,9,.32),var(--shadow-lg)}
+.modal.behind{pointer-events:none}
+
+/* ---------- Modal menu ---------- */
+.mm-grid{display:grid;grid-template-columns:210px minmax(0,1fr);gap:22px;align-items:start}
+.photo{display:grid;gap:12px;align-content:start}
+.photo-prev{position:relative;height:150px;border-radius:18px;background:var(--tile,#F3E9DD);display:grid;place-items:center;font-size:76px;line-height:1;transition:background .25s}
+.photo-prev small{position:absolute;left:10px;bottom:10px;font-size:10.5px;font-weight:800;letter-spacing:.04em;background:rgba(255,255,255,.82);color:var(--ink-2);padding:3px 8px;border-radius:999px}
+.drop{all:unset;box-sizing:border-box;display:grid;justify-items:center;gap:3px;padding:14px 10px;border:1.5px dashed var(--line-2);border-radius:14px;background:var(--surface-2);text-align:center;cursor:pointer;color:var(--ink-2);transition:border-color .15s,background .15s,color .15s}
+.drop strong{font-size:13px;font-weight:700;margin-top:3px}
+.drop small{font-size:11.5px;color:var(--ink-3);font-weight:500;line-height:1.35}
+.drop:hover,.drop.over{border-color:var(--accent);background:var(--accent-soft);color:var(--accent-ink)}
+.drop:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.sub-label{font-size:11px;font-weight:800;color:var(--ink-3);text-transform:uppercase;letter-spacing:.07em;margin-bottom:6px}
+.emoji-grid{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:3px}
+.emoji-grid button{aspect-ratio:1;border:1px solid transparent;border-radius:9px;background:transparent;font-size:19px;line-height:1;display:grid;place-items:center;transition:background .15s,border-color .15s}
+.emoji-grid button:hover{background:#F4EEE7}
+.emoji-grid button[aria-pressed="true"]{background:var(--accent-soft);border-color:var(--accent)}
+.tag-chip i{width:8px;height:8px;border-radius:50%;background:var(--line-2)}
+.tag-chip[data-tone="accent"] i{background:var(--accent)}
+.tag-chip[data-tone="info"] i{background:var(--info)}
+.tag-chip[data-tone="danger"] i{background:var(--danger)}
+.tag-chip[aria-pressed="true"][data-tone="accent"]{background:var(--accent-soft);border-color:var(--accent);color:var(--accent-ink)}
+.tag-chip[aria-pressed="true"][data-tone="info"]{background:var(--info-soft);border-color:var(--info);color:var(--info)}
+.tag-chip[aria-pressed="true"][data-tone="danger"]{background:var(--danger-soft);border-color:var(--danger);color:var(--danger)}
+.switch-row{display:flex;gap:12px;align-items:center;padding:12px 14px;border:1px solid var(--line);border-radius:14px;background:var(--surface-2);cursor:pointer}
+.switch-row strong{display:block;font-size:13.5px;font-weight:700}
+.switch-row small{display:block;font-size:12px;color:var(--ink-3);margin-top:1px}
+
+.recipe{margin-top:22px;border:1px solid var(--line);border-radius:18px;background:var(--surface-2);padding:16px}
+.recipe-h{display:flex;justify-content:space-between;align-items:flex-start;gap:12px}
+.recipe-h h3{font-size:14.5px;font-weight:800;letter-spacing:-.01em}
+.recipe-h p{font-size:12.5px;color:var(--ink-2);margin-top:2px}
+.rec-head{display:grid;grid-template-columns:minmax(0,1fr) 150px 42px;gap:10px;margin-top:14px;font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.06em;color:var(--ink-3)}
+.rec-list{display:grid;gap:10px;margin-top:8px}
+.rec-list:empty{margin-top:0}
+.rec-row{display:grid;grid-template-columns:minmax(0,1fr) 150px 42px;gap:6px 10px;align-items:start}
+.rec-ing{display:grid;gap:4px;min-width:0}
+.rec-row .select,.rec-row .affix{background-color:#fff}
+.rec-row .affix input{text-align:right;padding-right:6px;font-variant-numeric:tabular-nums}
+.rec-row .affix .rec-unit{padding:0 12px 0 0;font-weight:600}
+.rec-row .icon-btn{width:42px;height:42px;border-radius:12px}
+.rec-row .icon-btn:hover{color:var(--danger);background:var(--danger-soft);border-color:#F4C7C3}
+.rec-meta{font-size:11.5px;color:var(--ink-3);font-weight:600;padding-left:2px}
+.rec-meta b{font-weight:800}
+.st-ok{color:var(--ok)}
+.st-warn{color:var(--warn)}
+.st-danger{color:var(--danger)}
+.rec-err{grid-column:1 / -1}
+.rec-add{margin-top:12px;border-style:dashed;border-color:var(--line-2)}
+.rec-cap{display:flex;gap:8px;align-items:flex-start;margin-top:14px;padding-top:12px;border-top:1px dashed var(--line-2);font-size:12.5px;color:var(--ink-2);line-height:1.45}
+.rec-cap svg{flex:none;margin-top:1px}
+.rec-cap.warn{color:var(--warn)}
+.rec-cap.danger{color:var(--danger)}
+
+/* ---------- Modal kategori ---------- */
+.tints{display:flex;gap:10px;flex-wrap:wrap}
+.tint{position:relative;cursor:pointer}
+.tint input{position:absolute;inset:0;opacity:0;margin:0;cursor:pointer}
+.tint .sw{display:grid;place-items:center;width:42px;height:42px;border-radius:13px;background:var(--c);color:var(--espresso);box-shadow:inset 0 0 0 1px rgba(42,27,18,.1);transition:box-shadow .15s}
+.tint .sw svg{opacity:0;transition:opacity .15s}
+.tint input:checked + .sw{box-shadow:inset 0 0 0 1px rgba(42,27,18,.1),0 0 0 2px #fff,0 0 0 4px var(--espresso)}
+.tint input:checked + .sw svg{opacity:1}
+.tint input:focus-visible + .sw{outline:2px solid var(--accent);outline-offset:5px}
+.cat-prev{display:flex;align-items:center;gap:12px;margin-top:18px;padding:12px;border-radius:14px;background:var(--bg)}
+.cat-prev small{display:block;font-size:12px;color:var(--ink-3);margin-top:5px}
+
+/* ---------- Modal QR & kartu meja (tent card) ---------- */
+#qrModal{width:min(500px,calc(100% - 32px))}
+#qrWarn:empty{display:none}
+#qrWarn .alert{margin-bottom:14px}
+.qr-stage{display:grid;place-items:center;padding:22px;border-radius:18px;background:radial-gradient(circle at 1px 1px,rgba(42,27,18,.09) 1px,transparent 1.6px) 0 0/14px 14px,var(--bg)}
+.qr-meta{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;margin-top:14px;font-size:13px;color:var(--ink-2);font-weight:600}
+.qr-meta code{font-family:ui-monospace,"SF Mono",Menlo,Consolas,monospace;font-size:12.5px;background:#F1ECE6;color:var(--ink);padding:3px 8px;border-radius:8px;margin-left:4px}
+.qr-honest{display:flex;gap:6px;align-items:center;margin-top:8px;font-size:12px;color:var(--ink-3);font-weight:600}
+
+.tent{width:300px;margin:0 auto;background:#fff;border:1px solid #ECE3D8;border-radius:24px;padding:20px 22px 16px;text-align:center;color:#24170E;box-shadow:0 18px 40px rgba(42,27,18,.14);font-family:"Plus Jakarta Sans",system-ui,sans-serif}
+.tent *{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+.tent-brand{display:flex;align-items:center;justify-content:center;gap:9px;font-weight:800;font-size:14.5px;letter-spacing:-.01em}
+.tent-logo{width:30px;height:30px;border-radius:9px;background:#D2552A;color:#fff;display:grid;place-items:center;font-size:11.5px;font-weight:800;letter-spacing:.4px}
+.tent-no{margin-top:14px;font-size:38px;font-weight:800;letter-spacing:-.03em;line-height:1}
+.tent-no span{font-size:20px;font-weight:700;color:#6E6056;letter-spacing:-.01em;margin-right:7px}
+.tent-qr{display:inline-block;margin-top:16px;padding:10px;border:2px solid #24170E;border-radius:18px;line-height:0}
+.tent-qr svg{display:block}
+.tent-cta{margin-top:14px;font-size:15px;font-weight:800}
+.tent-sub{margin-top:3px;font-size:12px;color:#6E6056;font-weight:600}
+.tent-url{margin-top:14px;padding-top:10px;border-top:1px dashed #DCCFC1;font-size:9.5px;color:#A39488;word-break:break-all;font-family:ui-monospace,"SF Mono",Menlo,Consolas,monospace}
+
+/* ---------- Konfirmasi ---------- */
+.cf-top{display:flex;align-items:center;gap:12px;min-width:0}
+.cf-ico{flex:none;width:40px;height:40px;border-radius:13px;display:grid;place-items:center;background:var(--danger-soft);color:var(--danger)}
+.cf-body{font-size:13.5px;color:var(--ink-2);line-height:1.55}
+.cf-body b{color:var(--ink)}
+
+.proto-foot{display:flex;gap:6px;align-items:center;justify-content:center;font-size:12px;color:var(--ink-3);font-weight:600;padding-top:6px;text-align:center}
+
+/* ---------- Responsif ---------- */
+@media (max-width:1100px){.cat-layout{grid-template-columns:minmax(0,1fr) 330px}}
+@media (max-width:900px){
+  .cat-layout{grid-template-columns:minmax(0,1fr)}
+  .preview-card{position:static}
+}
+@media (max-width:700px){
+  .mm-grid{grid-template-columns:minmax(0,1fr)}
+  .emoji-grid{grid-template-columns:repeat(10,minmax(0,1fr))}
+  .rec-head{display:none}
+  .rec-row{grid-template-columns:minmax(0,1fr) 120px 42px}
+  .toolbar .search{flex:1 1 100%}
+  .toolbar .meta{margin-left:0}
+  .tnote{margin-left:0}
+}
+
+/* ---------- Cetak (QR) ---------- */
+@media print{
+  .shell,.modal,.drawer,.overlay,.scrim,.toast{display:none!important}
+  body.locked{overflow:visible!important}
+  #printArea{position:static!important}
+}
+</style>
+</head>
+<body data-page="menu">
+<div class="shell">
+  <aside class="side" id="side"></aside>
+  <div class="main">
+    <header class="topbar">
+      <div>
+        <h1>Menu &amp; Meja</h1>
+        <p id="pageSub">Memuat…</p>
+      </div>
+      <div class="actions" id="actions"></div>
+    </header>
+
+    <main class="content">
+      <div class="tabbar" id="tabs" role="tablist" aria-label="Bagian halaman Menu & Meja">
+        <button type="button" role="tab" id="tab-menu" aria-controls="panel-menu" aria-selected="true" data-act="tab" data-tab="menu"><span data-ico="menu"></span>Menu<em id="cnt-menu">0</em></button>
+        <button type="button" role="tab" id="tab-kategori" aria-controls="panel-kategori" aria-selected="false" tabindex="-1" data-act="tab" data-tab="kategori"><span data-ico="grid"></span>Kategori<em id="cnt-kategori">0</em></button>
+        <button type="button" role="tab" id="tab-meja" aria-controls="panel-meja" aria-selected="false" tabindex="-1" data-act="tab" data-tab="meja"><span data-ico="qr"></span>Meja &amp; QR<em id="cnt-meja">0</em></button>
+      </div>
+
+      <!-- ===== Tab: Menu ===== -->
+      <section class="panel" id="panel-menu" role="tabpanel" aria-labelledby="tab-menu">
+        <div class="toolbar">
+          <label class="search">
+            <span data-ico="search"></span>
+            <input type="search" id="mq" placeholder="Cari nama menu…" aria-label="Cari menu" autocomplete="off">
+          </label>
+          <div class="seg" id="availSeg" role="group" aria-label="Filter ketersediaan"></div>
+          <span class="meta" id="menuMeta" aria-live="polite"></span>
+        </div>
+        <div class="chips" id="catChips" role="group" aria-label="Filter kategori"></div>
+        <div id="menuAlert"></div>
+        <div class="mlist" id="menuGrid"></div>
+      </section>
+
+      <!-- ===== Tab: Kategori ===== -->
+      <section class="panel" id="panel-kategori" role="tabpanel" aria-labelledby="tab-kategori" hidden>
+        <div class="cat-layout">
+          <div class="cat-col">
+            <div class="card">
+              <div class="card-head">
+                <div>
+                  <h2>Urutan kategori</h2>
+                  <p>Urutan dari atas ke bawah = urutan tab di aplikasi pelanggan.</p>
+                </div>
+              </div>
+              <div class="card-body">
+                <ol class="cat-list" id="catList"></ol>
+                <button type="button" class="add-row" data-act="add-cat"><span data-ico="plus"></span>Tambah kategori</button>
+              </div>
+              <div class="card-foot">
+                <p class="hint"><span data-ico="lock" data-size="14"></span>Kategori yang masih berisi menu tidak bisa dihapus. Pindahkan menunya dulu lewat tombol Ubah di kartu menu.</p>
+              </div>
+            </div>
+            <div class="alert info">
+              <span data-ico="zap"></span>
+              <div class="grow"><strong>Tips:</strong> taruh kategori yang paling sering dipesan di urutan atas — pelanggan langsung melihatnya setelah scan QR.</div>
+            </div>
+          </div>
+
+          <aside class="card preview-card" aria-labelledby="pvTitle">
+            <div class="card-head">
+              <div>
+                <h2 id="pvTitle">Pratinjau di aplikasi pelanggan</h2>
+                <p>Tampilan setelah pelanggan scan QR meja.</p>
+              </div>
+              <a class="icon-btn sm" href="halaman-utama.html" target="_blank" rel="noopener" aria-label="Buka halaman pelanggan di tab baru" title="Buka halaman pelanggan" data-ico="external" data-size="16"></a>
+            </div>
+            <div class="card-body">
+              <div class="phone" role="group" aria-label="Pratinjau aplikasi pelanggan">
+                <div class="ph-screen">
+                  <div class="ph-hero">
+                    <div class="ph-top">
+                      <div class="ph-brand">
+                        <span class="ph-logo" id="phLogo" aria-hidden="true"></span>
+                        <div style="min-width:0"><strong id="phName"></strong><small id="phAddr"></small></div>
+                      </div>
+                      <div class="ph-chip"><span>Meja</span><strong>07</strong></div>
+                    </div>
+                    <p class="ph-hello">Selamat datang 👋</p>
+                    <p class="ph-greet">Mau pesan apa hari ini?</p>
+                  </div>
+                  <div class="ph-search"><span data-ico="search" data-size="14"></span>Cari menu, mis. kopi susu</div>
+                  <div class="ph-tabs" id="phTabs" role="tablist" aria-label="Kategori di aplikasi pelanggan (pratinjau)"></div>
+                  <div id="phList"></div>
+                </div>
+              </div>
+              <p class="pv-note">Urutan tab & status “Habis” mengikuti halaman ini. Di prototipe, perubahan baru tampil di pratinjau — belum tersambung ke halaman pelanggan.</p>
+            </div>
+          </aside>
+        </div>
+      </section>
+
+      <!-- ===== Tab: Meja & QR ===== -->
+      <section class="panel" id="panel-meja" role="tabpanel" aria-labelledby="tab-meja" hidden>
+        <div class="tbar">
+          <div class="chips" id="tableChips" role="group" aria-label="Filter meja"></div>
+          <span class="tnote"><span data-ico="qr" data-size="15"></span>QR ilustrasi — QR asli dibuat oleh sistem</span>
+        </div>
+        <div class="tgrid" id="tableGrid"></div>
+      </section>
+
+      <p class="proto-foot"><span data-ico="note" data-size="14"></span>Mode prototipe — perubahan hanya tersimpan selama halaman ini terbuka.</p>
+    </main>
+  </div>
+</div>
+
+<!-- ===== Modal: tambah / ubah menu ===== -->
+<section class="modal lg" id="menuModal" role="dialog" aria-modal="true" aria-labelledby="mmTitle">
+  <form class="mform" id="menuForm" novalidate>
+    <div class="modal-head">
+      <div>
+        <h2 id="mmTitle">Tambah Menu</h2>
+        <p id="mmSub">Menu baru langsung tampil di aplikasi pelanggan setelah disimpan.</p>
+      </div>
+      <button type="button" class="icon-btn" data-close aria-label="Tutup" data-ico="x"></button>
+    </div>
+    <div class="modal-body" id="mmBody">
+      <div class="mm-grid">
+        <div class="photo">
+          <div class="photo-prev" id="photoPrev"><span id="photoEmoji" aria-hidden="true">🍽️</span><small>Pratinjau</small></div>
+          <button type="button" class="drop" id="dropZone" data-act="upload">
+            <span data-ico="upload" data-size="20"></span>
+            <strong>Unggah foto</strong>
+            <small>Seret ke sini atau klik<br>JPG/PNG, maks. 2 MB</small>
+          </button>
+          <div>
+            <p class="sub-label" id="emoLbl">Atau pakai ikon sementara</p>
+            <div class="emoji-grid" id="emojiGrid" role="group" aria-labelledby="emoLbl"></div>
+          </div>
+        </div>
+
+        <div class="form-grid">
+          <div class="field span-2">
+            <label for="fName">Nama menu</label>
+            <input class="input" id="fName" maxlength="60" autocomplete="off" placeholder="Contoh: Nasi Goreng Kampung" aria-describedby="fName-err" autofocus>
+            <p class="err" id="fName-err" hidden></p>
+          </div>
+          <div class="field">
+            <label for="fCat">Kategori</label>
+            <select class="select" id="fCat" aria-describedby="fCat-err"></select>
+            <p class="err" id="fCat-err" hidden></p>
+          </div>
+          <div class="field">
+            <label for="fPrice">Harga</label>
+            <div class="affix"><span>Rp</span><input id="fPrice" inputmode="numeric" autocomplete="off" placeholder="0" class="tnum" aria-describedby="fPrice-err"></div>
+            <p class="err" id="fPrice-err" hidden></p>
+          </div>
+          <div class="field span-2">
+            <label for="fDesc">Deskripsi <span class="opt">(opsional)</span></label>
+            <textarea class="textarea" id="fDesc" rows="2" maxlength="140" placeholder="Ceritakan singkat isi & rasanya, mis. “Espresso, susu segar, dan gula aren asli.”"></textarea>
+            <small class="count"><span id="descCount">0</span>/140</small>
+          </div>
+          <div class="field span-2">
+            <span class="label" id="tagLbl">Label</span>
+            <div class="chips" id="tagChips" role="group" aria-labelledby="tagLbl"></div>
+            <small>Label tampil di kartu menu pelanggan. Boleh lebih dari satu.</small>
+          </div>
+          <label class="switch-row span-2">
+            <span class="switch"><input type="checkbox" role="switch" id="fAvail" checked><span></span></span>
+            <span><strong>Tersedia untuk dipesan</strong><small id="availHint">Pelanggan bisa memesan menu ini.</small></span>
+          </label>
+        </div>
+      </div>
+
+      <section class="recipe" aria-labelledby="recTitle">
+        <div class="recipe-h">
+          <div>
+            <h3 id="recTitle">Resep — untuk stok otomatis</h3>
+            <p>Stok bahan berkurang otomatis setiap menu ini terjual.</p>
+          </div>
+          <span class="badge" id="recCount"></span>
+        </div>
+        <div class="rec-head" id="recHead" aria-hidden="true"><span>Bahan</span><span>Jumlah per porsi</span><span></span></div>
+        <div class="rec-list" id="recList"></div>
+        <button type="button" class="btn btn-sm rec-add" data-act="rec-add"><span data-ico="plus" data-size="16"></span>Tambah bahan</button>
+        <p class="rec-cap" id="recCap" aria-live="polite"></p>
+      </section>
+    </div>
+    <div class="modal-foot">
+      <button type="button" class="btn btn-danger" id="mmDelete"><span data-ico="trash" data-size="16"></span>Hapus menu</button>
+      <span class="grow"></span>
+      <button type="button" class="btn" data-close>Batal</button>
+      <button type="submit" class="btn btn-primary" id="mmSave">Simpan Menu</button>
+    </div>
+  </form>
+</section>
+
+<!-- ===== Modal: tambah / ubah kategori ===== -->
+<section class="modal sm" id="catModal" role="dialog" aria-modal="true" aria-labelledby="ctTitle">
+  <form class="mform" id="catForm" novalidate>
+    <div class="modal-head">
+      <div>
+        <h2 id="ctTitle">Tambah Kategori</h2>
+        <p>Kategori jadi tab di aplikasi pelanggan.</p>
+      </div>
+      <button type="button" class="icon-btn" data-close aria-label="Tutup" data-ico="x"></button>
+    </div>
+    <div class="modal-body">
+      <div class="field">
+        <label for="cName">Nama kategori</label>
+        <input class="input" id="cName" maxlength="30" autocomplete="off" placeholder="Contoh: Dessert" aria-describedby="cName-err" autofocus>
+        <p class="err" id="cName-err" hidden></p>
+      </div>
+      <fieldset class="field" style="margin-top:16px">
+        <legend class="label">Warna latar ikon menu</legend>
+        <div class="tints" id="tints"></div>
+      </fieldset>
+      <div class="cat-prev" id="catPrev"></div>
+    </div>
+    <div class="modal-foot">
+      <button type="button" class="btn" data-close>Batal</button>
+      <button type="submit" class="btn btn-primary" id="ctSave">Tambah Kategori</button>
+    </div>
+  </form>
+</section>
+
+<!-- ===== Modal: tambah meja ===== -->
+<section class="modal sm" id="tableModal" role="dialog" aria-modal="true" aria-labelledby="tmTitle">
+  <form class="mform" id="tableForm" novalidate>
+    <div class="modal-head">
+      <div>
+        <h2 id="tmTitle">Tambah Meja</h2>
+        <p>Setiap meja otomatis mendapat QR unik untuk pemesanan.</p>
+      </div>
+      <button type="button" class="icon-btn" data-close aria-label="Tutup" data-ico="x"></button>
+    </div>
+    <div class="modal-body">
+      <div class="form-grid">
+        <div class="field">
+          <label for="tNo">Nomor meja</label>
+          <input class="input tnum" id="tNo" maxlength="6" autocomplete="off" placeholder="Contoh: 13" aria-describedby="tNo-err tNoHint" autofocus>
+        </div>
+        <div class="field">
+          <label for="tArea">Area</label>
+          <select class="select" id="tArea"></select>
+        </div>
+        <p class="err span-2" id="tNo-err" hidden></p>
+        <small class="hint span-2" id="tNoHint">Angka otomatis jadi 2 digit, mis. 7 → 07.</small>
+      </div>
+    </div>
+    <div class="modal-foot">
+      <button type="button" class="btn" data-close>Batal</button>
+      <button type="submit" class="btn btn-primary">Tambah Meja</button>
+    </div>
+  </form>
+</section>
+
+<!-- ===== Modal: QR meja ===== -->
+<section class="modal" id="qrModal" role="dialog" aria-modal="true" aria-labelledby="qrTitle">
+  <div class="modal-head">
+    <div>
+      <h2 id="qrTitle">QR Meja</h2>
+      <p>Cetak lalu letakkan di meja. Pelanggan cukup scan pakai kamera ponsel.</p>
+    </div>
+    <button type="button" class="icon-btn" data-close aria-label="Tutup" data-ico="x"></button>
+  </div>
+  <div class="modal-body">
+    <div id="qrWarn"></div>
+    <div class="qr-stage"><div id="qrCard"></div></div>
+    <div class="qr-meta">
+      <span>Kode QR<code id="qrToken"></code></span>
+      <button type="button" class="btn btn-sm btn-ghost" id="qrRegen"><span data-ico="refresh" data-size="15"></span>Buat ulang QR</button>
+    </div>
+    <p class="qr-honest"><span data-ico="eye" data-size="14"></span>QR ilustrasi — QR asli dibuat oleh sistem.</p>
+  </div>
+  <div class="modal-foot">
+    <a class="btn" id="qrOpen" href="halaman-utama.html" target="_blank" rel="noopener"><span data-ico="external" data-size="16"></span>Buka halaman pelanggan</a>
+    <button type="button" class="btn btn-primary" id="qrPrint"><span data-ico="printer"></span>Cetak QR</button>
+  </div>
+</section>
+
+<!-- ===== Modal: konfirmasi (bisa bertumpuk di atas modal lain) ===== -->
+<section class="modal sm" id="confirmModal" role="dialog" aria-modal="true" aria-labelledby="cfTitle" aria-describedby="cfBody">
+  <div class="modal-head">
+    <div class="cf-top"><span class="cf-ico" id="cfIco" aria-hidden="true"></span><h2 id="cfTitle">Yakin?</h2></div>
+    <button type="button" class="icon-btn" data-close aria-label="Tutup" data-ico="x"></button>
+  </div>
+  <div class="modal-body"><p class="cf-body" id="cfBody"></p></div>
+  <div class="modal-foot">
+    <button type="button" class="btn" data-close autofocus>Batal</button>
+    <button type="button" class="btn btn-solid-danger" id="cfOk">Ya, lanjutkan</button>
+  </div>
+</section>
+
+<script src="assets/app.js"></script>
+<script>
+(function () {
+  if (document.body.dataset.locked === 'true') return; // app.js mengganti .main bila peran tidak berhak
+
+  /* ===== Konstanta ===== */
+  const TABS = ['menu', 'kategori', 'meja'];
+  const TAG_TONE = { Terlaris:'accent', Baru:'info', Pedas:'danger' };
+  const TAG_LIST = Object.keys(TAG_TONE);
+  const EMOJIS = ['🍽️','🍳','🍗','🍜','🍱','🍖','🍛','🍝','🍲','🥗','🍔','🥟','☕','🧊','🍵','🥤','🧋','🍋','🥑','🍹','🥛','🍟','🍌','🍞','🥐','🍰','🧁','🍩','🍪','💧'];
+  const TINTS = [
+    { c:'#FCE6D4', n:'Persik' }, { c:'#E2EEDD', n:'Sage' }, { c:'#F7E9BE', n:'Mentega' },
+    { c:'#F8DDD8', n:'Mawar' },  { c:'#EDE1D4', n:'Latte' }, { c:'#E6E1F0', n:'Lavender' },
+  ];
+  const AREA_ORDER = ['Dalam', 'Teras'];
+
+  /* ===== State halaman ===== */
+  const state = { tab:'menu', q:'', cat:'all', avail:'all', tFilter:'all', pCat:'all' };
+  const needsPrint = new Set();   // meja yang QR-nya baru dibuat & belum dicetak
+  let draft = null;               // isian modal menu
+  let catEditId = null;
+  let qrId = null;
+  let cfAction = null;
+  let movedCat = null;            // kategori yang baru dipindah/disimpan (disorot sekali)
+  let flashTable = null;
+
+  /* ===== Util ===== */
+  const uid = p => p + Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
+  const cafeInitials = () => SETTINGS.cafe_name.split(/\s+/).filter(Boolean).map(w => w[0]).slice(0, 2).join('').toUpperCase();
+  const sortedCats = () => [...CATEGORIES].sort((a, b) => a.sort_order - b.sort_order);
+  const menusIn = id => MENUS.filter(m => m.category_id === id);
+  const tileOf = m => (catById[m.category_id] && catById[m.category_id].tile) || '#F3E9DD';
+  const outIngs = m => recipeOf(m.id).map(r => ingById[r.ingredient_id]).filter(i => i && stockStatus(i) === 'HABIS');
+  const sortedTables = () => [...TABLES].sort((a, b) => a.table_number.localeCompare(b.table_number, 'id', { numeric:true }));
+  const tableById = id => TABLES.find(t => t.id === id);
+  const fmtNum = n => Number(n).toLocaleString('id-ID', { maximumFractionDigits:2 });
+  const attr = (name, v) => `[${name}="${CSS.escape(String(v))}"]`;
+  const ingSorted = () => [...INGREDIENTS].sort((a, b) => a.name.localeCompare(b.name, 'id'));
+
+  /** "18" → 18, "0,5" → 0.5, "1.000" → 1000 (format angka Indonesia) */
+  function parseQty(s) {
+    let v = String(s ?? '').trim().replace(/\s/g, '');
+    if (/^\d{1,3}(\.\d{3})+(,\d+)?$/.test(v)) v = v.replace(/\./g, '');
+    v = v.replace(',', '.');
+    return /^\d*\.?\d+$/.test(v) ? parseFloat(v) : NaN;
+  }
+  function normalizeSort() { sortedCats().forEach((c, i) => { c.sort_order = i + 1; }); }
+  function newToken() {
+    let t;
+    do { t = 'ks-' + Math.floor(Math.random() * 0xfffff).toString(16).padStart(5, '0'); }
+    while (TABLES.some(x => x.qr_code === t));
+    return t;
+  }
+  function normTableNo(v) {
+    let s = String(v).trim().toUpperCase().replace(/\s+/g, '');
+    if (/^\d+$/.test(s)) s = String(parseInt(s, 10)).padStart(2, '0');
+    return s;
+  }
+  function flash(el) {
+    if (!el) return;
+    el.classList.remove('flash'); void el.offsetWidth; el.classList.add('flash');
+  }
+  function hydrateIcons(root) {
+    $$('[data-ico]', root || document).forEach(el => { el.innerHTML = icon(el.dataset.ico, Number(el.dataset.size) || 18); });
+  }
+  function emptyHTML(emo, title, text, action) {
+    return `<div class="empty card"><div class="em" aria-hidden="true">${emo}</div><h3>${title}</h3><p>${text}</p>${action ? `<div class="empty-act">${action}</div>` : ''}</div>`;
+  }
+
+  /* ----- Error inline ----- */
+  function setErr(id, msg) {
+    const el = $('#' + id);
+    el.setAttribute('aria-invalid', 'true');
+    const box = el.closest('.affix'); if (box) box.classList.add('invalid');
+    const er = $('#' + id + '-err');
+    er.innerHTML = icon('alert', 14) + '<span>' + esc(msg) + '</span>';
+    er.hidden = false;
+    return el;
+  }
+  function clearErr(id) {
+    const el = $('#' + id); if (!el) return;
+    el.removeAttribute('aria-invalid');
+    const box = el.closest('.affix'); if (box) box.classList.remove('invalid');
+    const er = $('#' + id + '-err'); if (er) { er.hidden = true; er.textContent = ''; }
+  }
+
+  /* ===== Kepala halaman & tab ===== */
+  function renderHead() {
+    const off = MENUS.filter(m => !m.is_available).length;
+    const on = TABLES.filter(t => t.is_active).length;
+    $('#pageSub').textContent = `${MENUS.length} menu · ${off} habis · ${on} meja aktif`;
+    $('#cnt-menu').textContent = MENUS.length;
+    $('#cnt-kategori').textContent = CATEGORIES.length;
+    $('#cnt-meja').textContent = TABLES.length;
+  }
+
+  const ACTIONS = {
+    menu: () => `<button type="button" class="btn btn-primary" data-act="add-menu">${ICON.plus}Tambah Menu</button>`,
+    kategori: () => `<button type="button" class="btn btn-primary" data-act="add-cat">${ICON.plus}Tambah Kategori</button>`,
+    meja: () => `<button type="button" class="btn" data-act="print-all">${ICON.printer}Cetak Semua QR</button>
+                 <button type="button" class="btn btn-primary" data-act="add-table">${ICON.plus}Tambah Meja</button>`,
+  };
+
+  function setTab(tab, opts) {
+    opts = opts || {};
+    if (!TABS.includes(tab)) tab = 'menu';
+    state.tab = tab;
+    $$('#tabs [role="tab"]').forEach(b => {
+      const on = b.dataset.tab === tab;
+      b.setAttribute('aria-selected', on);
+      b.tabIndex = on ? 0 : -1;
+    });
+    TABS.forEach(t => { $('#panel-' + t).hidden = t !== tab; });
+    $('#actions').innerHTML = ACTIONS[tab]();
+    if (opts.push !== false && location.hash.slice(1) !== tab) {
+      try { history.replaceState(null, '', '#' + tab); } catch (_) { location.hash = tab; }
+    }
+    if (opts.focus) $('#tab-' + tab).focus();
+  }
+
+  /* ===== Tab Menu ===== */
+  function mainLabel(m) { return `Ubah ${m.name}, ${rp(m.price)}${m.is_available ? '' : ', habis'}`; }
+
+  function cardHTML(m) {
+    const outs = outIngs(m);
+    const tags = (m.tags || []).filter(t => TAG_TONE[t]);
+    const id = esc(m.id);
+    return `<article class="mcard${m.is_available ? '' : ' off'}" data-id="${id}">
+      <button type="button" class="mc-main" data-act="edit-menu" data-id="${id}" aria-label="${esc(mainLabel(m))}">
+        <span class="mc-tile" style="--tile:${esc(tileOf(m))}" aria-hidden="true"><span class="emo">${esc(m.image_url)}</span>${m.is_available ? '' : '<span class="badge dark mc-sold">Habis</span>'}</span>
+        <span class="mc-body">
+          ${tags.length ? `<span class="mc-tags">${tags.map(t => `<span class="badge ${TAG_TONE[t]}">${t}</span>`).join('')}</span>` : ''}
+          <span class="mc-name">${esc(m.name)}</span>
+          <span class="mc-desc">${esc(m.desc || 'Belum ada deskripsi.')}</span>
+          <span class="mc-bottom">
+            ${outs.length ? `<span class="mc-warn">${icon('alert', 14)}<span>Bahan habis: ${outs.map(i => esc(i.name)).join(', ')}</span></span>` : ''}
+            <span class="mc-price">${rp(m.price)}</span>
+          </span>
+        </span>
+      </button>
+      <div class="mc-foot">
+        <label class="avail">
+          <span class="switch"><input type="checkbox" role="switch" data-toggle="menu" data-id="${id}"${m.is_available ? ' checked' : ''} aria-label="${esc(m.name)} tersedia"><span></span></span>
+          <span class="avail-txt">${m.is_available ? 'Tersedia' : 'Habis'}</span>
+        </label>
+        <button type="button" class="icon-btn sm" data-act="edit-menu" data-id="${id}" aria-label="Ubah ${esc(m.name)}" title="Ubah menu">${icon('edit', 16)}</button>
+      </div>
+    </article>`;
+  }
+
+  const addTileHTML = c => `<button type="button" class="add-tile" data-act="add-menu" data-cat="${esc(c.id)}">
+      <span class="plus">${icon('plus', 20)}</span><strong>Tambah menu</strong><small>ke ${esc(c.name)}</small></button>`;
+
+  function renderMenuControls() {
+    if (state.cat !== 'all' && !catById[state.cat]) state.cat = 'all';
+    const cats = sortedCats();
+    const chips = [{ id:'all', name:'Semua', n:MENUS.length }]
+      .concat(cats.map(c => ({ id:c.id, name:c.name, n:menusIn(c.id).length, tile:c.tile })));
+    $('#catChips').innerHTML = chips.map(c =>
+      `<button type="button" class="chip" data-act="f-cat" data-cat="${esc(c.id)}" aria-pressed="${state.cat === c.id}">${c.tile ? `<i class="dot" style="--tile:${esc(c.tile)}" aria-hidden="true"></i>` : ''}${esc(c.name)}<em>${c.n}</em></button>`).join('');
+
+    const pool = state.cat === 'all' ? MENUS : menusIn(state.cat);
+    const on = pool.filter(m => m.is_available).length;
+    $('#availSeg').innerHTML = [['all', 'Semua', pool.length], ['on', 'Tersedia', on], ['off', 'Habis', pool.length - on]]
+      .map(([v, l, n]) => `<button type="button" data-act="f-avail" data-v="${v}" aria-pressed="${state.avail === v}">${l}<em>${n}</em></button>`).join('');
+
+    // Menu yang masih bisa dipesan padahal salah satu bahannya habis
+    const risky = MENUS.filter(m => m.is_available && outIngs(m).length);
+    $('#menuAlert').innerHTML = risky.length ? `<div class="alert warn">${icon('alert', 20)}
+      <div class="grow"><strong>${risky.length} menu masih bisa dipesan padahal bahannya habis:</strong> ${risky.map(m => esc(m.name)).join(', ')}. Tandai habis supaya pelanggan tidak kecewa.</div>
+      <button type="button" class="btn btn-sm" data-act="mark-risky">Tandai habis</button></div>` : '';
+  }
+
+  function renderMenuGrid() {
+    const q = state.q.trim().toLowerCase();
+    const list = MENUS.filter(m =>
+      (state.cat === 'all' || m.category_id === state.cat) &&
+      (state.avail === 'all' || (state.avail === 'on') === !!m.is_available) &&
+      (!q || m.name.toLowerCase().includes(q) || String(m.desc || '').toLowerCase().includes(q)));
+    $('#menuMeta').textContent = list.length === MENUS.length ? `${MENUS.length} menu` : `Menampilkan ${list.length} dari ${MENUS.length} menu`;
+
+    const cats = sortedCats();
+    if (!cats.length) {
+      $('#menuGrid').innerHTML = emptyHTML('🗂️', 'Belum ada kategori', 'Buat kategori dulu (mis. Makanan, Minuman), lalu tambahkan menunya.',
+        '<button type="button" class="btn btn-primary" data-act="tab" data-tab="kategori">Atur kategori</button>');
+      return;
+    }
+    const showAdd = !q && state.avail === 'all';
+    const html = (state.cat === 'all' ? cats : cats.filter(c => c.id === state.cat)).map(c => {
+      const items = list.filter(m => m.category_id === c.id);
+      if (!items.length && !showAdd) return '';
+      return `<section class="msec" aria-labelledby="sec-${esc(c.id)}">
+        <div class="msec-h"><span class="msec-ico" style="--tile:${esc(c.tile)}" aria-hidden="true">${esc((menusIn(c.id)[0] || {}).image_url || '🍽️')}</span><h2 id="sec-${esc(c.id)}">${esc(c.name)}</h2><span>${items.length} menu</span></div>
+        <div class="mgrid">${items.map(cardHTML).join('')}${showAdd ? addTileHTML(c) : ''}</div>
+      </section>`;
+    }).join('');
+
+    const reset = '<button type="button" class="btn" data-act="reset">Reset filter</button>';
+    $('#menuGrid').innerHTML = html || (
+      q ? emptyHTML('🔍', 'Menu tidak ditemukan', `Tidak ada menu dengan kata “${esc(state.q.trim())}”. Coba kata lain, mis. “kopi” atau “nasi”.`, reset)
+      : state.avail === 'off' ? emptyHTML('🎉', 'Tidak ada menu yang habis', 'Semua menu di pilihan ini bisa dipesan pelanggan.', reset)
+      : emptyHTML('🍽️', 'Belum ada menu', 'Ubah filter, atau tambahkan menu baru.', reset));
+  }
+
+  function renderMenuTab() { renderMenuControls(); renderMenuGrid(); }
+
+  /** Perbarui satu kartu di tempat (switch tetap beranimasi & fokus tidak hilang) */
+  function syncMenuCard(m) {
+    const card = $('.mcard' + attr('data-id', m.id));
+    if (!card) return;
+    const on = !!m.is_available;
+    card.classList.toggle('off', !on);
+    card.querySelector('.avail-txt').textContent = on ? 'Tersedia' : 'Habis';
+    card.querySelector('.mc-main').setAttribute('aria-label', mainLabel(m));
+    const tile = card.querySelector('.mc-tile');
+    const b = tile.querySelector('.mc-sold');
+    if (on && b) b.remove();
+    if (!on && !b) tile.insertAdjacentHTML('beforeend', '<span class="badge dark mc-sold">Habis</span>');
+  }
+
+  function resetFilters() {
+    state.q = ''; $('#mq').value = '';
+    state.cat = 'all'; state.avail = 'all';
+    renderMenuTab();
+  }
+
+  /* ===== Modal menu ===== */
+  function openMenuModal(id, presetCat) {
+    const cats = sortedCats();
+    if (!cats.length) { toast('Buat kategori dulu sebelum menambah menu'); setTab('kategori'); return; }
+    const m = id ? menuById[id] : null;
+    draft = {
+      id: m ? m.id : null,
+      emoji: m ? m.image_url : '🍽️',
+      tags: m ? [...(m.tags || [])] : [],
+      recipe: m ? recipeOf(m.id).map(r => ({ ing:r.ingredient_id, qty:fmtNum(r.qty_used) })) : [],
+    };
+    $('#mmTitle').textContent = m ? 'Ubah Menu' : 'Tambah Menu';
+    $('#mmSub').textContent = m ? 'Perubahan langsung tampil di aplikasi pelanggan & layar kasir.' : 'Menu baru langsung tampil di aplikasi pelanggan setelah disimpan.';
+    $('#fName').value = m ? m.name : '';
+    $('#fCat').innerHTML = cats.map(c => `<option value="${esc(c.id)}">${esc(c.name)}</option>`).join('');
+    $('#fCat').value = m ? m.category_id
+      : (presetCat && catById[presetCat]) ? presetCat
+      : (state.cat !== 'all' && catById[state.cat]) ? state.cat : cats[0].id;
+    $('#fPrice').value = m ? Math.round(m.price).toLocaleString('id-ID') : '';
+    $('#fDesc').value = m ? (m.desc || '') : '';
+    $('#fAvail').checked = m ? !!m.is_available : true;
+    $('#mmDelete').hidden = !m;
+    $('#mmSave').textContent = m ? 'Simpan Perubahan' : 'Simpan Menu';
+    ['fName', 'fCat', 'fPrice'].forEach(clearErr);
+    renderEmojiGrid(); renderTagChips(); renderRecipe(); syncPhoto(); syncDesc(); syncAvailHint();
+    $('#mmBody').scrollTop = 0;
+    openLayer('menuModal');
+  }
+
+  function renderEmojiGrid() {
+    const list = EMOJIS.includes(draft.emoji) ? EMOJIS : [draft.emoji].concat(EMOJIS.slice(0, -1));
+    $('#emojiGrid').innerHTML = list.map(e =>
+      `<button type="button" data-act="emoji" data-emoji="${esc(e)}" aria-pressed="${e === draft.emoji}" aria-label="Pakai ikon ${esc(e)}">${esc(e)}</button>`).join('');
+  }
+  function renderTagChips() {
+    $('#tagChips').innerHTML = TAG_LIST.map(t =>
+      `<button type="button" class="chip tag-chip" data-act="tag" data-tag="${t}" data-tone="${TAG_TONE[t]}" aria-pressed="${draft.tags.includes(t)}"><i aria-hidden="true"></i>${t}</button>`).join('');
+  }
+  function syncPhoto() {
+    const c = catById[$('#fCat').value];
+    $('#photoPrev').style.setProperty('--tile', c ? c.tile : '#F3E9DD');
+    $('#photoEmoji').textContent = draft.emoji;
+  }
+  function syncDesc() { $('#descCount').textContent = $('#fDesc').value.length; }
+  function syncAvailHint() {
+    $('#availHint').textContent = $('#fAvail').checked
+      ? 'Pelanggan bisa memesan menu ini.'
+      : 'Tampil sebagai “Habis” — pelanggan tidak bisa memesannya.';
+  }
+
+  /* ----- Resep ----- */
+  function recMeta(ing) {
+    if (!ing) return 'Pilih bahan dari daftar stok';
+    const [tone, label] = STOCK_BADGE[stockStatus(ing)];
+    return `Stok ${esc(fmtQty(ing.stock_qty, ing.unit))} · <b class="st-${tone}">${label}</b>`;
+  }
+  function renderRecipe() {
+    const opts = ingSorted();
+    $('#recList').innerHTML = draft.recipe.map((r, i) => {
+      const ing = ingById[r.ing];
+      return `<div class="rec-row" data-i="${i}">
+        <div class="rec-ing">
+          <select class="select" data-rec="ing" aria-label="Bahan ke-${i + 1}" aria-describedby="rec-err-${i}">
+            <option value="">Pilih bahan…</option>
+            ${opts.map(x => `<option value="${esc(x.id)}"${x.id === r.ing ? ' selected' : ''}>${esc(x.name)}${stockStatus(x) === 'HABIS' ? ' (stok habis)' : ''}</option>`).join('')}
+          </select>
+          <span class="rec-meta">${recMeta(ing)}</span>
+        </div>
+        <div class="affix"><input type="text" inputmode="decimal" autocomplete="off" data-rec="qty" value="${esc(r.qty)}" placeholder="0" aria-label="Jumlah bahan ke-${i + 1} per porsi" aria-describedby="rec-err-${i}"><span class="rec-unit">${ing ? esc(ing.unit) : 'satuan'}</span></div>
+        <button type="button" class="icon-btn" data-act="rec-del" aria-label="Hapus bahan ke-${i + 1}" title="Hapus bahan">${icon('trash', 16)}</button>
+        <p class="err rec-err" id="rec-err-${i}" hidden></p>
+      </div>`;
+    }).join('');
+    $('#recHead').hidden = !draft.recipe.length;
+    $('#recCount').textContent = draft.recipe.length ? `${draft.recipe.length} bahan` : 'Belum ada bahan';
+    syncCapacity();
+  }
+  function clearRowErr(row) {
+    row.querySelectorAll('[aria-invalid]').forEach(x => x.removeAttribute('aria-invalid'));
+    row.querySelector('.affix').classList.remove('invalid');
+    const er = row.querySelector('.rec-err'); er.hidden = true; er.textContent = '';
+  }
+  /** Perkiraan porsi yang masih bisa dibuat dari stok sekarang */
+  function syncCapacity() {
+    const el = $('#recCap');
+    const rows = draft.recipe.map(r => ({ ing:ingById[r.ing], qty:parseQty(r.qty) })).filter(r => r.ing && r.qty > 0);
+    if (!rows.length) {
+      el.className = 'rec-cap';
+      el.innerHTML = `${icon('note', 15)}<span>Belum ada bahan. Menu tanpa resep tidak mengurangi stok saat terjual.</span>`;
+      return;
+    }
+    let min = Infinity, lim = null;
+    rows.forEach(r => { const n = Math.floor(r.ing.stock_qty / r.qty); if (n < min) { min = n; lim = r.ing; } });
+    if (min <= 0) {
+      el.className = 'rec-cap danger';
+      el.innerHTML = `${icon('alert', 15)}<span>Stok <b>${esc(lim.name)}</b> ${stockStatus(lim) === 'HABIS' ? 'habis' : 'tidak cukup'} — menu ini belum bisa dibuat. Tandai habis atau catat bahan masuk di Stok Bahan.</span>`;
+    } else {
+      el.className = 'rec-cap' + (min < 10 ? ' warn' : '');
+      el.innerHTML = `${icon('box', 15)}<span>Dengan stok sekarang, cukup untuk ± <b>${min.toLocaleString('id-ID')} porsi</b> lagi (paling cepat habis: ${esc(lim.name)}).</span>`;
+    }
+  }
+
+  function validateMenu() {
+    ['fName', 'fCat', 'fPrice'].forEach(clearErr);
+    const bad = [];
+    const name = $('#fName').value.trim().replace(/\s+/g, ' ');
+    if (!name) bad.push(setErr('fName', 'Nama menu wajib diisi.'));
+    else if (MENUS.some(m => m.id !== draft.id && m.name.trim().toLowerCase() === name.toLowerCase()))
+      bad.push(setErr('fName', `Sudah ada menu bernama “${name}”. Pakai nama lain.`));
+    if (!catById[$('#fCat').value]) bad.push(setErr('fCat', 'Pilih kategori.'));
+    const price = Number(String($('#fPrice').value).replace(/\D/g, '')) || 0;
+    if (price <= 0) bad.push(setErr('fPrice', 'Isi harga lebih dari Rp 0.'));
+
+    const seen = new Set();
+    $$('#recList .rec-row').forEach(row => {
+      clearRowErr(row);
+      const r = draft.recipe[Number(row.dataset.i)];
+      const q = parseQty(r.qty);
+      let msg = '', field = null;
+      if (!r.ing) { msg = 'Pilih bahan, atau hapus baris ini.'; field = row.querySelector('select'); }
+      else if (seen.has(r.ing)) { msg = `${ingById[r.ing].name} sudah ada di resep — gabungkan jumlahnya di satu baris.`; field = row.querySelector('select'); }
+      else if (!(q > 0)) { msg = `Isi jumlah ${ingById[r.ing].unit} per porsi (lebih dari 0).`; field = row.querySelector('input'); }
+      if (r.ing) seen.add(r.ing);
+      if (msg) {
+        field.setAttribute('aria-invalid', 'true');
+        if (field.tagName === 'INPUT') field.closest('.affix').classList.add('invalid');
+        const er = row.querySelector('.rec-err');
+        er.innerHTML = icon('alert', 14) + '<span>' + esc(msg) + '</span>';
+        er.hidden = false;
+        bad.push(field);
+      }
+    });
+    return { bad, name, price };
+  }
+
+  function saveMenu(e) {
+    e.preventDefault();
+    const { bad, name, price } = validateMenu();
+    if (bad.length) { bad[0].focus(); toast('Periksa lagi isian yang ditandai merah'); return; }
+    const isNew = !draft.id;
+    const data = {
+      name,
+      category_id: $('#fCat').value,
+      price,
+      desc: $('#fDesc').value.trim(),
+      image_url: draft.emoji,
+      tags: TAG_LIST.filter(t => draft.tags.includes(t)),
+      is_available: $('#fAvail').checked,
+    };
+    let m;
+    if (isNew) {
+      m = Object.assign({ id: uid('n') }, data, { created_at: new Date().toISOString() });
+      MENUS.push(m);
+      menuById[m.id] = m;
+      // pastikan menu baru terlihat
+      state.q = ''; $('#mq').value = ''; state.avail = 'all';
+      if (state.cat !== 'all' && state.cat !== m.category_id) state.cat = m.category_id;
+    } else {
+      m = menuById[draft.id];
+      Object.assign(m, data);
+    }
+    // Resep: ganti seluruh baris recipe_items milik menu ini
+    for (let k = RECIPE_ITEMS.length - 1; k >= 0; k--) if (RECIPE_ITEMS[k].menu_id === m.id) RECIPE_ITEMS.splice(k, 1);
+    draft.recipe.forEach(r => RECIPE_ITEMS.push({ id: uid('r'), menu_id: m.id, ingredient_id: r.ing, qty_used: parseQty(r.qty) }));
+
+    closeLayer('menuModal');
+    renderAll();
+    const card = $('.mcard' + attr('data-id', m.id));
+    if (card) {
+      card.querySelector('.mc-main').focus({ preventScroll:true });
+      card.scrollIntoView({ block:'nearest', behavior:'smooth' });
+      flash(card);
+    }
+    toast(isNew ? `“${m.name}” ditambahkan ke ${catById[m.category_id].name}` : `Perubahan “${m.name}” disimpan`);
+  }
+
+  function deleteMenu() {
+    const m = draft && menuById[draft.id];
+    if (!m) return;
+    const n = recipeOf(m.id).length;
+    confirmAction({
+      title: `Hapus “${m.name}”?`,
+      body: `Menu ini akan hilang dari aplikasi pelanggan dan layar kasir${n ? `, beserta resepnya (${n} bahan)` : ''}. Riwayat penjualan tetap tersimpan.<br><br><b>Hanya habis sementara?</b> Cukup matikan “Tersedia” — menu tetap tampil sebagai “Habis”.`,
+      ok: 'Ya, hapus menu',
+      ico: 'trash',
+      onOk() {
+        closeLayer('menuModal');
+        const i = MENUS.indexOf(m); if (i >= 0) MENUS.splice(i, 1);
+        delete menuById[m.id];
+        for (let k = RECIPE_ITEMS.length - 1; k >= 0; k--) if (RECIPE_ITEMS[k].menu_id === m.id) RECIPE_ITEMS.splice(k, 1);
+        renderAll();
+        toast(`“${m.name}” dihapus dari menu`);
+      },
+    });
+  }
+
+  /* ===== Tab Kategori ===== */
+  function renderCatTab() {
+    const cats = sortedCats();
+    $('#catList').innerHTML = cats.length ? cats.map((c, i) => {
+      const ms = menusIn(c.id);
+      const off = ms.filter(m => !m.is_available).length;
+      const n = esc(c.name), id = esc(c.id);
+      const locked = ms.length > 0;
+      const why = `Masih berisi ${ms.length} menu — pindahkan atau hapus menunya dulu`;
+      return `<li class="cat-row${movedCat === c.id ? ' flash' : ''}" data-id="${id}">
+        <span class="cat-pos tnum" aria-hidden="true">${i + 1}</span>
+        <span class="cat-sw" style="--tile:${esc(c.tile)}" aria-hidden="true">${esc(ms[0] ? ms[0].image_url : '🍽️')}</span>
+        <div class="cat-info"><strong>${n}</strong><small>${ms.length ? `${ms.length} menu${off ? ` · ${off} habis` : ''}` : 'Belum ada menu'}</small></div>
+        <div class="cat-acts">
+          <button type="button" class="icon-btn sm" data-act="cat-up" data-id="${id}" aria-label="Naikkan ${n}" title="Naikkan"${i === 0 ? ' disabled' : ''}>${icon('arrowUp', 16)}</button>
+          <button type="button" class="icon-btn sm" data-act="cat-down" data-id="${id}" aria-label="Turunkan ${n}" title="Turunkan"${i === cats.length - 1 ? ' disabled' : ''}>${icon('arrowDown', 16)}</button>
+          <span class="vsep" aria-hidden="true"></span>
+          <button type="button" class="icon-btn sm" data-act="edit-cat" data-id="${id}" aria-label="Ubah nama & warna ${n}" title="Ubah nama & warna">${icon('edit', 16)}</button>
+          <button type="button" class="icon-btn sm danger" data-act="del-cat" data-id="${id}"${locked
+            ? ` aria-disabled="true" aria-label="Hapus ${n} — tidak bisa, ${esc(why.toLowerCase())}" title="${esc(why)}"`
+            : ` aria-label="Hapus ${n}" title="Hapus kategori"`}>${icon('trash', 16)}</button>
+        </div>
+      </li>`;
+    }).join('') : '<li class="cat-empty">Belum ada kategori. Tambahkan minimal satu supaya menu bisa dikelompokkan.</li>';
+    movedCat = null;
+    renderPreview();
+  }
+
+  function moveCat(id, dir) {
+    const cats = sortedCats();
+    const i = cats.findIndex(c => c.id === id), j = i + dir;
+    if (i < 0 || j < 0 || j >= cats.length) return;
+    const tmp = cats[i].sort_order; cats[i].sort_order = cats[j].sort_order; cats[j].sort_order = tmp;
+    normalizeSort();
+    movedCat = id;
+    renderCatTab();
+    renderMenuTab(); // urutan chip & seksi ikut berubah
+    const row = $('.cat-row' + attr('data-id', id));
+    if (row) {
+      const same = row.querySelector(`[data-act="${dir < 0 ? 'cat-up' : 'cat-down'}"]`);
+      const other = row.querySelector(`[data-act="${dir < 0 ? 'cat-down' : 'cat-up'}"]`);
+      (same && !same.disabled ? same : other).focus();
+    }
+    toast(`Urutan disimpan — ${catById[id].name} kini di posisi ${j + 1}`);
+  }
+
+  function deleteCat(id) {
+    const c = catById[id];
+    if (!c) return;
+    const n = menusIn(id).length;
+    if (n) { toast(`“${c.name}” masih berisi ${n} menu — pindahkan atau hapus menunya dulu`); return; }
+    confirmAction({
+      title: `Hapus kategori “${c.name}”?`,
+      body: 'Kategori ini kosong, jadi aman dihapus. Tabnya akan hilang dari aplikasi pelanggan.',
+      ok: 'Hapus kategori',
+      ico: 'trash',
+      onOk() {
+        const i = CATEGORIES.indexOf(c); if (i >= 0) CATEGORIES.splice(i, 1);
+        delete catById[id];
+        normalizeSort();
+        if (state.cat === id) state.cat = 'all';
+        if (state.pCat === id) state.pCat = 'all';
+        renderAll();
+        toast(`Kategori “${c.name}” dihapus`);
+      },
+    });
+  }
+
+  /* ----- Pratinjau aplikasi pelanggan (meniru halaman-utama.html) ----- */
+  function renderPreview() {
+    const cats = sortedCats();
+    if (state.pCat !== 'all' && !catById[state.pCat]) state.pCat = 'all';
+    const tabs = [{ id:'all', name:'Semua', n:MENUS.length }]
+      .concat(cats.map(c => ({ id:c.id, name:c.name, n:menusIn(c.id).length })));
+    $('#phTabs').innerHTML = tabs.map(t =>
+      `<button type="button" class="ph-tab" role="tab" data-act="p-cat" data-cat="${esc(t.id)}" aria-selected="${state.pCat === t.id}">${esc(t.name)}<em>${t.n}</em></button>`).join('');
+
+    const shown = state.pCat === 'all' ? cats : cats.filter(c => c.id === state.pCat);
+    const html = shown.map(c => {
+      // Seperti di halaman pelanggan: menu tersedia di atas, menu habis di bawah
+      const items = menusIn(c.id).sort((a, b) => b.is_available - a.is_available);
+      if (!items.length) return '';
+      const lim = state.pCat === 'all' ? 3 : items.length;
+      return `<div class="ph-sec"><h4>${esc(c.name)}<span>${items.length} menu</span></h4>
+        ${items.slice(0, lim).map(m => `<div class="ph-item${m.is_available ? '' : ' so'}">
+          <span class="ph-thumb" style="--tile:${esc(c.tile)}" aria-hidden="true">${esc(m.image_url)}</span>
+          <span class="ph-txt"><b>${esc(m.name)}</b><i>${rp(m.price)}</i></span>
+          ${m.is_available ? `<span class="ph-add" aria-hidden="true">${icon('plus', 12)}</span>` : '<span class="ph-so">Habis</span>'}
+        </div>`).join('')}
+        ${items.length > lim ? `<p class="ph-more">+${items.length - lim} menu lainnya</p>` : ''}
+      </div>`;
+    }).join('');
+    $('#phList').innerHTML = html || '<p class="ph-empty">Belum ada menu di kategori ini.</p>';
+  }
+
+  /* ----- Modal kategori ----- */
+  function openCatModal(id) {
+    const c = id ? catById[id] : null;
+    catEditId = c ? c.id : null;
+    $('#ctTitle').textContent = c ? 'Ubah Kategori' : 'Tambah Kategori';
+    $('#ctSave').textContent = c ? 'Simpan' : 'Tambah Kategori';
+    $('#cName').value = c ? c.name : '';
+    clearErr('cName');
+    const used = CATEGORIES.map(x => String(x.tile).toLowerCase());
+    const pick = c ? c.tile : (TINTS.find(t => !used.includes(t.c.toLowerCase())) || TINTS[0]).c;
+    const list = TINTS.some(t => t.c.toLowerCase() === String(pick).toLowerCase()) ? TINTS : [{ c:pick, n:'Warna saat ini' }].concat(TINTS);
+    $('#tints').innerHTML = list.map(t => `<label class="tint" title="${esc(t.n)}">
+        <input type="radio" name="tint" value="${esc(t.c)}"${t.c.toLowerCase() === String(pick).toLowerCase() ? ' checked' : ''}>
+        <span class="sw" style="--c:${esc(t.c)}">${icon('check', 16)}</span><span class="sr-only">${esc(t.n)}</span>
+      </label>`).join('');
+    syncCatPreview();
+    openLayer('catModal');
+  }
+  function syncCatPreview() {
+    const name = $('#cName').value.trim() || 'Nama kategori';
+    const r = $('#tints input:checked');
+    const tint = r ? r.value : TINTS[0].c;
+    const first = catEditId ? menusIn(catEditId)[0] : null;
+    $('#catPrev').innerHTML = `<span class="cat-sw" style="--tile:${esc(tint)}" aria-hidden="true">${esc(first ? first.image_url : '🍽️')}</span>
+      <div class="grow"><span class="ph-tab sel">${esc(name)}</span><small>Begini tampilannya di aplikasi pelanggan.</small></div>`;
+  }
+  function saveCat(e) {
+    e.preventDefault();
+    clearErr('cName');
+    const name = $('#cName').value.trim().replace(/\s+/g, ' ');
+    if (!name) { setErr('cName', 'Nama kategori wajib diisi.').focus(); return; }
+    if (CATEGORIES.some(c => c.id !== catEditId && c.name.trim().toLowerCase() === name.toLowerCase())) {
+      setErr('cName', `Sudah ada kategori bernama “${name}”.`).focus(); return;
+    }
+    const r = $('#tints input:checked');
+    const tile = r ? r.value : TINTS[0].c;
+    let c, msg;
+    if (catEditId) {
+      c = catById[catEditId];
+      const old = c.name;
+      c.name = name; c.tile = tile;
+      msg = old !== name ? `“${old}” diganti jadi “${name}”` : `Kategori “${name}” disimpan`;
+    } else {
+      c = { id: uid('c'), name, sort_order: Math.max(0, ...CATEGORIES.map(x => x.sort_order)) + 1, tile };
+      CATEGORIES.push(c);
+      catById[c.id] = c;
+      msg = `Kategori “${name}” ditambahkan di urutan terakhir`;
+    }
+    movedCat = c.id;
+    closeLayer('catModal');
+    renderAll();
+    if (catEditId) { const b = $('.cat-row' + attr('data-id', c.id) + ' [data-act="edit-cat"]'); if (b) b.focus({ preventScroll:true }); }
+    toast(msg);
+  }
+
+  /* ===== Tab Meja & QR ===== */
+  function areaList() {
+    const s = new Set(AREA_ORDER);
+    TABLES.forEach(t => { if (t.area) s.add(t.area); });
+    return [...s];
+  }
+  const tBadges = t => (t.is_active ? '<span class="badge ok"><span class="dot"></span>Aktif</span>' : '<span class="badge">Nonaktif</span>')
+    + (needsPrint.has(t.id) ? '<span class="badge warn">Belum dicetak</span>' : '');
+
+  function tableCardHTML(t) {
+    const id = esc(t.id), no = esc(t.table_number);
+    return `<article class="tcard${t.is_active ? '' : ' off'}${flashTable === t.id ? ' flash' : ''}" data-id="${id}">
+      <div class="tc-top">
+        <div class="tc-info">
+          <span class="tc-label">Meja</span>
+          <strong class="tc-no">${no}</strong>
+          <span class="tc-area">Area ${esc(t.area || '—')}</span>
+          <span class="tc-badges">${tBadges(t)}</span>
+        </div>
+        <button type="button" class="tc-qr" data-act="qr" data-id="${id}" aria-label="Lihat QR Meja ${no}" title="Lihat QR">${fakeQR(t.qr_code, 96)}</button>
+      </div>
+      <div class="tc-foot">
+        <button type="button" class="btn btn-sm" data-act="qr" data-id="${id}">${icon('qr', 16)}Lihat QR</button>
+        <label class="avail">
+          <span class="switch"><input type="checkbox" role="switch" data-toggle="table" data-id="${id}"${t.is_active ? ' checked' : ''} aria-label="Meja ${no} aktif"><span></span></span>
+          <span class="avail-txt">${t.is_active ? 'Aktif' : 'Nonaktif'}</span>
+        </label>
+      </div>
+    </article>`;
+  }
+
+  function renderTableChips() {
+    const off = TABLES.filter(t => !t.is_active).length;
+    const chips = [['all', 'Semua', TABLES.length]]
+      .concat(areaList().map(a => [a, a, TABLES.filter(t => t.area === a).length]))
+      .concat([['off', 'Nonaktif', off]]);
+    $('#tableChips').innerHTML = chips.map(([v, l, n]) =>
+      `<button type="button" class="chip" data-act="f-table" data-v="${esc(v)}" aria-pressed="${state.tFilter === v}">${esc(l)}<em>${n}</em></button>`).join('');
+  }
+  function renderTableGrid() {
+    const f = state.tFilter;
+    const list = sortedTables().filter(t => f === 'all' || (f === 'off' ? !t.is_active : t.area === f));
+    let html = list.map(tableCardHTML).join('');
+    if (f !== 'off') {
+      html += `<button type="button" class="add-tile tall" data-act="add-table"><span class="plus">${icon('plus', 20)}</span><strong>Tambah meja</strong><small>QR unik dibuat otomatis</small></button>`;
+    } else if (!list.length) {
+      html = emptyHTML('🎉', 'Semua meja aktif', 'Tidak ada meja yang sedang dinonaktifkan.', '');
+    }
+    $('#tableGrid').innerHTML = html;
+    flashTable = null;
+  }
+  function renderTableTab() { renderTableChips(); renderTableGrid(); }
+
+  /* ----- Kartu QR untuk meja (tent card) ----- */
+  function tentHTML(t) {
+    return `<div class="tent">
+      <div class="tent-brand"><span class="tent-logo">${esc(cafeInitials())}</span>${esc(SETTINGS.cafe_name)}</div>
+      <div class="tent-no"><span>Meja</span>${esc(t.table_number)}</div>
+      <div class="tent-qr">${fakeQR(t.qr_code, 200)}</div>
+      <p class="tent-cta">Scan untuk lihat menu &amp; pesan</p>
+      <p class="tent-sub">Tanpa install aplikasi · Bayar di kasir</p>
+      <p class="tent-url">${esc(tableUrl(t))}</p>
+    </div>`;
+  }
+  /** HTML yang dicetak: kartu-kartu QR (2 per baris di A4). Gaya .tent dari <style> halaman ikut berlaku. */
+  function sheetHTML(list) {
+    return `<style>
+      @page{size:A4;margin:10mm}
+      .qr-sheet{width:100%;text-align:center;font-family:"Plus Jakarta Sans",system-ui,sans-serif;color:#24170E}
+      .qr-sheet .tent{display:inline-block;vertical-align:top;width:86mm;margin:0 2mm 6mm;box-shadow:none;border:1px dashed #B9A999;break-inside:avoid;page-break-inside:avoid}
+      .qr-sheet .tent-logo{background:#D2552A!important;color:#fff!important}
+      .qr-sheet *{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+    </style><div class="qr-sheet">${list.map(tentHTML).join('')}</div>`;
+  }
+
+  function openQR(id) {
+    if (!tableById(id)) return;
+    qrId = id;
+    renderQR();
+    openLayer('qrModal');
+  }
+  function renderQR() {
+    const t = tableById(qrId);
+    if (!t) return;
+    $('#qrTitle').textContent = `QR Meja ${t.table_number}`;
+    $('#qrCard').innerHTML = tentHTML(t);
+    $('#qrToken').textContent = t.qr_code;
+    $('#qrOpen').href = tableUrl(t);
+    $('#qrWarn').innerHTML = !t.is_active
+      ? `<div class="alert warn">${icon('alert', 18)}<div class="grow">Meja ini <b>nonaktif</b>. QR tetap bisa dicetak, tapi pelanggan baru bisa memesan setelah meja diaktifkan lagi.</div></div>`
+      : needsPrint.has(t.id)
+        ? `<div class="alert info">${icon('printer', 18)}<div class="grow">QR ini <b>belum dicetak</b>. Cetak, lalu ganti kartu lama di meja.</div></div>`
+        : '';
+  }
+  function printOne() {
+    const t = tableById(qrId);
+    if (!t) return;
+    toast(`Membuka dialog cetak — QR Meja ${t.table_number}`);
+    setTimeout(() => {
+      printReceipt(sheetHTML([t]));
+      needsPrint.delete(t.id);
+      renderQR();
+      renderTableGrid();
+    }, 120);
+  }
+  function printAll() {
+    const list = sortedTables().filter(t => t.is_active);
+    if (!list.length) { toast('Belum ada meja aktif untuk dicetak'); return; }
+    toast(`Membuka dialog cetak — ${list.length} kartu QR meja aktif`);
+    setTimeout(() => {
+      printReceipt(sheetHTML(list));
+      list.forEach(t => needsPrint.delete(t.id));
+      renderTableGrid();
+    }, 120);
+  }
+  function regenQR() {
+    const t = tableById(qrId);
+    if (!t) return;
+    confirmAction({
+      title: `Buat ulang QR Meja ${t.table_number}?`,
+      body: 'QR lama yang sudah tertempel di meja akan <b>langsung berhenti berfungsi</b>. Setelah ini, cetak QR baru dan ganti kartu di meja supaya pelanggan tetap bisa memesan.',
+      ok: 'Ya, buat QR baru',
+      ico: 'refresh',
+      onOk() {
+        t.qr_code = newToken();
+        needsPrint.add(t.id);
+        renderQR();
+        renderTableGrid();
+        toast(`QR Meja ${t.table_number} diperbarui — cetak & ganti kartu lamanya`);
+      },
+    });
+  }
+
+  /* ----- Modal tambah meja ----- */
+  function openTableModal() {
+    const nums = TABLES.map(t => parseInt(t.table_number, 10)).filter(n => !isNaN(n));
+    $('#tNo').value = String((nums.length ? Math.max(...nums) : 0) + 1).padStart(2, '0');
+    const areas = areaList();
+    $('#tArea').innerHTML = areas.map(a => `<option value="${esc(a)}">${esc(a)}</option>`).join('');
+    $('#tArea').value = areas.includes(state.tFilter) ? state.tFilter : areas[0];
+    clearErr('tNo');
+    syncTableHint();
+    openLayer('tableModal');
+  }
+  function syncTableHint() {
+    const v = normTableNo($('#tNo').value);
+    $('#tNoHint').textContent = v && /^[A-Z0-9-]{1,6}$/.test(v)
+      ? `Akan tampil sebagai “Meja ${v}”. Angka otomatis jadi 2 digit.`
+      : 'Angka otomatis jadi 2 digit, mis. 7 → 07.';
+  }
+  function saveTable(e) {
+    e.preventDefault();
+    clearErr('tNo');
+    const no = normTableNo($('#tNo').value);
+    const area = $('#tArea').value;
+    let msg = '';
+    if (!no) msg = 'Nomor meja wajib diisi.';
+    else if (!/^[A-Z0-9-]{1,6}$/.test(no)) msg = 'Pakai huruf, angka, atau tanda “-”, maksimal 6 karakter.';
+    else if (/^0+$/.test(no)) msg = 'Nomor meja tidak boleh 0.';
+    else if (TABLES.some(t => t.table_number.toUpperCase() === no)) msg = `Meja ${no} sudah ada. Pakai nomor lain.`;
+    if (msg) { setErr('tNo', msg).focus(); return; }
+
+    const t = { id: uid('t'), table_number: no, qr_code: newToken(), is_active: true, area };
+    TABLES.push(t);
+    needsPrint.add(t.id);
+    flashTable = t.id;
+    if (state.tFilter !== 'all' && state.tFilter !== area) state.tFilter = 'all';
+    closeLayer('tableModal');
+    renderHead();
+    renderTableTab();
+    const card = $('.tcard' + attr('data-id', t.id));
+    if (card) card.scrollIntoView({ block:'nearest', behavior:'smooth' });
+    toast(`Meja ${no} ditambahkan — QR-nya siap dicetak`);
+  }
+
+  /* ===== Konfirmasi (bertumpuk di atas modal lain bila perlu) ===== */
+  function confirmAction(o) {
+    $('#cfTitle').textContent = o.title;
+    $('#cfBody').innerHTML = o.body;
+    $('#cfOk').textContent = o.ok;
+    $('#cfIco').innerHTML = icon(o.ico || 'alert', 20);
+    cfAction = o.onOk;
+    const under = $$('.modal.show').filter(m => m.id !== 'confirmModal');
+    under.forEach(m => m.classList.add('behind'));
+    $('#confirmModal').classList.toggle('stacked', under.length > 0);
+    openLayer('confirmModal');
+  }
+  $('#cfOk').addEventListener('click', () => {
+    const fn = cfAction;
+    cfAction = null;
+    closeLayer('confirmModal');
+    if (fn) fn();
+  });
+  // Saat konfirmasi tertutup (Batal / Esc / klik luar), modal di bawahnya bisa diklik lagi
+  new MutationObserver(() => {
+    if (!$('#confirmModal').classList.contains('show')) $$('.modal.behind').forEach(m => m.classList.remove('behind'));
+  }).observe($('#confirmModal'), { attributes:true, attributeFilter:['class'] });
+
+  /* ===== Render semua ===== */
+  function renderAll() {
+    renderHead();
+    renderMenuTab();
+    renderCatTab();
+    renderTableTab();
+  }
+
+  /* ===== Event ===== */
+  // Kembalikan fokus ke tombol filter setelah daftar dirender ulang (pengguna keyboard)
+  function refocusLike(el) {
+    let s = `[data-act="${el.dataset.act}"]`;
+    if (el.dataset.cat != null) s += attr('data-cat', el.dataset.cat);
+    if (el.dataset.v != null) s += attr('data-v', el.dataset.v);
+    const n = $(s);
+    if (n) n.focus({ preventScroll:true });
+  }
+
+  document.addEventListener('click', e => {
+    const el = e.target.closest('[data-act]');
+    if (!el) return;
+    const act = el.dataset.act, id = el.dataset.id;
+    const hadFocus = document.activeElement === el;
+    switch (act) {
+      case 'tab': setTab(el.dataset.tab); break;
+
+      case 'add-menu': openMenuModal(null, el.dataset.cat); break;
+      case 'edit-menu': openMenuModal(id); break;
+      case 'f-cat': state.cat = el.dataset.cat; renderMenuTab(); if (hadFocus) refocusLike(el); break;
+      case 'f-avail': state.avail = el.dataset.v; renderMenuTab(); if (hadFocus) refocusLike(el); break;
+      case 'reset': resetFilters(); $('#mq').focus(); break;
+      case 'mark-risky': {
+        const risky = MENUS.filter(m => m.is_available && outIngs(m).length);
+        risky.forEach(m => { m.is_available = false; });
+        renderAll();
+        toast(risky.length === 1 ? `${risky[0].name} ditandai habis — pelanggan tidak bisa memesannya` : `${risky.length} menu ditandai habis`);
+        break;
+      }
+
+      case 'emoji':
+        draft.emoji = el.dataset.emoji;
+        $$('#emojiGrid button').forEach(b => b.setAttribute('aria-pressed', b === el));
+        syncPhoto();
+        break;
+      case 'tag': {
+        const t = el.dataset.tag;
+        draft.tags = draft.tags.includes(t) ? draft.tags.filter(x => x !== t) : draft.tags.concat(t);
+        el.setAttribute('aria-pressed', draft.tags.includes(t));
+        break;
+      }
+      case 'upload': toast('Prototipe: unggah foto belum aktif — pakai ikon dulu, ya'); break;
+      case 'rec-add': {
+        draft.recipe.push({ ing:'', qty:'' });
+        renderRecipe();
+        const rows = $$('#recList .rec-row');
+        rows[rows.length - 1].querySelector('select').focus();
+        break;
+      }
+      case 'rec-del': {
+        const i = Number(el.closest('.rec-row').dataset.i);
+        draft.recipe.splice(i, 1);
+        renderRecipe();
+        const rows = $$('#recList .rec-row');
+        const next = rows[i] || rows[i - 1];
+        if (next) next.querySelector('select').focus();
+        else $('[data-act="rec-add"]').focus();
+        break;
+      }
+
+      case 'add-cat': openCatModal(); break;
+      case 'edit-cat': openCatModal(id); break;
+      case 'del-cat': deleteCat(id); break;
+      case 'cat-up': moveCat(id, -1); break;
+      case 'cat-down': moveCat(id, 1); break;
+      case 'p-cat': state.pCat = el.dataset.cat; renderPreview(); if (hadFocus) refocusLike(el); break;
+
+      case 'f-table': state.tFilter = el.dataset.v; renderTableTab(); if (hadFocus) refocusLike(el); break;
+      case 'add-table': openTableModal(); break;
+      case 'print-all': printAll(); break;
+      case 'qr': openQR(id); break;
+    }
+  });
+
+  // Switch ketersediaan menu & status meja (diperbarui di tempat)
+  document.addEventListener('change', e => {
+    const el = e.target;
+    if (el.dataset.toggle === 'menu') {
+      const m = menuById[el.dataset.id];
+      if (!m) return;
+      m.is_available = el.checked;
+      syncMenuCard(m);
+      renderHead(); renderMenuControls(); renderCatTab();
+      const outs = outIngs(m);
+      toast(!m.is_available ? `${m.name} ditandai habis — pelanggan tidak bisa memesannya`
+        : outs.length ? `${m.name} tersedia lagi — tapi stok ${outs[0].name} masih habis`
+        : `${m.name} tersedia lagi — pelanggan bisa memesannya`);
+    } else if (el.dataset.toggle === 'table') {
+      const t = tableById(el.dataset.id);
+      if (!t) return;
+      t.is_active = el.checked;
+      const card = el.closest('.tcard');
+      card.classList.toggle('off', !t.is_active);
+      card.querySelector('.avail-txt').textContent = t.is_active ? 'Aktif' : 'Nonaktif';
+      card.querySelector('.tc-badges').innerHTML = tBadges(t);
+      renderHead(); renderTableChips();
+      toast(t.is_active ? `Meja ${t.table_number} aktif — pelanggan bisa pesan lewat QR-nya`
+        : `Meja ${t.table_number} nonaktif — QR-nya tidak bisa dipakai memesan`);
+    }
+  });
+
+  // Tab: panah kiri/kanan, Home, End
+  $('#tabs').addEventListener('keydown', e => {
+    const i = TABS.indexOf(state.tab);
+    const map = { ArrowRight:(i + 1) % TABS.length, ArrowLeft:(i - 1 + TABS.length) % TABS.length, Home:0, End:TABS.length - 1 };
+    if (!(e.key in map)) return;
+    e.preventDefault();
+    setTab(TABS[map[e.key]], { focus:true });
+  });
+  window.addEventListener('hashchange', () => {
+    const h = location.hash.slice(1);
+    if (TABS.includes(h) && h !== state.tab) setTab(h, { push:false });
+  });
+
+  // Pencarian menu
+  $('#mq').addEventListener('input', e => { state.q = e.target.value; renderMenuGrid(); });
+
+  // Form menu
+  $('#menuForm').addEventListener('submit', saveMenu);
+  $('#mmDelete').addEventListener('click', deleteMenu);
+  $('#fName').addEventListener('input', () => clearErr('fName'));
+  $('#fCat').addEventListener('change', () => { clearErr('fCat'); syncPhoto(); });
+  $('#fDesc').addEventListener('input', syncDesc);
+  $('#fAvail').addEventListener('change', syncAvailHint);
+  $('#fPrice').addEventListener('input', e => {
+    // Format ribuan saat mengetik (32000 → 32.000) tanpa membuat kursor melompat
+    const el = e.target;
+    const pos = el.selectionStart || 0;
+    const before = el.value.slice(0, pos).replace(/\D/g, '').length;
+    const d = el.value.replace(/\D/g, '').replace(/^0+(?=\d)/, '').slice(0, 9);
+    el.value = d ? Number(d).toLocaleString('id-ID') : '';
+    let i = 0, seen = 0;
+    while (i < el.value.length && seen < before) { if (/\d/.test(el.value[i])) seen++; i++; }
+    try { el.setSelectionRange(i, i); } catch (_) {}
+    clearErr('fPrice');
+  });
+  $('#recList').addEventListener('input', e => {
+    const f = e.target;
+    if (f.dataset.rec !== 'qty') return;
+    const row = f.closest('.rec-row');
+    draft.recipe[Number(row.dataset.i)].qty = f.value;
+    clearRowErr(row);
+    syncCapacity();
+  });
+  $('#recList').addEventListener('change', e => {
+    const f = e.target;
+    if (f.dataset.rec !== 'ing') return;
+    const row = f.closest('.rec-row');
+    const r = draft.recipe[Number(row.dataset.i)];
+    r.ing = f.value;
+    const ing = ingById[r.ing];
+    row.querySelector('.rec-unit').textContent = ing ? ing.unit : 'satuan';
+    row.querySelector('.rec-meta').innerHTML = recMeta(ing);
+    clearRowErr(row);
+    syncCapacity();
+  });
+
+  // Zona unggah foto (prototipe: hanya memberi tahu)
+  const dz = $('#dropZone');
+  ['dragenter', 'dragover'].forEach(ev => dz.addEventListener(ev, e => { e.preventDefault(); dz.classList.add('over'); }));
+  ['dragleave', 'drop'].forEach(ev => dz.addEventListener(ev, e => {
+    e.preventDefault();
+    dz.classList.remove('over');
+    if (ev === 'drop') toast('Prototipe: unggah foto belum aktif — pakai ikon dulu, ya');
+  }));
+  // Jangan biarkan berkas yang dijatuhkan di luar zona membuka tab baru
+  ['dragover', 'drop'].forEach(ev => window.addEventListener(ev, e => {
+    if (e.dataTransfer && [...e.dataTransfer.types].includes('Files')) e.preventDefault();
+  }));
+
+  // Form kategori
+  $('#catForm').addEventListener('submit', saveCat);
+  $('#cName').addEventListener('input', () => { clearErr('cName'); syncCatPreview(); });
+  $('#tints').addEventListener('change', syncCatPreview);
+
+  // Form meja & QR
+  $('#tableForm').addEventListener('submit', saveTable);
+  $('#tNo').addEventListener('input', () => { clearErr('tNo'); syncTableHint(); });
+  $('#qrPrint').addEventListener('click', printOne);
+  $('#qrRegen').addEventListener('click', regenQR);
+
+  /* ===== Mulai ===== */
+  hydrateIcons();
+  $('#phLogo').textContent = cafeInitials();
+  $('#phName').textContent = SETTINGS.cafe_name;
+  $('#phAddr').textContent = SETTINGS.address;
+  renderAll();
+  const h = location.hash.slice(1);
+  setTab(TABS.includes(h) ? h : 'menu', { push:false });
+})();
+</script>
+</body>
+</html>

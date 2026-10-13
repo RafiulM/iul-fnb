@@ -5,7 +5,7 @@ import { API_URL, headers, signUp } from "./helpers";
 // These tests drive the real browser path: React hooks → API on another
 // origin → PostgreSQL, plus server rendering with the forwarded cookie.
 
-test("the Notes page creates, edits, and deletes through the hooks, and SSR renders saved notes", async ({
+test("the Notes page creates, edits, and deletes through the hooks, and saved notes survive a reload", async ({
   page,
 }) => {
   const errors: string[] = [];
@@ -34,11 +34,11 @@ test("the Notes page creates, edits, and deletes through the hooks, and SSR rend
     page.getByTestId("note").filter({ hasText: "Buy oat milk ×2" }),
   ).toBeVisible();
 
-  // Server-rendered HTML already contains the note (SSR prefetch via the
-  // web server, which forwarded this browser's cookie to the API).
-  const html = await (await page.request.get("/notes")).text();
-  expect(html).toContain("Buy oat milk ×2");
-
+  // Signed-in screens render on the client while the IUL FnB features use
+  // their browser mock store (`ssr: false` in routes/_protected.tsx), so the
+  // saved note is checked after a reload instead of in the server HTML.
+  // Restore the SSR assertion when that `ssr: false` is removed:
+  //   expect(await (await page.request.get("/notes")).text()).toContain("Buy oat milk ×2");
   await page.reload();
   const edited = page
     .getByTestId("note")

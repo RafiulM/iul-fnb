@@ -1,0 +1,71 @@
+{
+  "schemaVersion": 1,
+  "frames": {
+    "kasir": {
+      "x": 3120,
+      "y": 96
+    },
+    "pelanggan": {
+      "x": 1143,
+      "y": 91
+    },
+    "pelanggan-keranjang": {
+      "x": 19246,
+      "y": 91
+    },
+    "login": {
+      "x": 1600,
+      "y": 96
+    },
+    "stok": {
+      "x": 4640,
+      "y": 96
+    },
+    "menu-meja": {
+      "x": 6160,
+      "y": 96
+    },
+    "penjualan": {
+      "x": 7680,
+      "y": 96
+    },
+    "staf": {
+      "x": 9200,
+      "y": 96
+    },
+    "pengaturan": {
+      "x": 10720,
+      "y": 96
+    },
+    "pelanggan-menu": {
+      "x": 18743,
+      "y": 91
+    },
+    "pelanggan-status": {
+      "x": 12240,
+      "y": 96
+    },
+    "pelanggan-tidak-valid": {
+      "x": 13257,
+      "y": 137
+    },
+    "pelanggan-tutup": {
+      "x": 13714,
+      "y": 137
+    },
+    "kasir-manual": {
+      "x": 14183,
+      "y": 91
+    },
+    "kasir-bayar": {
+      "x": 15703,
+      "y": 91
+    },
+    "riwayat": {
+      "x": 17223,
+      "y": 91
+    }
+  },
+  "hiddenPageIds": [],
+  "notes": []
+}

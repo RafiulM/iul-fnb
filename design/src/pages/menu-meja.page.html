@@ -1,0 +1,1616 @@
+<!-- dpai:page {"scoped":true,"typography":true} -->
+<style>
+  .p-menu-meja { display: grid; gap: var(--space-6); align-content: start; font-family: var(--font-ui); }
+  .mm-context { margin: calc(var(--space-4) * -1) 0 0; font: 400 var(--text-body-sm) / var(--leading-body-sm) var(--font-ui); color: var(--color-text-muted); font-variant-numeric: tabular-nums; }
+  .mm-app { display: grid; gap: var(--space-6); min-width: 0; }
+  .mm-grow { flex: 1; min-width: 0; }
+
+  /* Tab halaman */
+  .mm-tabs iconify-icon { font-size: 18px; }
+  .mm-tabs small { display: inline-grid; place-items: center; min-width: 24px; padding: 2px 7px; border-radius: var(--radius-pill); background: var(--color-surface-muted); font: 600 var(--text-label-sm) / 1.2 var(--font-ui); color: var(--color-text-muted); font-variant-numeric: tabular-nums; }
+  .mm-tabs button[aria-selected="true"] small { color: var(--color-text); }
+  .mm-tabs button:focus-visible { outline: 2px solid var(--color-focus-ring); outline-offset: 2px; border-radius: var(--radius-compact); }
+  .mm-panel { display: grid; gap: var(--spacing-20); align-content: start; min-width: 0; }
+  .mm-panel > .l-staf-seg { justify-self: start; }
+
+  /* Toolbar & filter */
+  .mm-toolbar { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-3); }
+  .mm-toolbar .l-staf-search { flex: 0 1 340px; }
+  .mm-meta { margin-inline-start: auto; font: 500 var(--text-body-sm) / 1.3 var(--font-ui); color: var(--color-text-muted); font-variant-numeric: tabular-nums; }
+  .mm-risk { align-items: center; }
+  .mm-risk .l-staf-btn { flex: none; }
+  .mm-risk strong { font-weight: 600; }
+
+  /* Daftar menu */
+  .mm-list { display: grid; gap: var(--spacing-32); }
+  .mm-sec { display: grid; gap: var(--space-3); }
+  .mm-sec-head { display: flex; align-items: baseline; gap: var(--space-2); }
+  .mm-sec-head h2 { margin: 0; font: 600 17px / 1.25 var(--font-ui); letter-spacing: -0.17px; }
+  .mm-sec-head span { font: 500 var(--text-body-sm) / 1 var(--font-ui); color: var(--color-text-muted); }
+  .mm-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(228px, 1fr)); gap: var(--space-4); }
+
+  .mm-card { position: relative; display: flex; flex-direction: column; min-width: 0; border: var(--border-hairline) solid var(--color-border); border-radius: var(--radius-card); background: var(--color-surface); transition: border-color var(--duration-fast) var(--ease-standard), background-color var(--duration-fast) var(--ease-standard); }
+  .mm-card:hover { border-color: var(--color-border-strong); }
+  .mm-card[data-state="current"], .mm-tcard[data-state="current"], .mm-cat-row[data-state="current"] { border-color: var(--color-border-strong); }
+  .mm-card[data-state="current"]::before, .mm-tcard[data-state="current"]::before, .mm-cat-row[data-state="current"]::before { content: ""; position: absolute; z-index: 1; inset-block: 14px; inset-inline-start: -1px; width: 3px; border-radius: var(--radius-pill); background: var(--color-accent); }
+  .mm-card[data-state="current"]::before, .mm-tcard[data-state="current"]::before { inset-block: 20px auto; height: 48px; }
+  .mm-card-main { position: relative; display: flex; flex-direction: column; flex: 1; min-width: 0; padding: 10px 10px 0; border: 0; border-radius: var(--radius-card) var(--radius-card) 0 0; background: none; color: inherit; font: inherit; text-align: start; cursor: pointer; }
+  .mm-card-main:focus-visible { outline: 2px solid var(--color-focus-ring); outline-offset: -2px; }
+  .mm-tile { display: grid; place-items: center; height: 120px; overflow: hidden; border-radius: var(--radius-image); background: var(--color-surface-muted); font-size: 56px; line-height: 1; user-select: none; transition: opacity var(--duration-fast) var(--ease-standard); }
+  .mm-emo { transition: transform var(--duration-base) var(--ease-standard); }
+  .mm-card:hover .mm-emo { transform: scale(1.06); }
+  .mm-sold { position: absolute; inset-block-start: 20px; inset-inline-end: 20px; }
+  .mm-card-body { display: flex; flex-direction: column; flex: 1; gap: 4px; min-width: 0; padding: 12px 6px 14px; }
+  .mm-tags { display: flex; flex-wrap: wrap; gap: 4px; margin-bottom: 2px; }
+  .mm-name { display: -webkit-box; overflow: hidden; -webkit-line-clamp: 2; -webkit-box-orient: vertical; font: 600 15px / 1.3 var(--font-ui); letter-spacing: -0.15px; }
+  .mm-desc { display: -webkit-box; overflow: hidden; -webkit-line-clamp: 2; -webkit-box-orient: vertical; font: 400 13px / 1.45 var(--font-ui); color: var(--color-text-muted); }
+  .mm-bottom { display: grid; gap: var(--space-2); margin-top: auto; padding-top: var(--space-2); }
+  .mm-warn { display: flex; align-items: flex-start; gap: 6px; padding: 6px var(--space-2); border: var(--border-hairline) solid var(--color-warning); border-radius: var(--radius-compact); background: color-mix(in srgb, var(--color-warning) 10%, var(--color-surface)); font: 500 12px / 1.35 var(--font-ui); color: var(--color-text); }
+  .mm-warn iconify-icon { flex: none; margin-top: 1px; color: var(--color-warning-text); }
+  .mm-price { font: 600 15px / 1.2 var(--font-ui); font-variant-numeric: tabular-nums; }
+  .mm-card-foot { display: flex; align-items: center; justify-content: space-between; gap: var(--space-2); padding: 10px 12px 10px 14px; border-block-start: var(--border-hairline) solid var(--color-border); }
+  .mm-card-foot .l-staf-iconbtn, .mm-cat-acts .l-staf-iconbtn { width: 36px; height: 36px; }
+  .mm-avail { display: inline-flex; align-items: center; gap: 10px; }
+  .mm-avail-txt { font: 600 13px / 1 var(--font-ui); cursor: pointer; user-select: none; }
+  .mm-card[data-off] { background: var(--color-surface-subtle); }
+  .mm-card[data-off] .mm-tile { filter: grayscale(1); opacity: .5; }
+  .mm-card[data-off] .mm-name, .mm-card[data-off] .mm-price, .mm-card[data-off] .mm-avail-txt, .mm-tcard[data-off] .mm-avail-txt { color: var(--color-text-muted); }
+
+  .mm-add { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; min-height: 200px; padding: var(--space-4); border: var(--border-hairline) dashed var(--color-border-strong); border-radius: var(--radius-card); background: transparent; color: var(--color-text); font: inherit; text-align: center; cursor: pointer; transition: border-color var(--duration-fast) var(--ease-standard), background-color var(--duration-fast) var(--ease-standard); }
+  .mm-add:hover { border-color: var(--color-text); background: var(--color-surface); }
+  .mm-add:focus-visible, .mm-add-row:focus-visible, .mm-drop:focus-visible, .mm-tc-qr:focus-visible, .mm-chip:focus-visible, .mm-emoji button:focus-visible, .mm-ph-tab:focus-visible { outline: 2px solid var(--color-focus-ring); outline-offset: 3px; }
+  .mm-add-plus { display: grid; place-items: center; width: 44px; height: 44px; margin-bottom: 6px; border-radius: var(--radius-pill); background: var(--color-surface-muted); }
+  .mm-add strong { font: 600 var(--text-body-sm) / 1.3 var(--font-ui); }
+  .mm-add small { font: 400 12px / 1.3 var(--font-ui); color: var(--color-text-muted); }
+  .mm-add[data-tall] { min-height: 186px; }
+  .mm-empty-card { grid-column: 1 / -1; }
+  .mm-empty-act { display: flex; justify-content: center; gap: var(--space-2); margin-top: var(--space-2); }
+
+  /* Kategori */
+  .mm-cat-layout { display: grid; grid-template-columns: minmax(0, 1fr) 360px; gap: var(--spacing-20); align-items: start; }
+  .mm-cat-col { display: grid; gap: var(--space-4); min-width: 0; }
+  .mm-cat-list { display: grid; gap: var(--space-2); margin: 0; padding: 0; list-style: none; }
+  .mm-cat-row { position: relative; display: flex; align-items: center; gap: var(--space-3); padding: 10px 10px 10px 12px; border: var(--border-hairline) solid var(--color-border); border-radius: var(--radius-image); background: var(--color-surface); transition: border-color var(--duration-fast) var(--ease-standard), background-color var(--duration-fast) var(--ease-standard); }
+  .mm-cat-row:hover { border-color: var(--color-border-strong); background: var(--color-surface-subtle); }
+  .mm-cat-pos { flex: none; display: grid; place-items: center; width: 26px; height: 26px; border-radius: var(--radius-compact); background: var(--color-surface-muted); font: 600 12px / 1 var(--font-ui); color: var(--color-text-soft); font-variant-numeric: tabular-nums; }
+  .mm-cat-info { flex: 1; min-width: 0; }
+  .mm-cat-info strong { display: block; overflow: hidden; font: 600 15px / 1.3 var(--font-ui); letter-spacing: -0.15px; text-overflow: ellipsis; white-space: nowrap; }
+  .mm-cat-info small { font: 500 13px / 1.3 var(--font-ui); color: var(--color-text-muted); }
+  .mm-cat-acts { display: flex; align-items: center; gap: 6px; }
+  .mm-vsep { width: 1px; height: 20px; margin: 0 2px; background: var(--color-border); }
+  .p-menu-meja .l-staf-iconbtn:disabled, .p-menu-meja .l-staf-iconbtn[aria-disabled="true"] { border-color: var(--color-border); background: var(--color-surface-subtle); color: var(--color-text-faint); cursor: not-allowed; }
+  .mm-del:not([aria-disabled="true"]):hover, .mm-rec-del:hover { border-color: var(--color-danger); color: var(--color-danger); }
+  .mm-add-row { display: flex; align-items: center; justify-content: center; gap: var(--space-2); width: 100%; min-height: 48px; margin-top: 10px; border: var(--border-hairline) dashed var(--color-border-strong); border-radius: var(--radius-image); background: transparent; color: var(--color-text); font: 600 var(--text-body-sm) / 1 var(--font-ui); cursor: pointer; transition: border-color var(--duration-fast) var(--ease-standard), background-color var(--duration-fast) var(--ease-standard); }
+  .mm-add-row:hover { border-color: var(--color-text); background: var(--color-surface-subtle); }
+  .mm-card-note { display: flex; align-items: flex-start; gap: var(--space-2); margin: 0; padding: var(--space-3) var(--spacing-20); border-block-start: var(--border-hairline) solid var(--color-border); font: 400 13px / 1.45 var(--font-ui); color: var(--color-text-muted); }
+  .mm-card-note iconify-icon, .mm-tnote iconify-icon, .mm-proto iconify-icon, .mm-qr-honest iconify-icon { flex: none; }
+  .mm-card-note iconify-icon { margin-top: 2px; }
+  .mm-cat-empty { padding: 28px 12px; text-align: center; font: 400 var(--text-body-sm) / 1.4 var(--font-ui); color: var(--color-text-muted); }
+
+  /* Pratinjau aplikasi pelanggan (Sunlit Ledger: krem, putih, pil hitam terpilih) */
+  .mm-preview { position: sticky; top: var(--space-6); }
+  .mm-preview .l-staf-card-head { flex-wrap: nowrap; }
+  .mm-preview .l-staf-card-head > div { flex: 1; min-width: 0; }
+  .mm-preview .l-staf-card-body { display: grid; justify-items: center; gap: var(--space-4); }
+  .mm-pv-note { max-width: 290px; margin: 0; text-align: center; font: 400 12px / 1.5 var(--font-ui); color: var(--color-text-muted); }
+  .mm-phone { position: relative; width: 288px; height: 548px; padding: 8px; border-radius: 44px; background: var(--color-text); }
+  .mm-phone::before { content: ""; position: absolute; z-index: 3; inset-block-start: 18px; inset-inline-start: 50%; width: 80px; height: 22px; border-radius: var(--radius-pill); background: var(--color-text); transform: translateX(-50%); }
+  .mm-ph-screen { position: relative; height: 100%; overflow: hidden auto; border-radius: 36px; background: var(--color-canvas); scrollbar-width: none; overscroll-behavior: contain; }
+  .mm-ph-head { padding: 46px 14px 0; }
+  .mm-ph-top { display: flex; align-items: center; justify-content: space-between; gap: var(--space-2); }
+  .mm-ph-brand { display: flex; align-items: center; gap: var(--space-2); min-width: 0; }
+  .mm-ph-brand > div { min-width: 0; }
+  .mm-ph-logo { flex: none; display: grid; place-items: center; width: 30px; height: 30px; border-radius: var(--radius-compact); background: var(--color-primary); color: var(--color-on-primary); font: 600 10.5px / 1 var(--font-ui); letter-spacing: .3px; }
+  .mm-ph-brand strong { display: block; font: 600 13px / 1.2 var(--font-ui); }
+  .mm-ph-brand small { display: block; overflow: hidden; font: 400 9.5px / 1.3 var(--font-ui); color: var(--color-text-muted); text-overflow: ellipsis; white-space: nowrap; }
+  .mm-ph-table { flex: none; padding: 4px 9px 5px; border: var(--border-hairline) solid var(--color-border); border-radius: var(--radius-compact); background: var(--color-surface); text-align: center; line-height: 1.05; }
+  .mm-ph-table span { display: block; font: 600 7.5px / 1.3 var(--font-ui); color: var(--color-text-muted); }
+  .mm-ph-table strong { font: 600 15px / 1 var(--font-ui); font-variant-numeric: tabular-nums; }
+  .mm-ph-hello { margin: 16px 0 0; font: 500 10.5px / 1.3 var(--font-ui); color: var(--color-text-muted); }
+  .mm-ph-greet { margin: 2px 0 0; font: 600 17px / 1.2 var(--font-ui); letter-spacing: -0.4px; }
+  .mm-ph-search { display: flex; align-items: center; gap: 7px; height: 36px; margin: 12px 12px 0; padding: 0 12px; border: var(--border-hairline) solid var(--color-border-strong); border-radius: var(--radius-control); background: var(--color-surface); font: 400 11px / 1 var(--font-ui); color: var(--color-text-muted); }
+  .mm-ph-tabs { position: sticky; z-index: 2; inset-block-start: 0; display: flex; gap: 6px; overflow-x: auto; padding: 12px 12px 10px; background: var(--color-canvas); scrollbar-width: none; }
+  .mm-ph-tab { flex: none; display: inline-flex; align-items: center; gap: 4px; padding: 6px 10px; border: var(--border-hairline) solid var(--color-border); border-radius: var(--radius-pill); background: var(--color-surface); color: var(--color-text-soft); font: 500 11px / 1.2 var(--font-ui); cursor: pointer; transition: background-color var(--duration-fast) var(--ease-standard), color var(--duration-fast) var(--ease-standard), border-color var(--duration-fast) var(--ease-standard); }
+  .mm-ph-tab small { font: 600 9.5px / 1 var(--font-ui); color: var(--color-text-muted); }
+  .mm-ph-tab[aria-pressed="true"] { border-color: var(--color-primary); background: var(--color-primary); color: var(--color-on-primary); }
+  .mm-ph-tab[aria-pressed="true"] small { color: rgb(255 255 255 / 72%); }
+  .mm-ph-sec { padding: 2px 12px 6px; }
+  .mm-ph-h { display: flex; align-items: baseline; justify-content: space-between; gap: var(--space-2); margin: 4px 2px 8px; font: 600 13px / 1.2 var(--font-ui); }
+  .mm-ph-h span { font: 500 9.5px / 1 var(--font-ui); color: var(--color-text-muted); }
+  .mm-ph-item { display: flex; align-items: center; gap: 9px; margin-bottom: 7px; padding: 7px; border: var(--border-hairline) solid var(--color-border); border-radius: var(--radius-image); background: var(--color-surface); }
+  .mm-ph-thumb { flex: none; display: grid; place-items: center; width: 44px; height: 44px; border-radius: var(--radius-compact); background: var(--color-surface-muted); font-size: 22px; line-height: 1; }
+  .mm-ph-txt { flex: 1; min-width: 0; }
+  .mm-ph-txt b { display: block; overflow: hidden; font: 600 11.5px / 1.25 var(--font-ui); text-overflow: ellipsis; white-space: nowrap; }
+  .mm-ph-txt i { display: block; margin-top: 2px; font: 500 11px / 1.2 var(--font-ui); font-style: normal; font-variant-numeric: tabular-nums; }
+  .mm-ph-add { flex: none; display: grid; place-items: center; width: 24px; height: 24px; border-radius: var(--radius-pill); background: var(--color-primary); color: var(--color-on-primary); }
+  .mm-ph-so { flex: none; padding: 3px 7px; border-radius: var(--radius-pill); background: var(--color-surface-muted); font: 600 9.5px / 1 var(--font-ui); color: var(--color-text-soft); }
+  .mm-ph-item[data-off] .mm-ph-thumb { filter: grayscale(1); opacity: .5; }
+  .mm-ph-item[data-off] .mm-ph-txt b, .mm-ph-item[data-off] .mm-ph-txt i { color: var(--color-text-muted); }
+  .mm-ph-more { margin: 0; padding: 0 0 4px; text-align: center; font: 500 10px / 1.3 var(--font-ui); color: var(--color-text-muted); }
+  .mm-ph-empty { margin: 0; padding: 30px 16px; text-align: center; font: 400 11.5px / 1.4 var(--font-ui); color: var(--color-text-muted); }
+
+  /* Meja & QR */
+  .mm-tbar { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-3); }
+  .mm-tnote { display: inline-flex; align-items: center; gap: 6px; margin-inline-start: auto; font: 500 13px / 1.3 var(--font-ui); color: var(--color-text-muted); }
+  .mm-tgrid { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: var(--space-4); }
+  .mm-tcard { position: relative; display: flex; flex-direction: column; min-width: 0; border: var(--border-hairline) solid var(--color-border); border-radius: var(--radius-card); background: var(--color-surface); transition: border-color var(--duration-fast) var(--ease-standard), background-color var(--duration-fast) var(--ease-standard); }
+  .mm-tcard:hover { border-color: var(--color-border-strong); }
+  .mm-tc-top { display: flex; justify-content: space-between; gap: var(--space-3); padding: var(--space-4) var(--space-4) var(--space-4) 18px; }
+  .mm-tc-info { display: flex; flex-direction: column; min-width: 0; }
+  .mm-tc-label { font: 600 var(--text-label-sm) / var(--leading-label-sm) var(--font-ui); color: var(--color-text-muted); }
+  .mm-tc-no { overflow: hidden; margin-top: 4px; font: 500 44px / 1 var(--font-ui); letter-spacing: -1.6px; font-variant-numeric: tabular-nums; text-overflow: ellipsis; white-space: nowrap; }
+  .mm-tc-area { margin-top: 6px; font: 500 13px / 1.3 var(--font-ui); color: var(--color-text-muted); }
+  .mm-tc-badges { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px; }
+  .mm-tc-qr { flex: none; align-self: flex-start; padding: 6px; border: var(--border-hairline) solid var(--color-border); border-radius: var(--radius-image); background: var(--color-surface); line-height: 0; cursor: pointer; transition: border-color var(--duration-fast) var(--ease-standard); }
+  .mm-tc-qr:hover { border-color: var(--color-border-strong); }
+  .mm-tc-foot { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-top: auto; padding: 10px 12px 10px 14px; border-block-start: var(--border-hairline) solid var(--color-border); }
+  .mm-tcard[data-off] { background: var(--color-surface-subtle); }
+  .mm-tcard[data-off] .mm-tc-no { color: var(--color-text-muted); }
+  .mm-tcard[data-off] .mm-tc-qr svg { opacity: .28; }
+
+  /* Dialog: form umum */
+  .mm-form { display: flex; flex-direction: column; flex: 1 1 auto; min-height: 0; }
+  .mm-fgrid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--space-4); align-content: start; }
+  .mm-span2 { grid-column: 1 / -1; }
+  .mm-opt { font-weight: 400; color: var(--color-text-muted); }
+  .mm-form .l-staf-affix { min-width: 0; }
+  .mm-form .l-staf-affix > input { width: 0; }
+  .mm-count { justify-self: end; font-variant-numeric: tabular-nums; }
+  .mm-chips { display: flex; flex-wrap: wrap; gap: var(--space-2); }
+  .mm-chip { display: inline-flex; align-items: center; gap: 6px; min-height: 36px; padding: 6px 14px; border: var(--border-hairline) solid var(--color-border-strong); border-radius: var(--radius-pill); background: var(--color-surface); color: var(--color-text); font: 500 var(--text-body-sm) / 1.2 var(--font-ui); cursor: pointer; transition: border-color var(--duration-fast) var(--ease-standard), background-color var(--duration-fast) var(--ease-standard); }
+  .mm-chip:hover { border-color: var(--color-text); }
+  .mm-chip i { flex: none; width: 8px; height: 8px; border-radius: var(--radius-pill); background: var(--color-border-strong); }
+  .mm-chip[data-tone="positive"] i { background: var(--color-positive); }
+  .mm-chip[data-tone="accent"] i { background: var(--color-accent); }
+  .mm-chip[data-tone="danger"] i { background: var(--color-danger); }
+  .mm-chip[aria-pressed="true"] { border-color: var(--color-primary); background: var(--color-surface-muted); box-shadow: inset 0 0 0 1px var(--color-primary); }
+  .mm-chip:not([aria-pressed="true"]) .mm-chk { display: none; }
+  .mm-switch-row { display: flex; align-items: center; gap: var(--space-3); padding: var(--space-3) 14px; border: var(--border-hairline) solid var(--color-border); border-radius: var(--radius-image); background: var(--color-surface-subtle); }
+  .mm-switch-row > label:last-child { flex: 1; min-width: 0; cursor: pointer; }
+  .mm-switch-row strong { display: block; font: 600 var(--text-body-sm) / 1.3 var(--font-ui); }
+  .mm-switch-row small { display: block; margin-top: 2px; font: 400 12px / 1.4 var(--font-ui); color: var(--color-text-muted); }
+
+  /* Dialog: menu */
+  .mm-mgrid { display: grid; grid-template-columns: 200px minmax(0, 1fr); gap: var(--space-6); align-items: start; }
+  .mm-photo { display: grid; gap: var(--space-3); align-content: start; }
+  .mm-photo-prev { position: relative; display: grid; place-items: center; height: 150px; border-radius: var(--radius-image); background: var(--color-surface-muted); font-size: 72px; line-height: 1; }
+  .mm-photo-prev small { position: absolute; inset-inline-start: 10px; inset-block-end: 10px; padding: 3px 8px; border-radius: var(--radius-pill); background: var(--color-surface); font: 600 11px / 1.3 var(--font-ui); color: var(--color-text-soft); }
+  .mm-drop { display: grid; justify-items: center; gap: 3px; width: 100%; padding: 14px 10px; border: var(--border-hairline) dashed var(--color-border-strong); border-radius: var(--radius-image); background: var(--color-surface-subtle); color: var(--color-text); font: inherit; text-align: center; cursor: pointer; transition: border-color var(--duration-fast) var(--ease-standard), background-color var(--duration-fast) var(--ease-standard); }
+  .mm-drop > iconify-icon { color: var(--color-text-muted); }
+  .mm-drop strong { margin-top: 3px; font: 600 13px / 1.3 var(--font-ui); }
+  .mm-drop small { font: 400 12px / 1.35 var(--font-ui); color: var(--color-text-muted); }
+  .mm-drop:hover { border-color: var(--color-text); }
+  .mm-drop[data-over] { border-color: var(--color-accent); background: var(--color-accent-soft); }
+  .mm-sublabel { margin: 0 0 6px; font: 600 12px / 1.3 var(--font-ui); color: var(--color-text-muted); }
+  .mm-emoji { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 3px; }
+  .mm-emoji button { display: grid; place-items: center; aspect-ratio: 1; padding: 0; border: var(--border-hairline) solid transparent; border-radius: var(--radius-compact); background: transparent; font-size: 19px; line-height: 1; cursor: pointer; transition: background-color var(--duration-fast) var(--ease-standard), border-color var(--duration-fast) var(--ease-standard); }
+  .mm-emoji button:hover { background: var(--color-surface-muted); }
+  .mm-emoji button[aria-pressed="true"] { border-color: var(--color-primary); background: var(--color-surface); box-shadow: inset 0 0 0 1px var(--color-primary); }
+
+  .mm-recipe { margin-top: var(--space-6); padding: var(--space-4); border: var(--border-hairline) solid var(--color-border); border-radius: var(--radius-image); background: var(--color-surface-subtle); }
+  .mm-recipe-head { display: flex; align-items: flex-start; justify-content: space-between; gap: var(--space-3); }
+  .mm-recipe-head h3 { margin: 0; font: 600 15px / 1.3 var(--font-ui); letter-spacing: -0.15px; }
+  .mm-recipe-head p { margin: 2px 0 0; font: 400 13px / 1.45 var(--font-ui); color: var(--color-text-muted); }
+  .mm-rec-cols, .mm-rec-row { display: grid; grid-template-columns: minmax(0, 1fr) 150px 48px; gap: 6px 10px; }
+  .mm-rec-cols { margin-top: 14px; font: 600 12px / 1.3 var(--font-ui); color: var(--color-text-muted); }
+  .mm-rec-list { display: grid; gap: var(--space-3); margin-top: var(--space-2); }
+  .mm-rec-list:empty { margin-top: 0; }
+  .mm-rec-row { align-items: start; }
+  .mm-rec-ing { display: grid; gap: 4px; min-width: 0; }
+  .mm-rec-meta { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 6px; padding-inline-start: 2px; font: 500 12px / 1.35 var(--font-ui); color: var(--color-text-muted); }
+  .mm-st { display: inline-flex; align-items: center; gap: 5px; font-weight: 600; color: var(--color-text); }
+  .mm-st::before { content: ""; width: 6px; height: 6px; border-radius: var(--radius-pill); background: var(--color-border-strong); }
+  .mm-st[data-tone="positive"]::before { background: var(--color-positive); }
+  .mm-st[data-tone="warning"]::before { background: var(--color-warning); }
+  .mm-st[data-tone="danger"]::before { background: var(--color-danger); }
+  .mm-rec-qty input { min-width: 0; padding-inline-end: 6px; text-align: end; font-variant-numeric: tabular-nums; }
+  .mm-rec-qty .mm-rec-unit { padding-inline: 0 14px; }
+  .mm-rec-del { width: 48px; height: 48px; }
+  .mm-rec-err { grid-column: 1 / -1; }
+  .mm-rec-add { margin-top: var(--space-3); border-style: dashed; }
+  .mm-rec-cap { display: flex; align-items: flex-start; gap: var(--space-2); margin: 14px 0 0; padding-top: var(--space-3); border-block-start: var(--border-hairline) dashed var(--color-border-strong); font: 400 13px / 1.45 var(--font-ui); color: var(--color-text-soft); }
+  .mm-rec-cap iconify-icon { flex: none; margin-top: 2px; color: var(--color-text-muted); }
+  .mm-rec-cap[data-tone="warning"] iconify-icon { color: var(--color-warning-text); }
+  .mm-rec-cap[data-tone="danger"] iconify-icon { color: var(--color-danger); }
+  .mm-rec-cap b { font-weight: 600; color: var(--color-text); }
+
+  /* Dialog: kategori */
+  .mm-cat-prev { display: flex; align-items: center; gap: var(--space-3); margin-top: var(--spacing-20); padding: var(--space-3); border-radius: var(--radius-image); background: var(--color-canvas); }
+  .mm-cat-prev small { display: block; margin-top: 6px; font: 400 12px / 1.4 var(--font-ui); color: var(--color-text-muted); }
+  .mm-pill-prev { display: inline-flex; max-width: 100%; overflow: hidden; padding: 6px 12px; border-radius: var(--radius-pill); background: var(--color-primary); color: var(--color-on-primary); font: 500 13px / 1.2 var(--font-ui); text-overflow: ellipsis; white-space: nowrap; }
+
+  /* Dialog: QR & kartu meja (juga dipakai saat mencetak) */
+  .mm-qr-warn .l-staf-alert { margin-bottom: 14px; }
+  .mm-qr-stage { display: grid; place-items: center; padding: 22px; border-radius: var(--radius-image); background: var(--color-surface-muted); }
+  .mm-qr-meta { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 10px; margin-top: 14px; font: 500 13px / 1.3 var(--font-ui); color: var(--color-text-soft); }
+  .mm-qr-meta code { margin-inline-start: 4px; padding: 3px 8px; border-radius: var(--radius-compact); background: var(--color-surface-muted); color: var(--color-text); font: 500 12.5px / 1.2 var(--font-mono); }
+  .mm-qr-honest { display: flex; align-items: center; gap: 6px; margin: var(--space-2) 0 0; font: 500 12px / 1.3 var(--font-ui); color: var(--color-text-muted); }
+  .mm-tent { width: 300px; margin: 0 auto; padding: 20px 22px 16px; border: var(--border-hairline) solid var(--color-border); border-radius: var(--radius-card); background: #fff; color: #1d1e1c; text-align: center; font-family: var(--font-ui); }
+  .mm-tent * { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  .mm-tent-brand { display: flex; align-items: center; justify-content: center; gap: var(--space-2); font: 600 15px / 1.2 var(--font-ui); letter-spacing: -0.15px; }
+  .mm-tent-logo { display: grid; place-items: center; width: 30px; height: 30px; border-radius: var(--radius-compact); background: #000; color: #fff; font: 600 11px / 1 var(--font-ui); letter-spacing: .4px; }
+  .mm-tent-no { margin-top: 14px; font: 500 40px / 1 var(--font-ui); letter-spacing: -1.4px; font-variant-numeric: tabular-nums; }
+  .mm-tent-no span { margin-inline-end: 7px; font: 500 20px / 1 var(--font-ui); letter-spacing: -0.4px; color: #6a696a; }
+  .mm-tent-qr { display: inline-block; margin-top: var(--space-4); padding: 10px; border: 2px solid #1d1e1c; border-radius: var(--radius-image); line-height: 0; }
+  .mm-tent-qr svg { display: block; }
+  .mm-tent-cta { margin: 14px 0 0; font: 600 15px / 1.3 var(--font-ui); }
+  .mm-tent-sub { margin: 3px 0 0; font: 500 12px / 1.4 var(--font-ui); color: #6a696a; }
+  .mm-tent-url { margin: 14px 0 0; padding-top: 10px; border-block-start: 1px dashed #999; font: 400 10px / 1.4 var(--font-mono); color: #6a696a; word-break: break-all; }
+  .mm-sheet { width: 100%; text-align: center; }
+  .mm-sheet .mm-tent { display: inline-block; width: 86mm; margin: 0 2mm 6mm; border: 1px dashed #999; vertical-align: top; break-inside: avoid; page-break-inside: avoid; }
+
+  /* Dialog: konfirmasi */
+  .mm-cf-top { display: flex; align-items: center; gap: var(--space-3); min-width: 0; }
+  .mm-cf-ico { flex: none; display: grid; place-items: center; width: 40px; height: 40px; border: var(--border-hairline) solid var(--color-danger); border-radius: var(--radius-pill); background: color-mix(in srgb, var(--color-danger) 8%, var(--color-surface)); color: var(--color-danger); }
+  .mm-cf-body { margin: 0; font: 400 var(--text-body-sm) / 1.55 var(--font-ui); color: var(--color-text-soft); }
+  .mm-cf-body b { font-weight: 600; color: var(--color-text); }
+
+  .mm-proto { display: flex; align-items: center; justify-content: center; gap: 6px; margin: 0; padding-top: 6px; text-align: center; font: 500 12px / 1.4 var(--font-ui); color: var(--color-text-muted); }
+  .mm-locked .l-staf-empty { padding: 64px var(--space-6); }
+  .mm-locked .l-staf-empty span { max-width: 460px; }
+  .mm-locked .l-staf-btn { margin-top: var(--space-3); }
+
+  @media (max-width: 1100px) {
+    .mm-cat-layout { grid-template-columns: minmax(0, 1fr) 320px; }
+  }
+  @media (max-width: 900px) {
+    .mm-cat-layout { grid-template-columns: minmax(0, 1fr); }
+    .mm-preview { position: static; }
+  }
+  @media (max-width: 700px) {
+    .mm-mgrid { grid-template-columns: minmax(0, 1fr); }
+    .mm-emoji { grid-template-columns: repeat(10, minmax(0, 1fr)); }
+    .mm-rec-cols { display: none; }
+    .mm-rec-row { grid-template-columns: minmax(0, 1fr) 120px 48px; }
+    .mm-toolbar .l-staf-search { flex: 1 1 100%; }
+    .mm-meta, .mm-tnote { margin-inline-start: 0; }
+  }
+  @media (max-width: 720px) {
+    .l-staf-btn[data-tab-action] { flex: 1 1 auto; padding-inline: var(--space-4); }
+  }
+  @media (max-width: 560px) {
+    .mm-tabs button { margin-inline-end: var(--space-2); }
+    .mm-tabs iconify-icon { display: none; }
+    .mm-panel > .l-staf-seg, .mm-tbar > .l-staf-seg { flex-wrap: nowrap; max-width: 100%; overflow-x: auto; scrollbar-width: none; }
+    .mm-panel > .l-staf-seg button, .mm-tbar > .l-staf-seg button { flex: none; }
+    .mm-fgrid { grid-template-columns: minmax(0, 1fr); }
+    .mm-rec-row { grid-template-columns: minmax(0, 1fr) 48px; }
+    .mm-rec-ing { grid-column: 1 / -1; }
+    .mm-cat-row { flex-wrap: wrap; }
+    .mm-cat-acts { flex-basis: 100%; justify-content: flex-end; }
+    .mm-tile { height: 104px; }
+    .mm-photo-prev { height: 120px; }
+    .mm-recipe { padding: var(--space-3); }
+    .mm-tent { width: 100%; max-width: 300px; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .mm-emo, .mm-card, .mm-tcard, .mm-cat-row, .mm-add, .mm-tile, .mm-ph-tab { transition: none; }
+    .mm-card:hover .mm-emo { transform: none; }
+  }
+</style>
+
+<template data-slot="header-actions">
+  <button class="l-staf-btn" data-variant="primary" type="button" data-act="add-menu" data-tab-action="menu"><iconify-icon icon="lucide:plus" aria-hidden="true"></iconify-icon>Tambah menu</button>
+  <button class="l-staf-btn" data-variant="primary" type="button" data-act="add-cat" data-tab-action="kategori" hidden><iconify-icon icon="lucide:plus" aria-hidden="true"></iconify-icon>Tambah kategori</button>
+  <button class="l-staf-btn" type="button" data-act="print-all" data-tab-action="meja" hidden><iconify-icon icon="lucide:printer" aria-hidden="true"></iconify-icon>Cetak semua QR</button>
+  <button class="l-staf-btn" data-variant="primary" type="button" data-act="add-table" data-tab-action="meja" hidden><iconify-icon icon="lucide:plus" aria-hidden="true"></iconify-icon>Tambah meja</button>
+</template>
+
+<template data-slot="content">
+  <main aria-label="Menu &amp; Meja" class="p-menu-meja" data-node-id="menu-meja">
+    <p class="mm-context" data-part="context" data-node-id="menu-meja.context">Memuat…</p>
+
+    <!-- Gerbang peran (prototipe): kasir tidak punya akses -->
+    <section class="l-staf-card mm-locked" aria-labelledby="menu-meja-locked-title" data-part="locked" data-node-id="menu-meja.locked" hidden>
+      <div class="l-staf-empty">
+        <iconify-icon icon="lucide:lock" aria-hidden="true"></iconify-icon>
+        <strong id="menu-meja-locked-title">Halaman ini khusus Pemilik</strong>
+        <span>Akun <b data-part="locked-who">Rina Kartika</b> (Kasir) tidak punya akses ke <b>Menu &amp; Meja</b>. Minta pemilik mengubah hak akses di menu Akun &amp; Staf.</span>
+        <a class="l-staf-btn" data-variant="primary" href="#/kasir" data-route-link><iconify-icon icon="lucide:clipboard-list" aria-hidden="true"></iconify-icon>Kembali ke Pesanan</a>
+      </div>
+    </section>
+
+    <div class="mm-app" data-part="app">
+      <div class="l-staf-tabs mm-tabs" role="tablist" aria-label="Bagian halaman Menu &amp; Meja" data-part="tabs" data-node-id="menu-meja.tabs">
+        <button type="button" role="tab" id="menu-meja-tab-menu" aria-controls="menu-meja-panel-menu" aria-selected="true" data-act="tab" data-tab="menu"><iconify-icon icon="lucide:utensils" aria-hidden="true"></iconify-icon>Menu<small data-part="cnt-menu">0</small></button>
+        <button type="button" role="tab" id="menu-meja-tab-kategori" aria-controls="menu-meja-panel-kategori" aria-selected="false" tabindex="-1" data-act="tab" data-tab="kategori"><iconify-icon icon="lucide:layout-grid" aria-hidden="true"></iconify-icon>Kategori<small data-part="cnt-kategori">0</small></button>
+        <button type="button" role="tab" id="menu-meja-tab-meja" aria-controls="menu-meja-panel-meja" aria-selected="false" tabindex="-1" data-act="tab" data-tab="meja"><iconify-icon icon="lucide:qr-code" aria-hidden="true"></iconify-icon>Meja &amp; QR<small data-part="cnt-meja">0</small></button>
+      </div>
+
+      <!-- ===== Tab: Menu ===== -->
+      <section class="mm-panel" id="menu-meja-panel-menu" role="tabpanel" aria-labelledby="menu-meja-tab-menu" data-panel="menu" data-node-id="menu-meja.menu">
+        <div class="mm-toolbar">
+          <label class="l-staf-search">
+            <iconify-icon icon="lucide:search" aria-hidden="true"></iconify-icon>
+            <input type="search" placeholder="Cari nama menu…" aria-label="Cari menu" autocomplete="off" data-part="q">
+          </label>
+          <div class="l-staf-seg" role="group" aria-label="Filter ketersediaan" data-part="avail-seg"></div>
+          <span class="mm-meta" aria-live="polite" data-part="menu-meta"></span>
+        </div>
+        <div class="l-staf-seg" role="group" aria-label="Filter kategori" data-part="cat-seg"></div>
+        <div data-part="menu-alert" hidden></div>
+        <div class="mm-list" data-part="menu-grid"></div>
+      </section>
+
+      <!-- ===== Tab: Kategori ===== -->
+      <section class="mm-panel" id="menu-meja-panel-kategori" role="tabpanel" aria-labelledby="menu-meja-tab-kategori" data-panel="kategori" data-node-id="menu-meja.kategori" hidden>
+        <div class="mm-cat-layout">
+          <div class="mm-cat-col">
+            <section class="l-staf-card" aria-labelledby="menu-meja-cat-title">
+              <div class="l-staf-card-head">
+                <div>
+                  <h2 id="menu-meja-cat-title">Urutan kategori</h2>
+                  <p>Urutan dari atas ke bawah = urutan tab di aplikasi pelanggan.</p>
+                </div>
+              </div>
+              <div class="l-staf-card-body">
+                <ol class="mm-cat-list" data-part="cat-list"></ol>
+                <button type="button" class="mm-add-row" data-act="add-cat"><iconify-icon icon="lucide:plus" aria-hidden="true"></iconify-icon>Tambah kategori</button>
+              </div>
+              <p class="mm-card-note"><iconify-icon icon="lucide:lock" aria-hidden="true" style="font-size:14px"></iconify-icon>Kategori yang masih berisi menu tidak bisa dihapus. Pindahkan menunya dulu lewat tombol Ubah di kartu menu.</p>
+            </section>
+            <div class="l-staf-alert" data-tone="neutral">
+              <iconify-icon icon="lucide:zap" aria-hidden="true"></iconify-icon>
+              <span><strong>Tips:</strong> taruh kategori yang paling sering dipesan di urutan atas — pelanggan langsung melihatnya setelah scan QR.</span>
+            </div>
+          </div>
+
+          <aside class="l-staf-card mm-preview" aria-labelledby="menu-meja-pv-title" data-node-id="menu-meja.preview">
+            <div class="l-staf-card-head">
+              <div>
+                <h2 id="menu-meja-pv-title">Pratinjau di aplikasi pelanggan</h2>
+                <p>Tampilan setelah pelanggan scan QR meja.</p>
+              </div>
+              <a class="l-staf-iconbtn" href="#/pelanggan?meja=07" data-route-link aria-label="Buka halaman pelanggan" title="Buka halaman pelanggan"><iconify-icon icon="lucide:external-link" aria-hidden="true"></iconify-icon></a>
+            </div>
+            <div class="l-staf-card-body">
+              <div class="mm-phone" role="group" aria-label="Pratinjau aplikasi pelanggan">
+                <div class="mm-ph-screen">
+                  <div class="mm-ph-head">
+                    <div class="mm-ph-top">
+                      <div class="mm-ph-brand">
+                        <span class="mm-ph-logo" aria-hidden="true" data-part="ph-logo">KS</span>
+                        <div><strong data-part="ph-name">Kedai Senja</strong><small data-part="ph-addr"></small></div>
+                      </div>
+                      <div class="mm-ph-table"><span>Meja</span><strong>07</strong></div>
+                    </div>
+                    <p class="mm-ph-hello">Selamat datang 👋</p>
+                    <p class="mm-ph-greet">Mau pesan apa hari ini?</p>
+                  </div>
+                  <div class="mm-ph-search" aria-hidden="true"><iconify-icon icon="lucide:search" style="font-size:14px"></iconify-icon>Cari menu, mis. kopi susu</div>
+                  <div class="mm-ph-tabs" role="group" aria-label="Kategori di aplikasi pelanggan (pratinjau)" data-part="ph-tabs"></div>
+                  <div data-part="ph-list"></div>
+                </div>
+              </div>
+              <p class="mm-pv-note">Urutan tab &amp; status “Habis” mengikuti halaman ini. Di prototipe, perubahan baru tampil di pratinjau — belum tersambung ke halaman pelanggan.</p>
+            </div>
+          </aside>
+        </div>
+      </section>
+
+      <!-- ===== Tab: Meja & QR ===== -->
+      <section class="mm-panel" id="menu-meja-panel-meja" role="tabpanel" aria-labelledby="menu-meja-tab-meja" data-panel="meja" data-node-id="menu-meja.meja" hidden>
+        <div class="mm-tbar">
+          <div class="l-staf-seg" role="group" aria-label="Filter meja" data-part="table-seg"></div>
+          <span class="mm-tnote"><iconify-icon icon="lucide:qr-code" aria-hidden="true" style="font-size:15px"></iconify-icon>QR ilustrasi — QR asli dibuat oleh sistem</span>
+        </div>
+        <div class="mm-tgrid" data-part="table-grid"></div>
+      </section>
+
+      <p class="mm-proto"><iconify-icon icon="lucide:sticky-note" aria-hidden="true" style="font-size:14px"></iconify-icon>Mode prototipe — perubahan hanya tersimpan selama halaman ini terbuka.</p>
+    </div>
+
+    <!-- ===== Dialog: tambah / ubah menu ===== -->
+    <dialog class="l-staf-dialog" data-size="lg" aria-labelledby="menu-meja-mm-title" data-part="menu-dlg" data-node-id="menu-meja.menu-dialog">
+      <form class="mm-form" novalidate data-part="menu-form">
+        <div class="l-staf-dialog-head">
+          <div><h2 id="menu-meja-mm-title" data-part="mm-title">Tambah menu</h2><p data-part="mm-sub">Menu baru langsung tampil di aplikasi pelanggan setelah disimpan.</p></div>
+          <button class="l-staf-iconbtn" type="button" data-close aria-label="Tutup"><iconify-icon icon="lucide:x" aria-hidden="true"></iconify-icon></button>
+        </div>
+        <div class="l-staf-dialog-body" data-part="mm-body">
+          <div class="mm-mgrid">
+            <div class="mm-photo">
+              <div class="mm-photo-prev"><span aria-hidden="true" data-part="photo-emoji">🍽️</span><small>Pratinjau</small></div>
+              <button type="button" class="mm-drop" data-act="upload" data-part="drop">
+                <iconify-icon icon="lucide:upload" aria-hidden="true" style="font-size:20px"></iconify-icon>
+                <strong>Unggah foto</strong>
+                <small>Seret ke sini atau klik<br>JPG/PNG, maks. 2 MB</small>
+              </button>
+              <div>
+                <p class="mm-sublabel" id="menu-meja-emo-lbl">Atau pakai ikon sementara</p>
+                <div class="mm-emoji" role="group" aria-labelledby="menu-meja-emo-lbl" data-part="emoji-grid"></div>
+              </div>
+            </div>
+
+            <div class="mm-fgrid">
+              <div class="l-staf-field mm-span2">
+                <label for="menu-meja-f-name">Nama menu</label>
+                <input class="l-staf-input" id="menu-meja-f-name" maxlength="60" autocomplete="off" placeholder="Contoh: Nasi Goreng Kampung" aria-describedby="menu-meja-f-name-err" data-part="f-name" autofocus>
+                <p class="l-staf-error" id="menu-meja-f-name-err" data-part="f-name-err" hidden></p>
+              </div>
+              <div class="l-staf-field">
+                <label for="menu-meja-f-cat">Kategori</label>
+                <select class="l-staf-select" id="menu-meja-f-cat" aria-describedby="menu-meja-f-cat-err" data-part="f-cat"></select>
+                <p class="l-staf-error" id="menu-meja-f-cat-err" data-part="f-cat-err" hidden></p>
+              </div>
+              <div class="l-staf-field">
+                <label for="menu-meja-f-price">Harga</label>
+                <div class="l-staf-affix"><span>Rp</span><input id="menu-meja-f-price" inputmode="numeric" autocomplete="off" placeholder="0" aria-describedby="menu-meja-f-price-err" data-part="f-price" style="font-variant-numeric:tabular-nums"></div>
+                <p class="l-staf-error" id="menu-meja-f-price-err" data-part="f-price-err" hidden></p>
+              </div>
+              <div class="l-staf-field mm-span2">
+                <label for="menu-meja-f-desc">Deskripsi <span class="mm-opt">(opsional)</span></label>
+                <textarea class="l-staf-textarea" id="menu-meja-f-desc" rows="2" maxlength="140" placeholder="Ceritakan singkat isi &amp; rasanya, mis. “Espresso, susu segar, dan gula aren asli.”" aria-describedby="menu-meja-desc-count" data-part="f-desc"></textarea>
+                <p class="l-staf-hint mm-count" id="menu-meja-desc-count"><span data-part="desc-count">0</span>/140</p>
+              </div>
+              <div class="l-staf-field mm-span2">
+                <span class="l-staf-label-text" id="menu-meja-tag-lbl">Label</span>
+                <div class="mm-chips" role="group" aria-labelledby="menu-meja-tag-lbl" data-part="tag-chips"></div>
+                <p class="l-staf-hint">Label tampil di kartu menu pelanggan. Boleh lebih dari satu.</p>
+              </div>
+              <div class="mm-switch-row mm-span2">
+                <label class="l-staf-switch"><input type="checkbox" role="switch" id="menu-meja-f-avail" data-part="f-avail" checked><span></span></label>
+                <label for="menu-meja-f-avail"><strong>Tersedia untuk dipesan</strong><small data-part="avail-hint">Pelanggan bisa memesan menu ini.</small></label>
+              </div>
+            </div>
+          </div>
+
+          <section class="mm-recipe" aria-labelledby="menu-meja-rec-title">
+            <div class="mm-recipe-head">
+              <div>
+                <h3 id="menu-meja-rec-title">Resep — untuk stok otomatis</h3>
+                <p>Stok bahan berkurang otomatis setiap menu ini terjual.</p>
+              </div>
+              <span class="l-staf-chip" data-tone="plain" data-part="rec-count"></span>
+            </div>
+            <div class="mm-rec-cols" aria-hidden="true" data-part="rec-head"><span>Bahan</span><span>Jumlah per porsi</span><span></span></div>
+            <div class="mm-rec-list" data-part="rec-list"></div>
+            <button type="button" class="l-staf-btn mm-rec-add" data-size="sm" data-act="rec-add" data-part="rec-add"><iconify-icon icon="lucide:plus" aria-hidden="true"></iconify-icon>Tambah bahan</button>
+            <p class="mm-rec-cap" aria-live="polite" data-part="rec-cap"></p>
+          </section>
+        </div>
+        <div class="l-staf-dialog-foot">
+          <button type="button" class="l-staf-btn" data-variant="danger" data-part="mm-delete"><iconify-icon icon="lucide:trash-2" aria-hidden="true"></iconify-icon>Hapus menu</button>
+          <span class="mm-grow"></span>
+          <button type="button" class="l-staf-btn" data-close>Batal</button>
+          <button type="submit" class="l-staf-btn" data-variant="primary" data-part="mm-save">Simpan menu</button>
+        </div>
+      </form>
+    </dialog>
+
+    <!-- ===== Dialog: tambah / ubah kategori ===== -->
+    <dialog class="l-staf-dialog" data-size="sm" aria-labelledby="menu-meja-ct-title" data-part="cat-dlg" data-node-id="menu-meja.category-dialog">
+      <form class="mm-form" novalidate data-part="cat-form">
+        <div class="l-staf-dialog-head">
+          <div><h2 id="menu-meja-ct-title" data-part="ct-title">Tambah kategori</h2><p>Kategori jadi tab di aplikasi pelanggan.</p></div>
+          <button class="l-staf-iconbtn" type="button" data-close aria-label="Tutup"><iconify-icon icon="lucide:x" aria-hidden="true"></iconify-icon></button>
+        </div>
+        <div class="l-staf-dialog-body">
+          <div class="l-staf-field">
+            <label for="menu-meja-c-name">Nama kategori</label>
+            <input class="l-staf-input" id="menu-meja-c-name" maxlength="30" autocomplete="off" placeholder="Contoh: Dessert" aria-describedby="menu-meja-c-name-err" data-part="c-name" autofocus>
+            <p class="l-staf-error" id="menu-meja-c-name-err" data-part="c-name-err" hidden></p>
+          </div>
+          <div class="mm-cat-prev" data-part="cat-prev"></div>
+        </div>
+        <div class="l-staf-dialog-foot">
+          <button type="button" class="l-staf-btn" data-close>Batal</button>
+          <button type="submit" class="l-staf-btn" data-variant="primary" data-part="ct-save">Tambah kategori</button>
+        </div>
+      </form>
+    </dialog>
+
+    <!-- ===== Dialog: tambah meja ===== -->
+    <dialog class="l-staf-dialog" data-size="sm" aria-labelledby="menu-meja-tm-title" data-part="table-dlg" data-node-id="menu-meja.table-dialog">
+      <form class="mm-form" novalidate data-part="table-form">
+        <div class="l-staf-dialog-head">
+          <div><h2 id="menu-meja-tm-title">Tambah meja</h2><p>Setiap meja otomatis mendapat QR unik untuk pemesanan.</p></div>
+          <button class="l-staf-iconbtn" type="button" data-close aria-label="Tutup"><iconify-icon icon="lucide:x" aria-hidden="true"></iconify-icon></button>
+        </div>
+        <div class="l-staf-dialog-body">
+          <div class="mm-fgrid">
+            <div class="l-staf-field">
+              <label for="menu-meja-t-no">Nomor meja</label>
+              <input class="l-staf-input" id="menu-meja-t-no" maxlength="6" autocomplete="off" placeholder="Contoh: 13" aria-describedby="menu-meja-t-no-err menu-meja-t-hint" data-part="t-no" style="font-variant-numeric:tabular-nums" autofocus>
+            </div>
+            <div class="l-staf-field">
+              <label for="menu-meja-t-area">Area</label>
+              <select class="l-staf-select" id="menu-meja-t-area" data-part="t-area"></select>
+            </div>
+            <p class="l-staf-error mm-span2" id="menu-meja-t-no-err" data-part="t-no-err" hidden></p>
+            <p class="l-staf-hint mm-span2" id="menu-meja-t-hint" data-part="t-hint">Angka otomatis jadi 2 digit, mis. 7 → 07.</p>
+          </div>
+        </div>
+        <div class="l-staf-dialog-foot">
+          <button type="button" class="l-staf-btn" data-close>Batal</button>
+          <button type="submit" class="l-staf-btn" data-variant="primary">Tambah meja</button>
+        </div>
+      </form>
+    </dialog>
+
+    <!-- ===== Dialog: QR meja ===== -->
+    <dialog class="l-staf-dialog" aria-labelledby="menu-meja-qr-title" data-part="qr-dlg" data-node-id="menu-meja.qr-dialog">
+      <div class="l-staf-dialog-head">
+        <div><h2 id="menu-meja-qr-title" data-part="qr-title">QR Meja</h2><p>Cetak lalu letakkan di meja. Pelanggan cukup scan pakai kamera ponsel.</p></div>
+        <button class="l-staf-iconbtn" type="button" data-close aria-label="Tutup"><iconify-icon icon="lucide:x" aria-hidden="true"></iconify-icon></button>
+      </div>
+      <div class="l-staf-dialog-body">
+        <div class="mm-qr-warn" data-part="qr-warn"></div>
+        <div class="mm-qr-stage" data-part="qr-card"></div>
+        <div class="mm-qr-meta">
+          <span>Kode QR<code data-part="qr-token"></code></span>
+          <button type="button" class="l-staf-btn" data-variant="ghost" data-size="sm" data-part="qr-regen"><iconify-icon icon="lucide:refresh-cw" aria-hidden="true"></iconify-icon>Buat ulang QR</button>
+        </div>
+        <p class="mm-qr-honest"><iconify-icon icon="lucide:eye" aria-hidden="true" style="font-size:14px"></iconify-icon>QR ilustrasi — QR asli dibuat oleh sistem.</p>
+      </div>
+      <div class="l-staf-dialog-foot">
+        <a class="l-staf-btn" href="#/pelanggan?meja=07" data-route-link data-part="qr-open"><iconify-icon icon="lucide:external-link" aria-hidden="true"></iconify-icon>Buka halaman pelanggan</a>
+        <button type="button" class="l-staf-btn" data-variant="primary" data-part="qr-print"><iconify-icon icon="lucide:printer" aria-hidden="true"></iconify-icon>Cetak QR</button>
+      </div>
+    </dialog>
+
+    <!-- ===== Dialog: konfirmasi (bisa bertumpuk di atas dialog lain) ===== -->
+    <dialog class="l-staf-dialog" data-size="sm" aria-labelledby="menu-meja-cf-title" aria-describedby="menu-meja-cf-body" data-part="cf-dlg" data-node-id="menu-meja.confirm">
+      <div class="l-staf-dialog-head">
+        <div class="mm-cf-top"><span class="mm-cf-ico" aria-hidden="true" data-part="cf-ico"></span><h2 id="menu-meja-cf-title" data-part="cf-title">Yakin?</h2></div>
+        <button class="l-staf-iconbtn" type="button" data-close aria-label="Tutup"><iconify-icon icon="lucide:x" aria-hidden="true"></iconify-icon></button>
+      </div>
+      <div class="l-staf-dialog-body"><p class="mm-cf-body" id="menu-meja-cf-body" data-part="cf-body"></p></div>
+      <div class="l-staf-dialog-foot">
+        <button type="button" class="l-staf-btn" data-close autofocus>Batal</button>
+        <button type="button" class="l-staf-btn" data-variant="danger" data-part="cf-ok">Ya, lanjutkan</button>
+      </div>
+    </dialog>
+
+    <div class="l-staf-toast" popover="manual" role="status" data-part="toast"></div>
+    <div class="l-staf-print-area" aria-hidden="true" data-part="print"></div>
+  </main>
+</template>
+
+<script>
+  /* ===== Data tiruan (sama dengan assets/app.js, struktur skema PRD §6) ===== */
+  const SETTINGS = { cafe_name: "Kedai Senja", address: "Jl. Kaliurang Km 5, Yogyakarta" };
+  const KEYS = { role: "iulfnb:role" };
+  const USERS = { OWNER: "Iul Rahman", CASHIER: "Rina Kartika" };
+  const TABS = ["menu", "kategori", "meja"];
+  const TAG_TONE = { Terlaris: "positive", Baru: "accent", Pedas: "danger" };
+  const TAG_LIST = Object.keys(TAG_TONE);
+  const EMOJIS = ["🍽️", "🍳", "🍗", "🍜", "🍱", "🍖", "🍛", "🍝", "🍲", "🥗", "🍔", "🥟", "☕", "🧊", "🍵", "🥤", "🧋", "🍋", "🥑", "🍹", "🥛", "🍟", "🍌", "🍞", "🥐", "🍰", "🧁", "🍩", "🍪", "💧"];
+  const AREA_ORDER = ["Dalam", "Teras"];
+  const STOCK = { AMAN: ["positive", "Aman"], MENIPIS: ["warning", "Menipis"], HABIS: ["danger", "Habis"] };
+
+  function seedData() {
+    const categories = [
+      { id: "makanan", name: "Makanan", sort_order: 1 },
+      { id: "minuman", name: "Minuman", sort_order: 2 },
+      { id: "lainnya", name: "Camilan & Lainnya", sort_order: 3 },
+    ];
+    const menus = [
+      { id: "m1", category_id: "makanan", name: "Nasi Goreng Kampung", price: 32000, image_url: "🍳", is_available: true, tags: ["Terlaris"], desc: "Nasi goreng bumbu terasi, telur ceplok, ayam suwir, dan kerupuk udang." },
+      { id: "m2", category_id: "makanan", name: "Ayam Geprek Sambal Matah", price: 35000, image_url: "🍗", is_available: true, tags: ["Pedas"], desc: "Ayam krispi digeprek dengan sambal matah segar dan nasi hangat." },
+      { id: "m3", category_id: "makanan", name: "Mie Goreng Jawa", price: 30000, image_url: "🍜", is_available: true, tags: [], desc: "Mie kuning dimasak di atas arang dengan sayur, telur, dan bawang goreng." },
+      { id: "m4", category_id: "makanan", name: "Rice Bowl Chicken Teriyaki", price: 36000, image_url: "🍱", is_available: true, tags: ["Baru"], desc: "Potongan ayam saus teriyaki, salad kol, wijen sangrai, dan nasi pulen." },
+      { id: "m5", category_id: "makanan", name: "Nasi Ayam Bakar Madu", price: 38000, image_url: "🍖", is_available: false, tags: [], desc: "Ayam bakar olesan madu, lalapan segar, dan sambal bawang." },
+      { id: "d1", category_id: "minuman", name: "Kopi Susu Gula Aren", price: 22000, image_url: "☕", is_available: true, tags: ["Terlaris"], desc: "Espresso, susu segar, dan gula aren asli. Tersedia panas atau dingin." },
+      { id: "d2", category_id: "minuman", name: "Es Americano", price: 20000, image_url: "🧊", is_available: true, tags: [], desc: "Double shot espresso dengan air dingin. Ringan, bersih, tanpa gula." },
+      { id: "d3", category_id: "minuman", name: "Matcha Latte", price: 28000, image_url: "🍵", is_available: true, tags: ["Baru"], desc: "Matcha Jepang premium dengan susu segar yang lembut." },
+      { id: "d4", category_id: "minuman", name: "Es Teh Manis", price: 10000, image_url: "🥤", is_available: true, tags: [], desc: "Teh melati diseduh segar setiap pagi." },
+      { id: "d5", category_id: "minuman", name: "Lemon Tea", price: 15000, image_url: "🍋", is_available: true, tags: [], desc: "Teh hitam dengan perasan lemon segar dan sedikit madu." },
+      { id: "d6", category_id: "minuman", name: "Jus Alpukat", price: 25000, image_url: "🥑", is_available: false, tags: [], desc: "Alpukat mentega dengan susu cokelat kental manis." },
+      { id: "s1", category_id: "lainnya", name: "Kentang Goreng", price: 20000, image_url: "🍟", is_available: true, tags: ["Terlaris"], desc: "Kentang goreng renyah dengan saus sambal dan mayones." },
+      { id: "s2", category_id: "lainnya", name: "Pisang Goreng Keju", price: 18000, image_url: "🍌", is_available: true, tags: [], desc: "Pisang kepok goreng tepung dengan parutan keju dan susu." },
+      { id: "s3", category_id: "lainnya", name: "Roti Bakar Cokelat Keju", price: 22000, image_url: "🍞", is_available: true, tags: [], desc: "Roti tebal dipanggang mentega, isi cokelat dan keju." },
+      { id: "s4", category_id: "lainnya", name: "Croissant Butter", price: 24000, image_url: "🥐", is_available: true, tags: [], desc: "Croissant mentega dipanggang setiap pagi." },
+      { id: "s5", category_id: "lainnya", name: "Air Mineral", price: 8000, image_url: "💧", is_available: true, tags: [], desc: "Air mineral botol 600 ml." },
+    ];
+    const tables = Array.from({ length: 12 }, (_, i) => {
+      const n = String(i + 1).padStart(2, "0");
+      return { id: "t" + n, table_number: n, qr_code: "ks-" + (0x3a7f1 + i * 977).toString(16), is_active: n !== "12", area: i < 8 ? "Dalam" : "Teras" };
+    });
+    const ingredients = [
+      ["i1", "Biji kopi espresso", "gram", 1850, 1000], ["i2", "Susu segar", "ml", 4200, 5000], ["i3", "Gula aren cair", "ml", 900, 800],
+      ["i4", "Bubuk matcha", "gram", 120, 200], ["i5", "Teh melati", "gram", 650, 300], ["i6", "Gula pasir", "gram", 3200, 1000],
+      ["i7", "Lemon", "pcs", 14, 10], ["i8", "Alpukat", "pcs", 0, 6], ["i9", "Beras", "gram", 12000, 5000],
+      ["i10", "Ayam fillet", "gram", 3200, 2000], ["i11", "Ayam potong (bakar)", "pcs", 0, 8], ["i12", "Telur", "pcs", 42, 30],
+      ["i13", "Mie kuning", "gram", 2400, 1500], ["i14", "Kentang beku", "gram", 1100, 2000], ["i15", "Pisang kepok", "pcs", 18, 12],
+      ["i16", "Roti tawar tebal", "pcs", 10, 8], ["i17", "Croissant beku", "pcs", 16, 10], ["i18", "Keju cheddar", "gram", 600, 300],
+      ["i19", "Air mineral 600 ml", "botol", 36, 24], ["i20", "Minyak goreng", "ml", 8000, 5000],
+    ].map(([id, name, unit, stock_qty, min_stock]) => ({ id, name, unit, stock_qty, min_stock }));
+    const recipe = [
+      ["m1", "i9", 150], ["m1", "i12", 1], ["m1", "i10", 50], ["m1", "i20", 20],
+      ["m2", "i10", 150], ["m2", "i9", 150], ["m2", "i20", 60],
+      ["m3", "i13", 120], ["m3", "i12", 1], ["m3", "i20", 20],
+      ["m4", "i10", 120], ["m4", "i9", 150],
+      ["m5", "i11", 1], ["m5", "i9", 150],
+      ["d1", "i1", 18], ["d1", "i2", 150], ["d1", "i3", 25],
+      ["d2", "i1", 18],
+      ["d3", "i4", 6], ["d3", "i2", 180],
+      ["d4", "i5", 5], ["d4", "i6", 20],
+      ["d5", "i5", 5], ["d5", "i7", 1],
+      ["d6", "i8", 1], ["d6", "i2", 50],
+      ["s1", "i14", 150], ["s1", "i20", 40],
+      ["s2", "i15", 2], ["s2", "i18", 20], ["s2", "i20", 40],
+      ["s3", "i16", 2], ["s3", "i18", 20],
+      ["s4", "i17", 1],
+      ["s5", "i19", 1],
+    ].map(([menu_id, ingredient_id, qty_used], i) => ({ id: "r" + (i + 1), menu_id, ingredient_id, qty_used }));
+    return { categories, menus, tables, ingredients, recipe };
+  }
+
+  /* ===== State (bertahan saat pindah halaman; tab disimpan di sini, bukan di location.hash) ===== */
+  const S = root.menuMejaState ??= {
+    tab: "menu", q: "", cat: "all", avail: "all", tFilter: "all", pCat: "all",
+    needsPrint: new Set(),
+    ...seedData(),
+  };
+
+  /* ===== Util ===== */
+  const $ = (part) => root.querySelector(`[data-part="${part}"]`);
+  const $$ = (sel, el = root) => [...el.querySelectorAll(sel)];
+  const rp = (n) => "Rp " + Math.round(n).toLocaleString("id-ID");
+  const esc = (s) => String(s ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+  const icon = (name, size = 18) => `<iconify-icon icon="lucide:${name}" aria-hidden="true" style="font-size:${size}px"></iconify-icon>`;
+  const attr = (name, v) => `[${name}="${CSS.escape(String(v))}"]`;
+  const uid = (p) => p + Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
+  const store = { get(k, d) { try { const v = localStorage.getItem(k); return v == null ? d : JSON.parse(v); } catch { return d; } } };
+  const role = () => store.get(KEYS.role, "OWNER") === "CASHIER" ? "CASHIER" : "OWNER";
+  const reduceMotion = () => { try { return matchMedia("(prefers-reduced-motion: reduce)").matches; } catch { return false; } };
+  const cafeInitials = () => SETTINGS.cafe_name.split(/\s+/).filter(Boolean).map((w) => w[0]).slice(0, 2).join("").toUpperCase();
+
+  const menuById = (id) => S.menus.find((m) => m.id === id);
+  const catById = (id) => S.categories.find((c) => c.id === id);
+  const ingById = (id) => S.ingredients.find((i) => i.id === id);
+  const tableById = (id) => S.tables.find((t) => t.id === id);
+  const sortedCats = () => [...S.categories].sort((a, b) => a.sort_order - b.sort_order);
+  const menusIn = (id) => S.menus.filter((m) => m.category_id === id);
+  const recipeOf = (menuId) => S.recipe.filter((r) => r.menu_id === menuId);
+  const stockStatus = (ing) => ing.stock_qty <= 0 ? "HABIS" : ing.stock_qty <= ing.min_stock ? "MENIPIS" : "AMAN";
+  const outIngs = (m) => recipeOf(m.id).map((r) => ingById(r.ingredient_id)).filter((i) => i && stockStatus(i) === "HABIS");
+  const sortedTables = () => [...S.tables].sort((a, b) => a.table_number.localeCompare(b.table_number, "id", { numeric: true }));
+  const ingSorted = () => [...S.ingredients].sort((a, b) => a.name.localeCompare(b.name, "id"));
+  const fmtNum = (n) => Number(n).toLocaleString("id-ID", { maximumFractionDigits: 2 });
+  const tableHash = (t) => "#/pelanggan?meja=" + encodeURIComponent(t.table_number);
+  const tableUrl = (t) => { try { const u = new URL(tableHash(t), location.href); return (u.host + u.pathname).replace(/\/$/, "") + u.hash; } catch { return tableHash(t); } };
+
+  /** Format jumlah bahan: 1850 gram → "1,85 kg", 4200 ml → "4,2 L" */
+  function fmtQty(q, unit) {
+    const n = (v) => v.toLocaleString("id-ID", { maximumFractionDigits: 2 });
+    if (unit === "gram" && Math.abs(q) >= 1000) return n(q / 1000) + " kg";
+    if (unit === "ml" && Math.abs(q) >= 1000) return n(q / 1000) + " L";
+    return n(q) + " " + ({ gram: "g", ml: "ml", pcs: "pcs", botol: "botol" }[unit] || unit);
+  }
+  /** "18" → 18, "0,5" → 0.5, "1.000" → 1000 (format angka Indonesia) */
+  function parseQty(s) {
+    let v = String(s ?? "").trim().replace(/\s/g, "");
+    if (/^\d{1,3}(\.\d{3})+(,\d+)?$/.test(v)) v = v.replace(/\./g, "");
+    v = v.replace(",", ".");
+    return /^\d*\.?\d+$/.test(v) ? parseFloat(v) : NaN;
+  }
+  function normalizeSort() { sortedCats().forEach((c, i) => { c.sort_order = i + 1; }); }
+  function newToken() {
+    let t;
+    do { t = "ks-" + Math.floor(Math.random() * 0xfffff).toString(16).padStart(5, "0"); }
+    while (S.tables.some((x) => x.qr_code === t));
+    return t;
+  }
+  function normTableNo(v) {
+    let s = String(v).trim().toUpperCase().replace(/\s+/g, "");
+    if (/^\d+$/.test(s)) s = String(parseInt(s, 10)).padStart(2, "0");
+    return s;
+  }
+
+  /** QR ilustrasi (bukan QR asli — untuk prototipe tampilan saja) */
+  function rng(seed) {
+    return () => { seed |= 0; seed = seed + 0x6D2B79F5 | 0; let t = Math.imul(seed ^ seed >>> 15, 1 | seed); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; };
+  }
+  function fakeQR(text, px = 160, decorative = false) {
+    const N = 25;
+    const r = rng([...String(text)].reduce((a, c) => (a * 31 + c.charCodeAt(0)) | 0, 7));
+    const finder = [[0, 0], [N - 7, 0], [0, N - 7]];
+    let d = "";
+    for (let y = 0; y < N; y++) for (let x = 0; x < N; x++) {
+      let on;
+      const f = finder.find(([fx, fy]) => x >= fx && x < fx + 7 && y >= fy && y < fy + 7);
+      if (f) { const dx = x - f[0], dy = y - f[1]; on = dx === 0 || dx === 6 || dy === 0 || dy === 6 || (dx >= 2 && dx <= 4 && dy >= 2 && dy <= 4); }
+      else if ((x < 8 && y < 8) || (x >= N - 8 && y < 8) || (x < 8 && y >= N - 8)) on = false;
+      else if (y === 6) on = x % 2 === 0;
+      else if (x === 6) on = y % 2 === 0;
+      else on = r() > .52;
+      if (on) d += `M${x} ${y}h1v1h-1z`;
+    }
+    const a11y = decorative ? 'aria-hidden="true"' : 'role="img" aria-label="QR code meja (ilustrasi)"';
+    return `<svg viewBox="-2 -2 ${N + 4} ${N + 4}" width="${px}" height="${px}" shape-rendering="crispEdges" ${a11y}><rect x="-2" y="-2" width="${N + 4}" height="${N + 4}" fill="#fff"/><path d="${d}" fill="#1D1E1C"/></svg>`;
+  }
+
+  /* Penanda "baru diubah" (garis oranye sesaat, tanpa animasi) */
+  const markTimers = new Set();
+  function markCurrent(el) {
+    if (!el) return;
+    el.dataset.state = "current";
+    const t = setTimeout(() => { el.removeAttribute("data-state"); markTimers.delete(t); }, 2600);
+    markTimers.add(t);
+  }
+  onCleanup(() => markTimers.forEach(clearTimeout));
+
+  /* ===== Toast & cetak (pola halaman Pesanan) ===== */
+  const toastEl = $("toast");
+  let toastTimer;
+  function toast(msg) {
+    toastEl.textContent = msg;
+    try { if (toastEl.matches(":popover-open")) toastEl.hidePopover(); toastEl.showPopover(); } catch {}
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => { try { toastEl.hidePopover(); } catch {} }, 2600);
+  }
+  onCleanup(() => { clearTimeout(toastTimer); try { toastEl.hidePopover(); } catch {} });
+  function printHTML(html, css) {
+    const area = $("print");
+    area.innerHTML = html;
+    if (css) { const st = document.createElement("style"); st.textContent = css; area.prepend(st); }
+    const doc = document.documentElement;
+    doc.dataset.lStafPrinting = "";
+    const done = () => { delete doc.dataset.lStafPrinting; area.innerHTML = ""; };
+    addEventListener("afterprint", done, { once: true, signal });
+    print();
+  }
+  const printTimers = new Set();
+  function later(fn, ms) { const t = setTimeout(() => { printTimers.delete(t); fn(); }, ms); printTimers.add(t); }
+  onCleanup(() => printTimers.forEach(clearTimeout));
+
+  /* ===== Dialog ===== */
+  const open = (part) => { const d = $(part); if (!d.open) d.showModal(); };
+  const close = (part) => { const d = $(part); if (d.open) d.close(); };
+  for (const d of $$("dialog")) {
+    d.addEventListener("click", (e) => {
+      if (e.target === d) d.close();
+      else if (e.target.closest("[data-close]")) d.close();
+    }, { signal });
+  }
+  onCleanup(() => { for (const d of $$("dialog").reverse()) if (d.open) d.close(); });
+
+  /* ----- Error inline ----- */
+  function setErr(part, msg) {
+    const el = $(part);
+    el.setAttribute("aria-invalid", "true");
+    el.closest(".l-staf-affix")?.setAttribute("aria-invalid", "true");
+    const er = $(part + "-err");
+    er.textContent = msg;
+    er.hidden = false;
+    return el;
+  }
+  function clearErr(part) {
+    const el = $(part);
+    if (!el) return;
+    el.removeAttribute("aria-invalid");
+    el.closest(".l-staf-affix")?.removeAttribute("aria-invalid");
+    const er = $(part + "-err");
+    if (er) { er.hidden = true; er.textContent = ""; }
+  }
+
+  /* ===== Peran, kepala halaman & tab ===== */
+  function paintActions() {
+    const locked = role() === "CASHIER";
+    actions?.querySelectorAll("[data-tab-action]").forEach((b) => { b.hidden = locked || b.dataset.tabAction !== S.tab; });
+  }
+  function applyRole() {
+    const locked = role() === "CASHIER";
+    $("app").hidden = locked;
+    $("context").hidden = locked;
+    $("locked").hidden = !locked;
+    $("locked-who").textContent = USERS.CASHIER;
+    if (locked) for (const d of $$("dialog")) if (d.open) d.close();
+    paintActions();
+  }
+  function renderHead() {
+    const off = S.menus.filter((m) => !m.is_available).length;
+    const on = S.tables.filter((t) => t.is_active).length;
+    $("context").textContent = `${S.menus.length} menu · ${off} habis · ${on} meja aktif`;
+    $("cnt-menu").textContent = S.menus.length;
+    $("cnt-kategori").textContent = S.categories.length;
+    $("cnt-meja").textContent = S.tables.length;
+  }
+  function setTab(tab, focus) {
+    if (!TABS.includes(tab)) tab = "menu";
+    S.tab = tab;
+    $$('[data-part="tabs"] [role="tab"]').forEach((b) => {
+      const on = b.dataset.tab === tab;
+      b.setAttribute("aria-selected", on);
+      b.tabIndex = on ? 0 : -1;
+    });
+    $$("[data-panel]").forEach((p) => { p.hidden = p.dataset.panel !== tab; });
+    paintActions();
+    if (focus) root.querySelector(`#menu-meja-tab-${tab}`)?.focus();
+  }
+
+  /* ===== Tab Menu ===== */
+  const mainLabel = (m) => `Ubah ${m.name}, ${rp(m.price)}${m.is_available ? "" : ", habis"}`;
+  const soldChip = '<span class="l-staf-chip mm-sold" data-tone="danger">Habis</span>';
+  function emptyHTML(ic, title, text, action) {
+    return `<div class="l-staf-card mm-empty-card"><div class="l-staf-empty">${icon(ic, 28)}<strong>${title}</strong><span>${text}</span>${action ? `<div class="mm-empty-act">${action}</div>` : ""}</div></div>`;
+  }
+
+  function cardHTML(m) {
+    const outs = outIngs(m);
+    const tags = (m.tags || []).filter((t) => TAG_TONE[t]);
+    const id = esc(m.id);
+    return `<article class="mm-card" data-id="${id}"${m.is_available ? "" : " data-off"}>
+      <button type="button" class="mm-card-main" data-act="edit-menu" data-id="${id}" aria-label="${esc(mainLabel(m))}">
+        <span class="mm-tile" aria-hidden="true"><span class="mm-emo">${esc(m.image_url)}</span></span>${m.is_available ? "" : soldChip}
+        <span class="mm-card-body">
+          ${tags.length ? `<span class="mm-tags">${tags.map((t) => `<span class="l-staf-chip" data-tone="${TAG_TONE[t]}">${t}</span>`).join("")}</span>` : ""}
+          <span class="mm-name">${esc(m.name)}</span>
+          <span class="mm-desc">${esc(m.desc || "Belum ada deskripsi.")}</span>
+          <span class="mm-bottom">
+            ${outs.length ? `<span class="mm-warn">${icon("triangle-alert", 14)}<span>Bahan habis: ${outs.map((i) => esc(i.name)).join(", ")}</span></span>` : ""}
+            <span class="mm-price">${rp(m.price)}</span>
+          </span>
+        </span>
+      </button>
+      <div class="mm-card-foot">
+        <div class="mm-avail">
+          <label class="l-staf-switch"><input type="checkbox" role="switch" id="menu-meja-av-${id}" data-toggle="menu" data-id="${id}"${m.is_available ? " checked" : ""} aria-label="${esc(m.name)} tersedia"><span></span></label>
+          <label class="mm-avail-txt" for="menu-meja-av-${id}">${m.is_available ? "Tersedia" : "Habis"}</label>
+        </div>
+        <button type="button" class="l-staf-iconbtn" data-act="edit-menu" data-id="${id}" aria-label="Ubah ${esc(m.name)}" title="Ubah menu">${icon("pencil", 16)}</button>
+      </div>
+    </article>`;
+  }
+  const addTileHTML = (c) => `<button type="button" class="mm-add" data-act="add-menu" data-cat="${esc(c.id)}">
+      <span class="mm-add-plus">${icon("plus", 20)}</span><strong>Tambah menu</strong><small>ke ${esc(c.name)}</small></button>`;
+
+  function renderMenuControls() {
+    if (S.cat !== "all" && !catById(S.cat)) S.cat = "all";
+    const cats = sortedCats();
+    const chips = [{ id: "all", name: "Semua", n: S.menus.length }].concat(cats.map((c) => ({ id: c.id, name: c.name, n: menusIn(c.id).length })));
+    $("cat-seg").innerHTML = chips.map((c) =>
+      `<button type="button" data-act="f-cat" data-cat="${esc(c.id)}" aria-pressed="${S.cat === c.id}">${esc(c.name)}<small>${c.n}</small></button>`).join("");
+
+    const pool = S.cat === "all" ? S.menus : menusIn(S.cat);
+    const on = pool.filter((m) => m.is_available).length;
+    $("avail-seg").innerHTML = [["all", "Semua", pool.length], ["on", "Tersedia", on], ["off", "Habis", pool.length - on]]
+      .map(([v, l, n]) => `<button type="button" data-act="f-avail" data-v="${v}" aria-pressed="${S.avail === v}">${l}<small>${n}</small></button>`).join("");
+
+    // Menu yang masih bisa dipesan padahal salah satu bahannya habis
+    const risky = S.menus.filter((m) => m.is_available && outIngs(m).length);
+    const al = $("menu-alert");
+    al.hidden = !risky.length;
+    al.innerHTML = risky.length ? `<div class="l-staf-alert mm-risk" data-tone="warning">${icon("triangle-alert", 18)}
+      <div class="mm-grow"><strong>${risky.length} menu masih bisa dipesan padahal bahannya habis:</strong> ${risky.map((m) => esc(m.name)).join(", ")}. Tandai habis supaya pelanggan tidak kecewa.</div>
+      <button type="button" class="l-staf-btn" data-size="sm" data-act="mark-risky">Tandai habis</button></div>` : "";
+  }
+
+  function renderMenuGrid() {
+    const q = S.q.trim().toLowerCase();
+    const list = S.menus.filter((m) =>
+      (S.cat === "all" || m.category_id === S.cat) &&
+      (S.avail === "all" || (S.avail === "on") === !!m.is_available) &&
+      (!q || m.name.toLowerCase().includes(q) || String(m.desc || "").toLowerCase().includes(q)));
+    $("menu-meta").textContent = list.length === S.menus.length ? `${S.menus.length} menu` : `Menampilkan ${list.length} dari ${S.menus.length} menu`;
+
+    const cats = sortedCats();
+    if (!cats.length) {
+      $("menu-grid").innerHTML = emptyHTML("folder-open", "Belum ada kategori", "Buat kategori dulu (mis. Makanan, Minuman), lalu tambahkan menunya.",
+        '<button type="button" class="l-staf-btn" data-act="tab" data-tab="kategori">Atur kategori</button>');
+      return;
+    }
+    const showAdd = !q && S.avail === "all";
+    const html = (S.cat === "all" ? cats : cats.filter((c) => c.id === S.cat)).map((c) => {
+      const items = list.filter((m) => m.category_id === c.id);
+      if (!items.length && !showAdd) return "";
+      return `<section class="mm-sec" aria-labelledby="menu-meja-sec-${esc(c.id)}">
+        <header class="mm-sec-head"><h2 id="menu-meja-sec-${esc(c.id)}">${esc(c.name)}</h2><span>${items.length} menu</span></header>
+        <div class="mm-grid">${items.map(cardHTML).join("")}${showAdd ? addTileHTML(c) : ""}</div>
+      </section>`;
+    }).join("");
+
+    const reset = '<button type="button" class="l-staf-btn" data-act="reset">Reset filter</button>';
+    $("menu-grid").innerHTML = html || (
+      q ? emptyHTML("search-x", "Menu tidak ditemukan", `Tidak ada menu dengan kata “${esc(S.q.trim())}”. Coba kata lain, mis. “kopi” atau “nasi”.`, reset)
+        : S.avail === "off" ? emptyHTML("circle-check", "Tidak ada menu yang habis", "Semua menu di pilihan ini bisa dipesan pelanggan.", reset)
+          : emptyHTML("utensils", "Belum ada menu", "Ubah filter, atau tambahkan menu baru.", reset));
+  }
+  function renderMenuTab() { renderMenuControls(); renderMenuGrid(); }
+
+  /** Perbarui satu kartu di tempat (switch tetap beranimasi & fokus tidak hilang) */
+  function syncMenuCard(m) {
+    const card = root.querySelector(".mm-card" + attr("data-id", m.id));
+    if (!card) return;
+    const on = !!m.is_available;
+    card.toggleAttribute("data-off", !on);
+    card.querySelector(".mm-avail-txt").textContent = on ? "Tersedia" : "Habis";
+    const main = card.querySelector(".mm-card-main");
+    main.setAttribute("aria-label", mainLabel(m));
+    const b = main.querySelector(".mm-sold");
+    if (on && b) b.remove();
+    if (!on && !b) main.querySelector(".mm-tile").insertAdjacentHTML("afterend", soldChip);
+  }
+  function resetFilters() {
+    S.q = ""; $("q").value = "";
+    S.cat = "all"; S.avail = "all";
+    renderMenuTab();
+  }
+
+  /* ===== Dialog menu ===== */
+  let draft = null;
+  function openMenuModal(id, presetCat) {
+    const cats = sortedCats();
+    if (!cats.length) { toast("Buat kategori dulu sebelum menambah menu"); setTab("kategori"); return; }
+    const m = id ? menuById(id) : null;
+    draft = {
+      id: m ? m.id : null,
+      emoji: m ? m.image_url : "🍽️",
+      tags: m ? [...(m.tags || [])] : [],
+      recipe: m ? recipeOf(m.id).map((r) => ({ ing: r.ingredient_id, qty: fmtNum(r.qty_used) })) : [],
+    };
+    $("mm-title").textContent = m ? "Ubah menu" : "Tambah menu";
+    $("mm-sub").textContent = m ? "Perubahan langsung tampil di aplikasi pelanggan & layar kasir." : "Menu baru langsung tampil di aplikasi pelanggan setelah disimpan.";
+    $("f-name").value = m ? m.name : "";
+    $("f-cat").innerHTML = cats.map((c) => `<option value="${esc(c.id)}">${esc(c.name)}</option>`).join("");
+    $("f-cat").value = m ? m.category_id
+      : (presetCat && catById(presetCat)) ? presetCat
+        : (S.cat !== "all" && catById(S.cat)) ? S.cat : cats[0].id;
+    $("f-price").value = m ? Math.round(m.price).toLocaleString("id-ID") : "";
+    $("f-desc").value = m ? (m.desc || "") : "";
+    $("f-avail").checked = m ? !!m.is_available : true;
+    $("mm-delete").hidden = !m;
+    $("mm-save").textContent = m ? "Simpan perubahan" : "Simpan menu";
+    ["f-name", "f-cat", "f-price"].forEach(clearErr);
+    renderEmojiGrid(); renderTagChips(); renderRecipe(); syncPhoto(); syncDesc(); syncAvailHint();
+    $("mm-body").scrollTop = 0;
+    open("menu-dlg");
+  }
+  function renderEmojiGrid() {
+    const list = EMOJIS.includes(draft.emoji) ? EMOJIS : [draft.emoji].concat(EMOJIS.slice(0, -1));
+    $("emoji-grid").innerHTML = list.map((e) =>
+      `<button type="button" data-act="emoji" data-emoji="${esc(e)}" aria-pressed="${e === draft.emoji}" aria-label="Pakai ikon ${esc(e)}">${esc(e)}</button>`).join("");
+  }
+  function renderTagChips() {
+    $("tag-chips").innerHTML = TAG_LIST.map((t) =>
+      `<button type="button" class="mm-chip" data-act="tag" data-tag="${t}" data-tone="${TAG_TONE[t]}" aria-pressed="${draft.tags.includes(t)}"><i aria-hidden="true"></i>${t}<iconify-icon class="mm-chk" icon="lucide:check" aria-hidden="true" style="font-size:14px"></iconify-icon></button>`).join("");
+  }
+  function syncPhoto() { $("photo-emoji").textContent = draft.emoji; }
+  function syncDesc() { $("desc-count").textContent = $("f-desc").value.length; }
+  function syncAvailHint() {
+    $("avail-hint").textContent = $("f-avail").checked ? "Pelanggan bisa memesan menu ini." : "Tampil sebagai “Habis” — pelanggan tidak bisa memesannya.";
+  }
+
+  /* ----- Resep ----- */
+  function recMeta(ing) {
+    if (!ing) return "Pilih bahan dari daftar stok";
+    const [tone, label] = STOCK[stockStatus(ing)];
+    return `<span>Stok ${esc(fmtQty(ing.stock_qty, ing.unit))}</span><span aria-hidden="true">·</span><span class="mm-st" data-tone="${tone}">${label}</span>`;
+  }
+  function renderRecipe() {
+    const opts = ingSorted();
+    $("rec-list").innerHTML = draft.recipe.map((r, i) => {
+      const ing = ingById(r.ing);
+      return `<div class="mm-rec-row" data-i="${i}">
+        <div class="mm-rec-ing">
+          <select class="l-staf-select" data-rec="ing" aria-label="Bahan ke-${i + 1}" aria-describedby="menu-meja-rec-err-${i}">
+            <option value="">Pilih bahan…</option>
+            ${opts.map((x) => `<option value="${esc(x.id)}"${x.id === r.ing ? " selected" : ""}>${esc(x.name)}${stockStatus(x) === "HABIS" ? " (stok habis)" : ""}</option>`).join("")}
+          </select>
+          <span class="mm-rec-meta">${recMeta(ing)}</span>
+        </div>
+        <div class="l-staf-affix mm-rec-qty"><input type="text" inputmode="decimal" autocomplete="off" data-rec="qty" value="${esc(r.qty)}" placeholder="0" aria-label="Jumlah bahan ke-${i + 1} per porsi" aria-describedby="menu-meja-rec-err-${i}"><span class="mm-rec-unit">${ing ? esc(ing.unit) : "satuan"}</span></div>
+        <button type="button" class="l-staf-iconbtn mm-rec-del" data-act="rec-del" aria-label="Hapus bahan ke-${i + 1}" title="Hapus bahan">${icon("trash-2", 16)}</button>
+        <p class="l-staf-error mm-rec-err" id="menu-meja-rec-err-${i}" hidden></p>
+      </div>`;
+    }).join("");
+    $("rec-head").hidden = !draft.recipe.length;
+    $("rec-count").textContent = draft.recipe.length ? `${draft.recipe.length} bahan` : "Belum ada bahan";
+    syncCapacity();
+  }
+  function clearRowErr(row) {
+    row.querySelectorAll("[aria-invalid]").forEach((x) => x.removeAttribute("aria-invalid"));
+    const er = row.querySelector(".mm-rec-err");
+    er.hidden = true; er.textContent = "";
+  }
+  /** Perkiraan porsi yang masih bisa dibuat dari stok sekarang */
+  function syncCapacity() {
+    const el = $("rec-cap");
+    const rows = draft.recipe.map((r) => ({ ing: ingById(r.ing), qty: parseQty(r.qty) })).filter((r) => r.ing && r.qty > 0);
+    if (!rows.length) {
+      el.dataset.tone = "";
+      el.innerHTML = `${icon("sticky-note", 15)}<span>Belum ada bahan. Menu tanpa resep tidak mengurangi stok saat terjual.</span>`;
+      return;
+    }
+    let min = Infinity, lim = null;
+    rows.forEach((r) => { const n = Math.floor(r.ing.stock_qty / r.qty); if (n < min) { min = n; lim = r.ing; } });
+    if (min <= 0) {
+      el.dataset.tone = "danger";
+      el.innerHTML = `${icon("triangle-alert", 15)}<span>Stok <b>${esc(lim.name)}</b> ${stockStatus(lim) === "HABIS" ? "habis" : "tidak cukup"} — menu ini belum bisa dibuat. Tandai habis atau catat bahan masuk di Stok Bahan.</span>`;
+    } else {
+      el.dataset.tone = min < 10 ? "warning" : "";
+      el.innerHTML = `${icon(min < 10 ? "triangle-alert" : "package", 15)}<span>Dengan stok sekarang, cukup untuk ± <b>${min.toLocaleString("id-ID")} porsi</b> lagi (paling cepat habis: ${esc(lim.name)}).</span>`;
+    }
+  }
+
+  function validateMenu() {
+    ["f-name", "f-cat", "f-price"].forEach(clearErr);
+    const bad = [];
+    const name = $("f-name").value.trim().replace(/\s+/g, " ");
+    if (!name) bad.push(setErr("f-name", "Nama menu wajib diisi."));
+    else if (S.menus.some((m) => m.id !== draft.id && m.name.trim().toLowerCase() === name.toLowerCase()))
+      bad.push(setErr("f-name", `Sudah ada menu bernama “${name}”. Pakai nama lain.`));
+    if (!catById($("f-cat").value)) bad.push(setErr("f-cat", "Pilih kategori."));
+    const price = Number(String($("f-price").value).replace(/\D/g, "")) || 0;
+    if (price <= 0) bad.push(setErr("f-price", "Isi harga lebih dari Rp 0."));
+
+    const seen = new Set();
+    $$('[data-part="rec-list"] .mm-rec-row').forEach((row) => {
+      clearRowErr(row);
+      const r = draft.recipe[Number(row.dataset.i)];
+      const q = parseQty(r.qty);
+      let msg = "", field = null;
+      if (!r.ing) { msg = "Pilih bahan, atau hapus baris ini."; field = row.querySelector("select"); }
+      else if (seen.has(r.ing)) { msg = `${ingById(r.ing).name} sudah ada di resep — gabungkan jumlahnya di satu baris.`; field = row.querySelector("select"); }
+      else if (!(q > 0)) { msg = `Isi jumlah ${ingById(r.ing).unit} per porsi (lebih dari 0).`; field = row.querySelector("input"); }
+      if (r.ing) seen.add(r.ing);
+      if (msg) {
+        field.setAttribute("aria-invalid", "true");
+        if (field.tagName === "INPUT") field.closest(".l-staf-affix").setAttribute("aria-invalid", "true");
+        const er = row.querySelector(".mm-rec-err");
+        er.textContent = msg; er.hidden = false;
+        bad.push(field);
+      }
+    });
+    return { bad, name, price };
+  }
+
+  function saveMenu(e) {
+    e.preventDefault();
+    const { bad, name, price } = validateMenu();
+    if (bad.length) { bad[0].focus(); toast("Periksa lagi isian yang ditandai merah"); return; }
+    const isNew = !draft.id;
+    const data = {
+      name, category_id: $("f-cat").value, price,
+      desc: $("f-desc").value.trim(),
+      image_url: draft.emoji,
+      tags: TAG_LIST.filter((t) => draft.tags.includes(t)),
+      is_available: $("f-avail").checked,
+    };
+    let m;
+    if (isNew) {
+      m = Object.assign({ id: uid("n") }, data, { created_at: new Date().toISOString() });
+      S.menus.push(m);
+      // pastikan menu baru terlihat
+      S.q = ""; $("q").value = ""; S.avail = "all";
+      if (S.cat !== "all" && S.cat !== m.category_id) S.cat = m.category_id;
+    } else {
+      m = menuById(draft.id);
+      Object.assign(m, data);
+    }
+    // Resep: ganti seluruh baris recipe_items milik menu ini
+    S.recipe = S.recipe.filter((r) => r.menu_id !== m.id);
+    draft.recipe.forEach((r) => S.recipe.push({ id: uid("r"), menu_id: m.id, ingredient_id: r.ing, qty_used: parseQty(r.qty) }));
+
+    close("menu-dlg");
+    renderAll();
+    const card = root.querySelector(".mm-card" + attr("data-id", m.id));
+    if (card) {
+      card.querySelector(".mm-card-main").focus({ preventScroll: true });
+      card.scrollIntoView({ block: "nearest", behavior: reduceMotion() ? "auto" : "smooth" });
+      markCurrent(card);
+    }
+    toast(isNew ? `“${m.name}” ditambahkan ke ${catById(m.category_id).name}` : `Perubahan “${m.name}” disimpan`);
+  }
+
+  function deleteMenu() {
+    const m = draft && menuById(draft.id);
+    if (!m) return;
+    const n = recipeOf(m.id).length;
+    confirmAction({
+      title: `Hapus “${m.name}”?`,
+      body: `Menu ini akan hilang dari aplikasi pelanggan dan layar kasir${n ? `, beserta resepnya (${n} bahan)` : ""}. Riwayat penjualan tetap tersimpan.<br><br><b>Hanya habis sementara?</b> Cukup matikan “Tersedia” — menu tetap tampil sebagai “Habis”.`,
+      ok: "Ya, hapus menu", ico: "trash-2",
+      onOk() {
+        close("menu-dlg");
+        S.menus = S.menus.filter((x) => x !== m);
+        S.recipe = S.recipe.filter((r) => r.menu_id !== m.id);
+        renderAll();
+        toast(`“${m.name}” dihapus dari menu`);
+      },
+    });
+  }
+
+  /* ===== Tab Kategori ===== */
+  function renderCatTab(markId) {
+    const cats = sortedCats();
+    $("cat-list").innerHTML = cats.length ? cats.map((c, i) => {
+      const ms = menusIn(c.id);
+      const off = ms.filter((m) => !m.is_available).length;
+      const n = esc(c.name), id = esc(c.id);
+      const locked = ms.length > 0;
+      const why = `Masih berisi ${ms.length} menu — pindahkan atau hapus menunya dulu`;
+      return `<li class="mm-cat-row" data-id="${id}">
+        <span class="mm-cat-pos" aria-hidden="true">${i + 1}</span>
+        <span class="l-staf-thumb" aria-hidden="true">${esc(ms[0] ? ms[0].image_url : "🍽️")}</span>
+        <div class="mm-cat-info"><strong>${n}</strong><small>${ms.length ? `${ms.length} menu${off ? ` · ${off} habis` : ""}` : "Belum ada menu"}</small></div>
+        <div class="mm-cat-acts">
+          <button type="button" class="l-staf-iconbtn" data-act="cat-up" data-id="${id}" aria-label="Naikkan ${n}" title="Naikkan"${i === 0 ? " disabled" : ""}>${icon("arrow-up", 16)}</button>
+          <button type="button" class="l-staf-iconbtn" data-act="cat-down" data-id="${id}" aria-label="Turunkan ${n}" title="Turunkan"${i === cats.length - 1 ? " disabled" : ""}>${icon("arrow-down", 16)}</button>
+          <span class="mm-vsep" aria-hidden="true"></span>
+          <button type="button" class="l-staf-iconbtn" data-act="edit-cat" data-id="${id}" aria-label="Ubah nama ${n}" title="Ubah nama">${icon("pencil", 16)}</button>
+          <button type="button" class="l-staf-iconbtn mm-del" data-act="del-cat" data-id="${id}"${locked
+            ? ` aria-disabled="true" aria-label="Hapus ${n} — tidak bisa, ${esc(why.toLowerCase())}" title="${esc(why)}"`
+            : ` aria-label="Hapus ${n}" title="Hapus kategori"`}>${icon("trash-2", 16)}</button>
+        </div>
+      </li>`;
+    }).join("") : '<li class="mm-cat-empty">Belum ada kategori. Tambahkan minimal satu supaya menu bisa dikelompokkan.</li>';
+    if (markId) markCurrent(root.querySelector(".mm-cat-row" + attr("data-id", markId)));
+    renderPreview();
+  }
+
+  function moveCat(id, dir) {
+    const cats = sortedCats();
+    const i = cats.findIndex((c) => c.id === id), j = i + dir;
+    if (i < 0 || j < 0 || j >= cats.length) return;
+    const tmp = cats[i].sort_order; cats[i].sort_order = cats[j].sort_order; cats[j].sort_order = tmp;
+    normalizeSort();
+    renderCatTab(id);
+    renderMenuTab(); // urutan filter & seksi ikut berubah
+    const row = root.querySelector(".mm-cat-row" + attr("data-id", id));
+    if (row) {
+      const same = row.querySelector(`[data-act="${dir < 0 ? "cat-up" : "cat-down"}"]`);
+      const other = row.querySelector(`[data-act="${dir < 0 ? "cat-down" : "cat-up"}"]`);
+      (same && !same.disabled ? same : other).focus();
+    }
+    toast(`Urutan disimpan — ${catById(id).name} kini di posisi ${j + 1}`);
+  }
+
+  function deleteCat(id) {
+    const c = catById(id);
+    if (!c) return;
+    const n = menusIn(id).length;
+    if (n) { toast(`“${c.name}” masih berisi ${n} menu — pindahkan atau hapus menunya dulu`); return; }
+    confirmAction({
+      title: `Hapus kategori “${c.name}”?`,
+      body: "Kategori ini kosong, jadi aman dihapus. Tabnya akan hilang dari aplikasi pelanggan.",
+      ok: "Hapus kategori", ico: "trash-2",
+      onOk() {
+        S.categories = S.categories.filter((x) => x !== c);
+        normalizeSort();
+        if (S.cat === id) S.cat = "all";
+        if (S.pCat === id) S.pCat = "all";
+        renderAll();
+        toast(`Kategori “${c.name}” dihapus`);
+      },
+    });
+  }
+
+  /* ----- Pratinjau aplikasi pelanggan (meniru halaman Menu Pelanggan) ----- */
+  function renderPreview() {
+    const cats = sortedCats();
+    if (S.pCat !== "all" && !catById(S.pCat)) S.pCat = "all";
+    const tabs = [{ id: "all", name: "Semua", n: S.menus.length }].concat(cats.map((c) => ({ id: c.id, name: c.name, n: menusIn(c.id).length })));
+    $("ph-tabs").innerHTML = tabs.map((t) =>
+      `<button type="button" class="mm-ph-tab" data-act="p-cat" data-cat="${esc(t.id)}" aria-pressed="${S.pCat === t.id}">${esc(t.name)}<small>${t.n}</small></button>`).join("");
+    const shown = S.pCat === "all" ? cats : cats.filter((c) => c.id === S.pCat);
+    const html = shown.map((c) => {
+      // Seperti di halaman pelanggan: menu tersedia di atas, menu habis di bawah
+      const items = menusIn(c.id).sort((a, b) => b.is_available - a.is_available);
+      if (!items.length) return "";
+      const lim = S.pCat === "all" ? 3 : items.length;
+      return `<div class="mm-ph-sec"><p class="mm-ph-h">${esc(c.name)}<span>${items.length} menu</span></p>
+        ${items.slice(0, lim).map((m) => `<div class="mm-ph-item"${m.is_available ? "" : " data-off"}>
+          <span class="mm-ph-thumb" aria-hidden="true">${esc(m.image_url)}</span>
+          <span class="mm-ph-txt"><b>${esc(m.name)}</b><i>${rp(m.price)}</i></span>
+          ${m.is_available ? `<span class="mm-ph-add" aria-hidden="true">${icon("plus", 13)}</span>` : '<span class="mm-ph-so">Habis</span>'}
+        </div>`).join("")}
+        ${items.length > lim ? `<p class="mm-ph-more">+${items.length - lim} menu lainnya</p>` : ""}
+      </div>`;
+    }).join("");
+    $("ph-list").innerHTML = html || '<p class="mm-ph-empty">Belum ada menu di kategori ini.</p>';
+  }
+
+  /* ----- Dialog kategori ----- */
+  let catEditId = null;
+  function openCatModal(id) {
+    const c = id ? catById(id) : null;
+    catEditId = c ? c.id : null;
+    $("ct-title").textContent = c ? "Ubah kategori" : "Tambah kategori";
+    $("ct-save").textContent = c ? "Simpan" : "Tambah kategori";
+    $("c-name").value = c ? c.name : "";
+    clearErr("c-name");
+    syncCatPreview();
+    open("cat-dlg");
+  }
+  function syncCatPreview() {
+    const name = $("c-name").value.trim() || "Nama kategori";
+    const first = catEditId ? menusIn(catEditId)[0] : null;
+    $("cat-prev").innerHTML = `<span class="l-staf-thumb" aria-hidden="true">${esc(first ? first.image_url : "🍽️")}</span>
+      <div class="mm-grow"><span class="mm-pill-prev">${esc(name)}</span><small>Begini tampilannya di aplikasi pelanggan.</small></div>`;
+  }
+  function saveCat(e) {
+    e.preventDefault();
+    clearErr("c-name");
+    const name = $("c-name").value.trim().replace(/\s+/g, " ");
+    if (!name) { setErr("c-name", "Nama kategori wajib diisi.").focus(); return; }
+    if (S.categories.some((c) => c.id !== catEditId && c.name.trim().toLowerCase() === name.toLowerCase())) {
+      setErr("c-name", `Sudah ada kategori bernama “${name}”.`).focus(); return;
+    }
+    let c, msg;
+    const editing = catEditId;
+    if (editing) {
+      c = catById(editing);
+      const old = c.name;
+      c.name = name;
+      msg = old !== name ? `“${old}” diganti jadi “${name}”` : `Kategori “${name}” disimpan`;
+    } else {
+      c = { id: uid("c"), name, sort_order: Math.max(0, ...S.categories.map((x) => x.sort_order)) + 1 };
+      S.categories.push(c);
+      msg = `Kategori “${name}” ditambahkan di urutan terakhir`;
+    }
+    close("cat-dlg");
+    renderHead(); renderMenuTab(); renderCatTab(c.id); renderTableTab();
+    if (editing) root.querySelector(".mm-cat-row" + attr("data-id", c.id) + ' [data-act="edit-cat"]')?.focus({ preventScroll: true });
+    toast(msg);
+  }
+
+  /* ===== Tab Meja & QR ===== */
+  function areaList() {
+    const s = new Set(AREA_ORDER);
+    S.tables.forEach((t) => { if (t.area) s.add(t.area); });
+    return [...s];
+  }
+  const tBadges = (t) => (t.is_active ? '<span class="l-staf-chip" data-tone="positive">Aktif</span>' : '<span class="l-staf-chip" data-tone="plain">Nonaktif</span>')
+    + (S.needsPrint.has(t.id) ? '<span class="l-staf-chip" data-tone="warning">Belum dicetak</span>' : "");
+
+  function tableCardHTML(t) {
+    const id = esc(t.id), no = esc(t.table_number);
+    return `<article class="mm-tcard" data-id="${id}"${t.is_active ? "" : " data-off"}>
+      <div class="mm-tc-top">
+        <div class="mm-tc-info">
+          <span class="mm-tc-label">Meja</span>
+          <strong class="mm-tc-no">${no}</strong>
+          <span class="mm-tc-area">Area ${esc(t.area || "—")}</span>
+          <span class="mm-tc-badges">${tBadges(t)}</span>
+        </div>
+        <button type="button" class="mm-tc-qr" data-act="qr" data-id="${id}" aria-label="Lihat QR Meja ${no}" title="Lihat QR">${fakeQR(t.qr_code, 92, true)}</button>
+      </div>
+      <div class="mm-tc-foot">
+        <button type="button" class="l-staf-btn" data-size="sm" data-act="qr" data-id="${id}">${icon("qr-code", 16)}Lihat QR</button>
+        <div class="mm-avail">
+          <label class="mm-avail-txt" for="menu-meja-ta-${id}">${t.is_active ? "Aktif" : "Nonaktif"}</label>
+          <label class="l-staf-switch"><input type="checkbox" role="switch" id="menu-meja-ta-${id}" data-toggle="table" data-id="${id}"${t.is_active ? " checked" : ""} aria-label="Meja ${no} aktif"><span></span></label>
+        </div>
+      </div>
+    </article>`;
+  }
+  function renderTableChips() {
+    const off = S.tables.filter((t) => !t.is_active).length;
+    const chips = [["all", "Semua", S.tables.length]]
+      .concat(areaList().map((a) => [a, a, S.tables.filter((t) => t.area === a).length]))
+      .concat([["off", "Nonaktif", off]]);
+    $("table-seg").innerHTML = chips.map(([v, l, n]) =>
+      `<button type="button" data-act="f-table" data-v="${esc(v)}" aria-pressed="${S.tFilter === v}">${esc(l)}<small>${n}</small></button>`).join("");
+  }
+  function renderTableGrid(markId) {
+    const f = S.tFilter;
+    const list = sortedTables().filter((t) => f === "all" || (f === "off" ? !t.is_active : t.area === f));
+    let html = list.map(tableCardHTML).join("");
+    if (f !== "off") html += `<button type="button" class="mm-add" data-tall data-act="add-table"><span class="mm-add-plus">${icon("plus", 20)}</span><strong>Tambah meja</strong><small>QR unik dibuat otomatis</small></button>`;
+    else if (!list.length) html = emptyHTML("circle-check", "Semua meja aktif", "Tidak ada meja yang sedang dinonaktifkan.", "");
+    $("table-grid").innerHTML = html;
+    if (markId) markCurrent(root.querySelector(".mm-tcard" + attr("data-id", markId)));
+  }
+  function renderTableTab(markId) { renderTableChips(); renderTableGrid(markId); }
+
+  /* ----- Kartu QR untuk meja (tent card) ----- */
+  function tentHTML(t) {
+    return `<div class="mm-tent">
+      <div class="mm-tent-brand"><span class="mm-tent-logo">${esc(cafeInitials())}</span>${esc(SETTINGS.cafe_name)}</div>
+      <div class="mm-tent-no"><span>Meja</span>${esc(t.table_number)}</div>
+      <div class="mm-tent-qr">${fakeQR(t.qr_code, 200)}</div>
+      <p class="mm-tent-cta">Scan untuk lihat menu &amp; pesan</p>
+      <p class="mm-tent-sub">Tanpa install aplikasi · Bayar di kasir</p>
+      <p class="mm-tent-url">${esc(tableUrl(t))}</p>
+    </div>`;
+  }
+  /** Kartu-kartu QR yang dicetak (2 per baris di A4). Gaya .mm-tent/.mm-sheet ada di CSS halaman;
+      PRINT_CSS (disisipkan sementara saat mencetak) membuat area cetak mengalir normal supaya banyak kartu bisa pindah halaman. */
+  const PRINT_CSS = `
+    @page { size: A4; margin: 10mm; }
+    @media print {
+      html[data-l-staf-printing], html[data-l-staf-printing] body { background: #fff !important; }
+      html[data-l-staf-printing] body *:not(:has(.mm-sheet)):not(.mm-sheet):not(.mm-sheet *) { display: none !important; }
+      html[data-l-staf-printing] body *:has(.mm-sheet) { display: block !important; position: static !important; inset: auto !important; width: auto !important; height: auto !important; min-height: 0 !important; max-height: none !important; margin: 0 !important; padding: 0 !important; border: 0 !important; overflow: visible !important; background: none !important; transform: none !important; animation: none !important; }
+    }`;
+  const printSheet = (list) => printHTML(`<div class="mm-sheet">${list.map(tentHTML).join("")}</div>`, PRINT_CSS);
+
+  let qrId = null;
+  function openQR(id) {
+    if (!tableById(id)) return;
+    qrId = id;
+    renderQR();
+    open("qr-dlg");
+  }
+  function renderQR() {
+    const t = tableById(qrId);
+    if (!t) return;
+    $("qr-title").textContent = `QR Meja ${t.table_number}`;
+    $("qr-card").innerHTML = tentHTML(t);
+    $("qr-token").textContent = t.qr_code;
+    $("qr-open").href = tableHash(t);
+    $("qr-warn").innerHTML = !t.is_active
+      ? `<div class="l-staf-alert" data-tone="warning">${icon("triangle-alert", 18)}<span>Meja ini <b>nonaktif</b>. QR tetap bisa dicetak, tapi pelanggan baru bisa memesan setelah meja diaktifkan lagi.</span></div>`
+      : S.needsPrint.has(t.id)
+        ? `<div class="l-staf-alert">${icon("printer", 18)}<span>QR ini <b>belum dicetak</b>. Cetak, lalu ganti kartu lama di meja.</span></div>`
+        : "";
+  }
+  function printOne() {
+    const t = tableById(qrId);
+    if (!t) return;
+    toast(`Membuka dialog cetak — QR Meja ${t.table_number}`);
+    later(() => {
+      printSheet([t]);
+      S.needsPrint.delete(t.id);
+      renderQR();
+      renderTableGrid();
+    }, 120);
+  }
+  function printAll() {
+    const list = sortedTables().filter((t) => t.is_active);
+    if (!list.length) { toast("Belum ada meja aktif untuk dicetak"); return; }
+    toast(`Membuka dialog cetak — ${list.length} kartu QR meja aktif`);
+    later(() => {
+      printSheet(list);
+      list.forEach((t) => S.needsPrint.delete(t.id));
+      renderTableGrid();
+    }, 120);
+  }
+  function regenQR() {
+    const t = tableById(qrId);
+    if (!t) return;
+    confirmAction({
+      title: `Buat ulang QR Meja ${t.table_number}?`,
+      body: "QR lama yang sudah tertempel di meja akan <b>langsung berhenti berfungsi</b>. Setelah ini, cetak QR baru dan ganti kartu di meja supaya pelanggan tetap bisa memesan.",
+      ok: "Ya, buat QR baru", ico: "refresh-cw",
+      onOk() {
+        t.qr_code = newToken();
+        S.needsPrint.add(t.id);
+        renderQR();
+        renderTableGrid();
+        toast(`QR Meja ${t.table_number} diperbarui — cetak & ganti kartu lamanya`);
+      },
+    });
+  }
+
+  /* ----- Dialog tambah meja ----- */
+  function openTableModal() {
+    const nums = S.tables.map((t) => parseInt(t.table_number, 10)).filter((n) => !isNaN(n));
+    $("t-no").value = String((nums.length ? Math.max(...nums) : 0) + 1).padStart(2, "0");
+    const areas = areaList();
+    $("t-area").innerHTML = areas.map((a) => `<option value="${esc(a)}">${esc(a)}</option>`).join("");
+    $("t-area").value = areas.includes(S.tFilter) ? S.tFilter : areas[0];
+    clearErr("t-no");
+    syncTableHint();
+    open("table-dlg");
+    $("t-no").select();
+  }
+  function syncTableHint() {
+    const v = normTableNo($("t-no").value);
+    $("t-hint").textContent = v && /^[A-Z0-9-]{1,6}$/.test(v) ? `Akan tampil sebagai “Meja ${v}”. Angka otomatis jadi 2 digit.` : "Angka otomatis jadi 2 digit, mis. 7 → 07.";
+  }
+  function saveTable(e) {
+    e.preventDefault();
+    clearErr("t-no");
+    const no = normTableNo($("t-no").value);
+    const area = $("t-area").value;
+    let msg = "";
+    if (!no) msg = "Nomor meja wajib diisi.";
+    else if (!/^[A-Z0-9-]{1,6}$/.test(no)) msg = "Pakai huruf, angka, atau tanda “-”, maksimal 6 karakter.";
+    else if (/^0+$/.test(no)) msg = "Nomor meja tidak boleh 0.";
+    else if (S.tables.some((t) => t.table_number.toUpperCase() === no)) msg = `Meja ${no} sudah ada. Pakai nomor lain.`;
+    if (msg) { setErr("t-no", msg).focus(); return; }
+
+    const t = { id: uid("t"), table_number: no, qr_code: newToken(), is_active: true, area };
+    S.tables.push(t);
+    S.needsPrint.add(t.id);
+    if (S.tFilter !== "all" && S.tFilter !== area) S.tFilter = "all";
+    close("table-dlg");
+    renderHead();
+    renderTableTab(t.id);
+    root.querySelector(".mm-tcard" + attr("data-id", t.id))?.scrollIntoView({ block: "nearest", behavior: reduceMotion() ? "auto" : "smooth" });
+    toast(`Meja ${no} ditambahkan — QR-nya siap dicetak`);
+  }
+
+  /* ===== Konfirmasi (dialog native bertumpuk di atas dialog lain) ===== */
+  let cfAction = null;
+  function confirmAction(o) {
+    $("cf-title").textContent = o.title;
+    $("cf-body").innerHTML = o.body;
+    $("cf-ok").innerHTML = icon(o.ico || "triangle-alert", 16) + esc(o.ok);
+    $("cf-ico").innerHTML = icon(o.ico || "triangle-alert", 20);
+    cfAction = o.onOk;
+    open("cf-dlg");
+  }
+
+  /* ===== Render semua ===== */
+  function renderAll() {
+    renderHead();
+    renderMenuTab();
+    renderCatTab();
+    renderTableTab();
+  }
+
+  /* ===== Event ===== */
+  // Kembalikan fokus ke tombol filter setelah daftar dirender ulang (pengguna keyboard)
+  function refocusLike(el) {
+    let s = `[data-act="${el.dataset.act}"]`;
+    if (el.dataset.cat != null) s += attr("data-cat", el.dataset.cat);
+    if (el.dataset.v != null) s += attr("data-v", el.dataset.v);
+    root.querySelector(s)?.focus({ preventScroll: true });
+  }
+  function onAct(e) {
+    const el = e.target.closest("[data-act]");
+    if (!el) return;
+    const act = el.dataset.act, id = el.dataset.id;
+    const hadFocus = document.activeElement === el;
+    switch (act) {
+      case "tab": setTab(el.dataset.tab); break;
+
+      case "add-menu": openMenuModal(null, el.dataset.cat); break;
+      case "edit-menu": openMenuModal(id); break;
+      case "f-cat": S.cat = el.dataset.cat; renderMenuTab(); if (hadFocus) refocusLike(el); break;
+      case "f-avail": S.avail = el.dataset.v; renderMenuTab(); if (hadFocus) refocusLike(el); break;
+      case "reset": resetFilters(); $("q").focus(); break;
+      case "mark-risky": {
+        const risky = S.menus.filter((m) => m.is_available && outIngs(m).length);
+        risky.forEach((m) => { m.is_available = false; });
+        renderAll();
+        toast(risky.length === 1 ? `${risky[0].name} ditandai habis — pelanggan tidak bisa memesannya` : `${risky.length} menu ditandai habis`);
+        break;
+      }
+
+      case "emoji":
+        draft.emoji = el.dataset.emoji;
+        $$('[data-part="emoji-grid"] button').forEach((b) => b.setAttribute("aria-pressed", b === el));
+        syncPhoto();
+        break;
+      case "tag": {
+        const t = el.dataset.tag;
+        draft.tags = draft.tags.includes(t) ? draft.tags.filter((x) => x !== t) : draft.tags.concat(t);
+        el.setAttribute("aria-pressed", draft.tags.includes(t));
+        break;
+      }
+      case "upload": toast("Prototipe: unggah foto belum aktif — pakai ikon dulu, ya"); break;
+      case "rec-add": {
+        draft.recipe.push({ ing: "", qty: "" });
+        renderRecipe();
+        const rows = $$('[data-part="rec-list"] .mm-rec-row');
+        rows[rows.length - 1].querySelector("select").focus();
+        break;
+      }
+      case "rec-del": {
+        const i = Number(el.closest(".mm-rec-row").dataset.i);
+        draft.recipe.splice(i, 1);
+        renderRecipe();
+        const rows = $$('[data-part="rec-list"] .mm-rec-row');
+        const next = rows[i] || rows[i - 1];
+        if (next) next.querySelector("select").focus();
+        else $("rec-add").focus();
+        break;
+      }
+
+      case "add-cat": openCatModal(); break;
+      case "edit-cat": openCatModal(id); break;
+      case "del-cat": deleteCat(id); break;
+      case "cat-up": moveCat(id, -1); break;
+      case "cat-down": moveCat(id, 1); break;
+      case "p-cat": S.pCat = el.dataset.cat; renderPreview(); if (hadFocus) refocusLike(el); break;
+
+      case "f-table": S.tFilter = el.dataset.v; renderTableTab(); if (hadFocus) refocusLike(el); break;
+      case "add-table": openTableModal(); break;
+      case "print-all": printAll(); break;
+      case "qr": openQR(id); break;
+    }
+  }
+  root.addEventListener("click", onAct, { signal });
+  actions?.addEventListener("click", onAct, { signal });
+
+  // Switch ketersediaan menu & status meja (diperbarui di tempat)
+  root.addEventListener("change", (e) => {
+    const el = e.target;
+    if (el.dataset.toggle === "menu") {
+      const m = menuById(el.dataset.id);
+      if (!m) return;
+      m.is_available = el.checked;
+      syncMenuCard(m);
+      renderHead(); renderMenuControls(); renderCatTab();
+      const outs = outIngs(m);
+      toast(!m.is_available ? `${m.name} ditandai habis — pelanggan tidak bisa memesannya`
+        : outs.length ? `${m.name} tersedia lagi — tapi stok ${outs[0].name} masih habis`
+          : `${m.name} tersedia lagi — pelanggan bisa memesannya`);
+    } else if (el.dataset.toggle === "table") {
+      const t = tableById(el.dataset.id);
+      if (!t) return;
+      t.is_active = el.checked;
+      const card = el.closest(".mm-tcard");
+      card.toggleAttribute("data-off", !t.is_active);
+      card.querySelector(".mm-avail-txt").textContent = t.is_active ? "Aktif" : "Nonaktif";
+      card.querySelector(".mm-tc-badges").innerHTML = tBadges(t);
+      renderHead(); renderTableChips();
+      toast(t.is_active ? `Meja ${t.table_number} aktif — pelanggan bisa pesan lewat QR-nya` : `Meja ${t.table_number} nonaktif — QR-nya tidak bisa dipakai memesan`);
+    } else if (el.dataset.rec === "ing") {
+      const row = el.closest(".mm-rec-row");
+      const r = draft.recipe[Number(row.dataset.i)];
+      r.ing = el.value;
+      const ing = ingById(r.ing);
+      row.querySelector(".mm-rec-unit").textContent = ing ? ing.unit : "satuan";
+      row.querySelector(".mm-rec-meta").innerHTML = recMeta(ing);
+      clearRowErr(row);
+      syncCapacity();
+    } else if (el.dataset.part === "f-cat") clearErr("f-cat");
+    else if (el.dataset.part === "f-avail") syncAvailHint();
+  }, { signal });
+
+  root.addEventListener("input", (e) => {
+    const el = e.target, part = el.dataset.part;
+    if (part === "q") { S.q = el.value; renderMenuGrid(); }
+    else if (part === "f-name") clearErr("f-name");
+    else if (part === "f-desc") syncDesc();
+    else if (part === "f-price") {
+      // Format ribuan saat mengetik (32000 → 32.000) tanpa membuat kursor melompat
+      const pos = el.selectionStart || 0;
+      const before = el.value.slice(0, pos).replace(/\D/g, "").length;
+      const d = el.value.replace(/\D/g, "").replace(/^0+(?=\d)/, "").slice(0, 9);
+      el.value = d ? Number(d).toLocaleString("id-ID") : "";
+      let i = 0, seen = 0;
+      while (i < el.value.length && seen < before) { if (/\d/.test(el.value[i])) seen++; i++; }
+      try { el.setSelectionRange(i, i); } catch {}
+      clearErr("f-price");
+    }
+    else if (el.dataset.rec === "qty") {
+      const row = el.closest(".mm-rec-row");
+      draft.recipe[Number(row.dataset.i)].qty = el.value;
+      clearRowErr(row);
+      syncCapacity();
+    }
+    else if (part === "c-name") { clearErr("c-name"); syncCatPreview(); }
+    else if (part === "t-no") { clearErr("t-no"); syncTableHint(); }
+  }, { signal });
+
+  // Tab: panah kiri/kanan, Home, End
+  $("tabs").addEventListener("keydown", (e) => {
+    const i = TABS.indexOf(S.tab);
+    const map = { ArrowRight: (i + 1) % TABS.length, ArrowLeft: (i - 1 + TABS.length) % TABS.length, Home: 0, End: TABS.length - 1 };
+    if (!(e.key in map)) return;
+    e.preventDefault();
+    setTab(TABS[map[e.key]], true);
+  }, { signal });
+
+  // Form
+  $("menu-form").addEventListener("submit", saveMenu, { signal });
+  $("mm-delete").addEventListener("click", deleteMenu, { signal });
+  $("cat-form").addEventListener("submit", saveCat, { signal });
+  $("table-form").addEventListener("submit", saveTable, { signal });
+  $("qr-print").addEventListener("click", printOne, { signal });
+  $("qr-regen").addEventListener("click", regenQR, { signal });
+  $("cf-ok").addEventListener("click", () => { const fn = cfAction; cfAction = null; close("cf-dlg"); fn?.(); }, { signal });
+
+  // Zona unggah foto (prototipe: hanya memberi tahu)
+  const dz = $("drop");
+  ["dragenter", "dragover"].forEach((ev) => dz.addEventListener(ev, (e) => { e.preventDefault(); dz.dataset.over = ""; }, { signal }));
+  ["dragleave", "drop"].forEach((ev) => dz.addEventListener(ev, (e) => {
+    e.preventDefault();
+    delete dz.dataset.over;
+    if (ev === "drop") toast("Prototipe: unggah foto belum aktif — pakai ikon dulu, ya");
+  }, { signal }));
+  // Jangan biarkan berkas yang dijatuhkan di luar zona membuka tab baru
+  ["dragover", "drop"].forEach((ev) => addEventListener(ev, (e) => {
+    if (e.dataTransfer && [...e.dataTransfer.types].includes("Files")) e.preventDefault();
+  }, { signal }));
+
+  // Peran berubah di tab lain (prototipe)
+  addEventListener("storage", (e) => { if (e.key === KEYS.role) applyRole(); }, { signal });
+
+  /* ===== Mulai ===== */
+  $("ph-logo").textContent = cafeInitials();
+  $("ph-name").textContent = SETTINGS.cafe_name;
+  $("ph-addr").textContent = SETTINGS.address;
+  $("q").value = S.q;
+  renderAll();
+  setTab(S.tab);
+  applyRole();
+</script>

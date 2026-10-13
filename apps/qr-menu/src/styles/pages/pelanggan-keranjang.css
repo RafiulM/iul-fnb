@@ -1,0 +1,461 @@
+/* Styles for the pelanggan-keranjang screen, ported from design/src/pages/pelanggan-keranjang.page.html.
+   Scoped under [data-page="pelanggan-keranjang"] (the prototype's @scope root). */
+[data-page="pelanggan-keranjang"] {
+  .p-pelanggan-keranjang {
+    min-height: 100vh;
+    min-height: 100dvh;
+    background: var(--color-canvas);
+    color: var(--color-text);
+    font: 400 var(--text-body-md) / var(--leading-body-md) var(--font-ui);
+    letter-spacing: -0.14px;
+    -webkit-tap-highlight-color: transparent;
+  }
+  :where(button, input, textarea) {
+    font: inherit;
+    color: inherit;
+    letter-spacing: inherit;
+  }
+  :where(h1, h2, h3, p) {
+    margin: 0;
+  }
+  :where(ul, ol) {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .pl-app {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    max-width: 440px;
+    min-height: 100vh;
+    min-height: 100dvh;
+    margin: 0 auto;
+    background: var(--color-canvas);
+  }
+
+  /* ---------- Bilah atas ---------- */
+  .pl-bar {
+    position: sticky;
+    top: 0;
+    z-index: 5;
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
+    align-items: center;
+    gap: var(--space-3);
+    padding: 10px var(--space-4);
+    border-block-end: var(--border-hairline) solid var(--color-border);
+    background: var(--color-canvas);
+  }
+  .pl-bar-title {
+    font: 600 15px / 1.2 var(--font-ui);
+    letter-spacing: -0.15px;
+  }
+  .pl-iconbtn {
+    flex: none;
+    display: grid;
+    place-items: center;
+    width: 40px;
+    height: 40px;
+    padding: 0;
+    border: var(--border-hairline) solid var(--color-border);
+    border-radius: var(--radius-pill);
+    background: var(--color-surface);
+    color: var(--color-text);
+    text-decoration: none;
+    cursor: pointer;
+    transition: border-color var(--duration-fast) var(--ease-standard);
+  }
+  .pl-iconbtn:hover {
+    border-color: var(--color-border-strong);
+  }
+  .pl-iconbtn :is(iconify-icon, svg.lucide) {
+    font-size: 18px;
+  }
+
+  /* ---------- Kepala ---------- */
+  .pl-head {
+    padding: 22px var(--space-4) 0;
+  }
+  .pl-eyebrow {
+    font: 500 var(--text-body-sm) / 1.4 var(--font-ui);
+    color: var(--color-text-muted);
+  }
+  .pl-thesis {
+    margin-top: 4px;
+    font: 400 34px / 1.1 var(--font-editorial);
+    letter-spacing: -1px;
+    outline: 0;
+    text-wrap: balance;
+  }
+  .pl-sub {
+    margin-top: 6px;
+    font: 500 var(--text-body-sm) / 1.4 var(--font-ui);
+    color: var(--color-text-muted);
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* ---------- Kartu & baris keranjang ---------- */
+  .pl-body {
+    flex: 1;
+    padding: 18px var(--space-4) var(--space-6);
+  }
+  .pl-card {
+    border: var(--border-hairline) solid var(--color-border);
+    border-radius: var(--radius-card);
+    background: var(--color-surface);
+  }
+  .pl-lines {
+    padding: 0 14px;
+  }
+  .pl-line {
+    display: grid;
+    grid-template-columns: 56px minmax(0, 1fr) auto;
+    align-items: start;
+    gap: var(--space-3);
+    padding: 14px 0;
+  }
+  .pl-line + .pl-line {
+    border-block-start: var(--border-hairline) solid var(--color-border);
+  }
+  .pl-thumb {
+    display: grid;
+    place-items: center;
+    width: 56px;
+    height: 56px;
+    border-radius: var(--radius-compact);
+    background: var(--color-surface-muted);
+    font-size: 28px;
+    line-height: 1;
+    user-select: none;
+  }
+  .pl-line-info {
+    display: grid;
+    justify-items: start;
+    gap: 2px;
+    min-width: 0;
+  }
+  .pl-name {
+    font: 600 15px / 1.3 var(--font-ui);
+    letter-spacing: -0.2px;
+  }
+  .pl-line-price {
+    padding-top: 2px;
+    font: 600 var(--text-body-sm) / 1.2 var(--font-ui);
+    font-variant-numeric: tabular-nums;
+  }
+  .pl-line-price small {
+    display: block;
+    margin-top: 3px;
+    font: 400 var(--text-label-sm) / 1.2 var(--font-ui);
+    color: var(--color-text-muted);
+  }
+  .pl-note-btn {
+    display: block;
+    max-width: 100%;
+    padding: 2px 0;
+    border: 0;
+    background: none;
+    text-align: start;
+    font: 400 13px / 1.45 var(--font-ui);
+    color: var(--color-text-muted);
+    cursor: pointer;
+  }
+  .pl-note-btn q {
+    font-style: italic;
+    font-weight: 500;
+    color: var(--color-warning-text);
+    overflow-wrap: anywhere;
+  }
+  .pl-note-btn > :is(iconify-icon, svg.lucide) {
+    margin-inline-end: 4px;
+    vertical-align: -2px;
+    color: var(--color-warning-text);
+  }
+  .pl-note-btn b {
+    font-weight: 600;
+    color: var(--color-text);
+    text-decoration: underline;
+    text-decoration-color: var(--color-border-strong);
+    text-underline-offset: 3px;
+  }
+  .pl-note-btn:hover b {
+    text-decoration-color: currentColor;
+  }
+
+  .pl-stepper {
+    flex: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 2px;
+    padding: 3px;
+    border: var(--border-hairline) solid var(--color-border);
+    border-radius: var(--radius-pill);
+    background: var(--color-surface-subtle);
+  }
+  .pl-stepper button {
+    display: grid;
+    place-items: center;
+    width: 32px;
+    height: 32px;
+    padding: 0;
+    border: 0;
+    border-radius: var(--radius-pill);
+    background: var(--color-surface);
+    color: var(--color-text);
+    box-shadow: 0 0 0 1px var(--color-border);
+    cursor: pointer;
+  }
+  .pl-stepper button:disabled {
+    background: transparent;
+    box-shadow: none;
+    color: var(--color-text-faint);
+    cursor: not-allowed;
+  }
+  .pl-stepper :is(iconify-icon, svg.lucide) {
+    font-size: 14px;
+  }
+  .pl-stepper output {
+    min-width: 26px;
+    text-align: center;
+    font: 600 var(--text-body-sm) / 1 var(--font-ui);
+    font-variant-numeric: tabular-nums;
+  }
+
+  .pl-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-2);
+    box-sizing: border-box;
+    min-height: 48px;
+    padding: 10px var(--space-6);
+    border: var(--border-hairline) solid var(--color-border-strong);
+    border-radius: var(--radius-control);
+    background: var(--color-surface);
+    color: var(--color-text);
+    font: 500 16px / 1.2 var(--font-ui);
+    letter-spacing: -0.2px;
+    white-space: nowrap;
+    text-decoration: none;
+    cursor: pointer;
+    transition:
+      background-color var(--duration-fast) var(--ease-standard),
+      border-color var(--duration-fast) var(--ease-standard),
+      color var(--duration-fast) var(--ease-standard);
+  }
+  .pl-btn:hover {
+    border-color: var(--color-text);
+  }
+  .pl-btn :is(iconify-icon, svg.lucide) {
+    font-size: 18px;
+  }
+  .pl-btn[data-variant="primary"] {
+    min-height: 54px;
+    border-color: var(--color-primary);
+    background: var(--color-primary);
+    color: var(--color-on-primary);
+  }
+  .pl-btn[data-variant="primary"]:hover {
+    border-color: var(--color-primary-hover);
+    background: var(--color-primary-hover);
+  }
+  .pl-btn[data-variant="primary"]:active {
+    background: var(--color-primary-active);
+  }
+  .pl-btn[data-variant="primary"]:disabled {
+    border-color: var(--color-border);
+    background: var(--color-surface-muted);
+    color: var(--color-text-muted);
+    cursor: not-allowed;
+  }
+  .pl-btn[data-variant="primary"][aria-busy="true"] {
+    border-color: var(--color-primary-active);
+    background: var(--color-primary-active);
+    color: var(--color-on-primary);
+    cursor: progress;
+  }
+  .pl-btn[data-block] {
+    width: 100%;
+  }
+  .pl-sep {
+    opacity: 0.55;
+  }
+  .pl-more {
+    width: 100%;
+    margin-top: var(--space-3);
+    border-style: dashed;
+    background: transparent;
+  }
+
+  /* ---------- Ringkasan ---------- */
+  .pl-summary {
+    margin-top: var(--space-4);
+    padding: var(--space-4);
+  }
+  .pl-summary h2 {
+    margin-bottom: var(--space-3);
+    font: 600 16px / 1.3 var(--font-ui);
+    letter-spacing: -0.16px;
+  }
+  .pl-sum {
+    display: grid;
+    gap: var(--space-2);
+    font: 400 var(--text-body-sm) / 1.4 var(--font-ui);
+    color: var(--color-text-muted);
+  }
+  .pl-sum div {
+    display: flex;
+    justify-content: space-between;
+    gap: var(--space-3);
+  }
+  .pl-sum span:last-child {
+    font-variant-numeric: tabular-nums;
+  }
+  .pl-sum .pl-total {
+    margin-top: 4px;
+    padding-top: 12px;
+    border-block-start: var(--border-hairline) dashed var(--color-border-strong);
+    font: 600 17px / 1.3 var(--font-ui);
+    color: var(--color-text);
+  }
+  .pl-notice {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    margin-top: var(--space-3);
+    padding: var(--space-3) 14px;
+    border: var(--border-hairline) solid var(--color-border);
+    border-radius: var(--radius-compact);
+    background: var(--color-surface-subtle);
+    font: 400 13px / 1.5 var(--font-ui);
+    color: var(--color-text-soft);
+  }
+  .pl-notice > :is(iconify-icon, svg.lucide) {
+    flex: none;
+    margin-top: 1px;
+    font-size: 18px;
+    color: var(--color-text-muted);
+  }
+  .pl-notice strong {
+    font-weight: 600;
+    color: var(--color-text);
+  }
+  .pl-demo {
+    display: flex;
+    justify-content: center;
+    gap: 6px;
+    margin-top: var(--space-4);
+    text-align: center;
+    font: 400 var(--text-label-sm) / 1.5 var(--font-ui);
+    color: var(--color-text-muted);
+  }
+  .pl-demo > :is(iconify-icon, svg.lucide) {
+    flex: none;
+    margin-top: 2px;
+  }
+
+  /* ---------- Kosong ---------- */
+  .pl-empty {
+    display: grid;
+    justify-items: center;
+    gap: 6px;
+    margin-top: 6px;
+    padding: 40px var(--space-6) 28px;
+    text-align: center;
+    font: 400 var(--text-body-sm) / 1.5 var(--font-ui);
+    color: var(--color-text-muted);
+  }
+  .pl-empty-ico {
+    display: grid;
+    place-items: center;
+    width: 64px;
+    height: 64px;
+    margin-bottom: 6px;
+    border-radius: var(--radius-pill);
+    background: var(--color-surface-muted);
+    color: var(--color-text-muted);
+  }
+  .pl-empty-ico :is(iconify-icon, svg.lucide) {
+    font-size: 28px;
+  }
+  .pl-empty strong {
+    font: 600 var(--text-body-md) / 1.3 var(--font-ui);
+    color: var(--color-text);
+  }
+  .pl-empty .pl-btn {
+    margin-top: var(--space-4);
+    min-width: 200px;
+  }
+  .pl-empty .pl-link {
+    margin-top: var(--space-2);
+  }
+  .pl-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    font: 600 var(--text-body-sm) / 1.4 var(--font-ui);
+    color: var(--color-text);
+    text-decoration: underline;
+    text-decoration-color: var(--color-border-strong);
+    text-underline-offset: 3px;
+  }
+  .pl-link:hover {
+    text-decoration-color: currentColor;
+  }
+
+  /* ---------- Dok bawah (sticky) ---------- */
+  .pl-dock {
+    position: sticky;
+    bottom: 0;
+    z-index: 6;
+    margin-top: auto;
+    padding: var(--space-3) var(--space-4)
+      calc(14px + env(safe-area-inset-bottom));
+    border-block-start: var(--border-hairline) solid var(--color-border);
+    background: var(--color-surface);
+  }
+  .pl-reason {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    margin-bottom: 10px;
+    font: 500 13px / 1.45 var(--font-ui);
+    color: var(--color-text);
+  }
+  .pl-reason :is(iconify-icon, svg.lucide) {
+    flex: none;
+    margin-top: 1px;
+    font-size: 16px;
+    color: var(--color-warning-text);
+  }
+
+  /* ---------- Toast ---------- */
+  .pl-toast {
+    position: fixed;
+    inset: auto auto calc(108px + env(safe-area-inset-bottom)) 50%;
+    max-width: min(400px, calc(100% - 32px));
+    margin: 0;
+    padding: 10px 18px;
+    border: 0;
+    border-radius: var(--radius-control);
+    background: var(--color-primary);
+    color: var(--color-on-primary);
+    font: 500 var(--text-body-sm) / 1.4 var(--font-ui);
+    white-space: normal;
+    text-align: center;
+    text-wrap: balance;
+    transform: translateX(-50%);
+    box-shadow: var(--shadow-nav);
+  }
+
+  @media (min-width: 480px) {
+    .p-pelanggan-keranjang {
+      background: var(--color-surface-muted);
+    }
+    .pl-app {
+      border-inline: var(--border-hairline) solid var(--color-border);
+    }
+  }
+}

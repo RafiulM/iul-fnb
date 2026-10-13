@@ -1,8 +1,14 @@
-import { createFileRoute, Outlet, redirect } from "@tanstack/react-router";
-import { Brand } from "@/components/brand";
+import {
+  createFileRoute,
+  Outlet,
+  redirect,
+  useLocation,
+} from "@tanstack/react-router";
+import { AuthBrandPanel } from "@/components/auth-form";
 import { siteConfig } from "@/config/site";
 
-// Pathless layout: /sign-in and /sign-up. Signed-in visitors go to the app.
+// Pathless layout for /sign-in and /sign-up (design page "login"), rendered on
+// the server. Signed-in visitors go straight to the app.
 export const Route = createFileRoute("/_auth")({
   beforeLoad: ({ context }) => {
     if (context.session) throw redirect({ to: siteConfig.homePath });
@@ -11,16 +17,23 @@ export const Route = createFileRoute("/_auth")({
 });
 
 function AuthLayout() {
+  const signingUp = useLocation({
+    select: (location) => location.pathname.startsWith("/sign-up"),
+  });
   return (
-    <div className="min-h-svh">
-      <header className="mx-auto max-w-6xl px-6 py-6 sm:px-10">
-        <Brand />
-      </header>
+    <div data-page="login">
       <main
         id="main-content"
-        className="mx-auto flex min-h-[75svh] max-w-6xl items-center justify-center px-6 py-12"
+        className="p-login"
+        aria-label={signingUp ? "Buat akun" : "Masuk"}
       >
-        <Outlet />
+        <AuthBrandPanel />
+        <div className="lg-main">
+          <Outlet />
+          <p className="lg-foot">
+            Didukung oleh <strong>{siteConfig.name}</strong>
+          </p>
+        </div>
       </main>
     </div>
   );

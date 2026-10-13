@@ -1,0 +1,150 @@
+/* Pemuat font untuk --font-ui (Inter) dan --font-editorial (IBM Plex Serif), SIL OFL-1.1 via Fontsource CDN */
+@font-face {
+  font-family: "Inter";
+  font-style: normal;
+  font-weight: 100 900;
+  font-display: swap;
+  src: url("https://cdn.jsdelivr.net/fontsource/fonts/inter:vf@5/latin-wght-normal.woff2")
+    format("woff2");
+}
+@font-face {
+  font-family: "IBM Plex Serif";
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url("https://cdn.jsdelivr.net/fontsource/fonts/ibm-plex-serif@5/latin-400-normal.woff2")
+    format("woff2");
+}
+
+:root {
+  color-scheme: light;
+  --color-primary: #000000;
+  --color-primary-hover: #4f4f4f;
+  --color-primary-active: #1d1e1c;
+  --color-secondary: #ffffff;
+  --color-accent: #fa5d00;
+  --color-accent-soft: rgb(250 93 0 / 10%);
+  --color-accent-text: #c1490b;
+  --color-warning-text: #a95d05;
+  --color-on-primary: #ffffff;
+  --color-on-accent: #1d1e1c;
+  --color-canvas: #fbf5f0;
+  --color-canvas-warm: #fff8f1;
+  --color-surface: #ffffff;
+  --color-surface-muted: #f3ebe4;
+  --color-surface-subtle: #f8f5f1;
+  --color-text: #1d1e1c;
+  --color-text-soft: #2c222d;
+  --color-text-muted: #6a696a;
+  --color-text-faint: #858585;
+  --color-border: rgb(29 30 28 / 10%);
+  --color-border-strong: #999999;
+  --color-focus-ring: #fa5d00;
+  --color-positive: #23a40c;
+  --color-warning: #f18d2a;
+  --color-danger: #cb5c5b;
+  --font-editorial: "IBM Plex Serif", ui-serif, Georgia, serif;
+  --font-ui: "Inter", ui-sans-serif, system-ui, sans-serif;
+  --font-display: var(--font-editorial);
+  --font-body: var(--font-ui);
+  --font-sans: var(--font-ui);
+  --font-mono: ui-monospace, monospace;
+  --weight-regular: 400;
+  --weight-medium: 500;
+  --weight-semibold: 600;
+  --weight-bold: 700;
+  --weight-black: 700;
+  --text-label-sm: 12px;
+  --text-label-md: 17px;
+  --text-body-sm: 14px;
+  --text-body-md: 16px;
+  --text-body-lg: 19px;
+  --text-heading-sm: 22px;
+  --text-heading-md: 30px;
+  --text-heading-lg: 50px;
+  --text-display-page: clamp(48px, 5vw, 60px);
+  --text-display-hero: clamp(52px, 6vw, 70px);
+  --leading-label-sm: 1.33;
+  --leading-label-md: 1.18;
+  --leading-body-sm: 1.5;
+  --leading-body-md: 1.5;
+  --leading-body-lg: 1.4;
+  --leading-heading-sm: 1.2;
+  --leading-heading-md: 1.2;
+  --leading-heading-lg: 1.1;
+  --leading-display-page: 1.1;
+  --leading-display-hero: 1.1;
+  --leading-solid: 1;
+  --leading-tight: 1.2;
+  --leading-normal: 1.5;
+  --leading-relaxed: 1.6;
+  --tracking-label: -0.17px;
+  --tracking-heading: -0.9px;
+  --tracking-display: -2.8px;
+  --spacing-4: 4px;
+  --spacing-8: 8px;
+  --spacing-12: 12px;
+  --spacing-16: 16px;
+  --spacing-20: 20px;
+  --spacing-24: 24px;
+  --spacing-32: 32px;
+  --spacing-40: 40px;
+  --spacing-64: 64px;
+  --spacing-80: 80px;
+  --space-1: var(--spacing-4);
+  --space-2: var(--spacing-8);
+  --space-3: var(--spacing-12);
+  --space-4: var(--spacing-16);
+  --space-6: var(--spacing-24);
+  --space-8: var(--spacing-40);
+  --space-12: var(--spacing-80);
+  --radius-compact: 10px;
+  --radius-image: 16px;
+  --radius-card: 20px;
+  --radius-control: 30px;
+  --radius-pill: 9999px;
+  --border-hairline: 1px;
+  --shadow-sm: 0 0 14px rgb(0 0 0 / 7%);
+  --shadow-md: 0 4px 9.9px rgb(123 85 31 / 21%);
+  --shadow-nav: 0 14px 14px rgb(0 0 0 / 10%);
+  --duration-fast: 200ms;
+  --duration-base: 300ms;
+  --ease-standard: ease;
+  --container-page: 1280px;
+  --container-work: 1200px;
+}
+
+html {
+  background: var(--color-canvas);
+  color: var(--color-text);
+  font-family: var(--font-body);
+}
+
+body {
+  margin: 0;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+::selection {
+  background: var(--color-accent-soft);
+  color: var(--color-text);
+}
+
+:focus-visible {
+  outline: 2px solid var(--color-focus-ring);
+  outline-offset: 3px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    scroll-behavior: auto !important;
+    transition-duration: 0.01ms !important;
+  }
+}

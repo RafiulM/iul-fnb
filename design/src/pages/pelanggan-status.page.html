@@ -1,0 +1,445 @@
+<!-- dpai:page {"scoped":true,"typography":true} -->
+<style>
+  .p-pelanggan-status { min-height: 100vh; min-height: 100dvh; background: var(--color-canvas); color: var(--color-text); font: 400 var(--text-body-md) / var(--leading-body-md) var(--font-ui); letter-spacing: -0.14px; -webkit-tap-highlight-color: transparent; }
+  :where(button, input, textarea) { font: inherit; color: inherit; letter-spacing: inherit; }
+  :where(h1, h2, h3, p, dl, dd) { margin: 0; }
+  :where(ul, ol) { margin: 0; padding: 0; list-style: none; }
+  .pc-sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+
+  .pc-app { position: relative; max-width: 440px; min-height: 100vh; min-height: 100dvh; margin: 0 auto; padding-bottom: calc(28px + env(safe-area-inset-bottom)); background: var(--color-canvas); }
+
+  /* ---------- Bilah atas ---------- */
+  .pc-bar { position: sticky; top: 0; z-index: 5; display: grid; grid-template-columns: 40px minmax(0, 1fr) 40px; align-items: center; gap: var(--space-3); padding: 10px var(--space-4); border-block-end: var(--border-hairline) solid var(--color-border); background: var(--color-canvas); }
+  .pc-bar-title { display: grid; justify-items: center; gap: 1px; min-width: 0; text-align: center; }
+  .pc-bar-title strong { font: 600 15px / 1.2 var(--font-ui); letter-spacing: -0.15px; }
+  .pc-bar-title span { max-width: 100%; overflow: hidden; font: 400 var(--text-label-sm) / 1.35 var(--font-ui); color: var(--color-text-muted); white-space: nowrap; text-overflow: ellipsis; }
+  .pc-mono { flex: none; display: grid; place-items: center; width: 40px; height: 40px; border-radius: var(--radius-compact); background: var(--color-primary); color: var(--color-on-primary); font: 600 14px / 1 var(--font-ui); letter-spacing: 0.5px; }
+  .pc-iconbtn { flex: none; display: grid; place-items: center; width: 40px; height: 40px; padding: 0; border: var(--border-hairline) solid var(--color-border); border-radius: var(--radius-pill); background: var(--color-surface); color: var(--color-text); text-decoration: none; cursor: pointer; transition: border-color var(--duration-fast) var(--ease-standard); }
+  .pc-iconbtn:hover { border-color: var(--color-border-strong); }
+  .pc-iconbtn iconify-icon { font-size: 18px; }
+
+  /* ---------- Kepala editorial ---------- */
+  .pc-st-head { padding: 28px var(--space-6) 0; text-align: center; }
+  .pc-st-icon { display: grid; place-items: center; width: 72px; height: 72px; margin: 0 auto; border: var(--border-hairline) solid var(--color-border); border-radius: var(--radius-pill); background: var(--color-surface); font-size: 34px; line-height: 1; user-select: none; }
+  .pc-st-head h1 { margin-top: var(--space-4); font: 400 34px / 1.1 var(--font-editorial); letter-spacing: -1px; text-wrap: balance; }
+  .pc-st-head p { max-width: 320px; margin: var(--space-2) auto 0; font: 400 var(--text-body-sm) / 1.5 var(--font-ui); color: var(--color-text-muted); text-wrap: pretty; }
+
+  .pc-st-meta { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); margin: 22px var(--space-4) 0; padding: var(--space-3) 4px; border: var(--border-hairline) solid var(--color-border); border-radius: var(--radius-image); background: var(--color-surface); text-align: center; }
+  .pc-st-meta div + div { border-inline-start: var(--border-hairline) solid var(--color-border); }
+  .pc-st-meta dt { font: 500 var(--text-label-sm) / 1.3 var(--font-ui); color: var(--color-text-muted); }
+  .pc-st-meta dd { margin-top: 3px; font: 600 17px / 1.2 var(--font-ui); font-variant-numeric: tabular-nums; }
+
+  /* ---------- Linimasa ---------- */
+  .pc-timeline { margin: 14px var(--space-4) 0; padding: 18px 18px 2px; border: var(--border-hairline) solid var(--color-border); border-radius: var(--radius-card); background: var(--color-surface); }
+  .pc-step { position: relative; display: grid; grid-template-columns: 36px minmax(0, 1fr) auto; gap: var(--space-3); padding-bottom: 18px; }
+  .pc-step:not(:last-child)::before { content: ""; position: absolute; inset-inline-start: 17px; top: 40px; bottom: 4px; width: 2px; border-radius: 2px; background: var(--color-border); }
+  .pc-step[data-state="done"]::before { background: var(--color-primary); }
+  .pc-dot { display: grid; place-items: center; width: 36px; height: 36px; border: 2px solid transparent; border-radius: var(--radius-pill); background: var(--color-surface-muted); font-size: 17px; line-height: 1; }
+  .pc-dot iconify-icon { font-size: 16px; }
+  .pc-step[data-state="todo"] .pc-dot > span { filter: grayscale(1); opacity: 0.5; }
+  .pc-step[data-state="done"] .pc-dot { border-color: var(--color-primary); background: var(--color-primary); color: var(--color-on-primary); }
+  .pc-step[data-state="current"] .pc-dot { border-color: var(--color-accent); background: var(--color-surface); box-shadow: 0 0 0 4px var(--color-accent-soft); }
+  .pc-step[data-state="cancelled"] .pc-dot { border-color: var(--color-danger); background: var(--color-surface); color: var(--color-danger); }
+  .pc-step strong { display: block; margin-top: 2px; font: 600 15px / 1.3 var(--font-ui); letter-spacing: -0.15px; }
+  .pc-step p { margin-top: 1px; font: 400 13px / 1.4 var(--font-ui); color: var(--color-text-muted); }
+  .pc-step[data-state="todo"] strong { font-weight: 500; color: var(--color-text-muted); }
+  .pc-step time { margin-top: 4px; font: 500 var(--text-label-sm) / 1.3 var(--font-ui); color: var(--color-text-muted); font-variant-numeric: tabular-nums; }
+  .pc-step[data-state="current"] time { color: var(--color-text); font-weight: 600; }
+
+  /* ---------- Chip ---------- */
+  .pc-chip { display: inline-flex; align-items: center; gap: 6px; padding: 3px 10px; border: var(--border-hairline) solid var(--color-border); border-radius: var(--radius-pill); background: var(--color-surface-muted); color: var(--color-text-soft); font: 600 var(--text-label-sm) / var(--leading-label-sm) var(--font-ui); white-space: nowrap; }
+  .pc-chip::before { content: ""; flex: none; width: 6px; height: 6px; border-radius: var(--radius-pill); background: var(--pc-tone, var(--color-border-strong)); }
+  .pc-chip[data-tone="positive"] { --pc-tone: var(--color-positive); }
+  .pc-chip[data-tone="warning"] { --pc-tone: var(--color-warning); }
+  .pc-chip[data-tone="danger"] { --pc-tone: var(--color-danger); }
+  .pc-chip[data-tone="accent"] { --pc-tone: var(--color-accent); }
+  .pc-chip[data-tone="dark"] { border-color: var(--color-primary); background: var(--color-primary); color: var(--color-on-primary); }
+  .pc-chip[data-tone="plain"]::before, .pc-chip[data-tone="dark"]::before { display: none; }
+
+  /* ---------- Rincian pesanan ---------- */
+  .pc-receipt { margin: 14px var(--space-4) 0; padding: var(--space-4); border: var(--border-hairline) solid var(--color-border); border-radius: var(--radius-card); background: var(--color-surface); }
+  .pc-receipt-head { display: flex; align-items: center; justify-content: space-between; gap: var(--space-3); margin-bottom: var(--space-3); }
+  .pc-receipt-head h2 { font: 600 16px / 1.3 var(--font-ui); letter-spacing: -0.16px; }
+  .pc-r-items { display: grid; gap: 10px; font: 400 var(--text-body-sm) / 1.4 var(--font-ui); }
+  .pc-r-items li { display: grid; grid-template-columns: 28px minmax(0, 1fr) auto; gap: 6px; }
+  .pc-r-items .q, .pc-r-items .p { font-weight: 600; font-variant-numeric: tabular-nums; }
+  .pc-r-items small { display: flex; align-items: center; gap: 4px; margin-top: 2px; font: 500 var(--text-label-sm) / 1.4 var(--font-ui); font-style: italic; color: var(--color-warning-text); }
+  .pc-sum { display: grid; gap: var(--space-2); margin-top: var(--space-4); padding-top: 14px; border-block-start: var(--border-hairline) dashed var(--color-border-strong); font: 400 var(--text-body-sm) / 1.4 var(--font-ui); color: var(--color-text-muted); }
+  .pc-sum div { display: flex; justify-content: space-between; gap: var(--space-3); }
+  .pc-sum span:last-child { font-variant-numeric: tabular-nums; }
+  .pc-sum .pc-total { padding-top: 4px; font: 600 17px / 1.3 var(--font-ui); color: var(--color-text); }
+  [data-cancelled] .pc-sum .pc-total span:last-child { text-decoration: line-through; text-decoration-color: var(--color-text-muted); }
+  .pc-notice { display: flex; align-items: flex-start; gap: 10px; margin-top: var(--space-4); padding: var(--space-3) 14px; border: var(--border-hairline) solid var(--color-border); border-radius: var(--radius-compact); background: var(--color-surface-subtle); font: 400 13px / 1.5 var(--font-ui); color: var(--color-text-soft); }
+  .pc-notice > iconify-icon { flex: none; margin-top: 1px; font-size: 18px; color: var(--color-text-muted); }
+  .pc-notice[data-tone="positive"] > iconify-icon { color: var(--color-positive); }
+  .pc-notice strong { font-weight: 600; color: var(--color-text); }
+
+  /* ---------- Catatan sinkronisasi ---------- */
+  .pc-sync { display: flex; align-items: flex-start; gap: 10px; margin: 14px var(--space-4) 0; padding: var(--space-3) 14px; border: var(--border-hairline) solid var(--color-border); border-radius: var(--radius-image); background: var(--color-surface); font: 400 13px / 1.5 var(--font-ui); color: var(--color-text-muted); }
+  .pc-sync[data-mode="sim"] { border-style: dashed; border-color: var(--color-border-strong); background: transparent; }
+  .pc-sync > iconify-icon { flex: none; margin-top: 1px; font-size: 18px; color: var(--color-text-muted); }
+  .pc-sync[data-mode="live"] > iconify-icon { color: var(--color-positive); }
+  .pc-sync strong { display: block; margin-bottom: 1px; font: 600 var(--text-body-sm) / 1.4 var(--font-ui); color: var(--color-text); }
+  .pc-sync a { color: var(--color-text); font-weight: 600; text-underline-offset: 3px; }
+
+  /* ---------- Tombol ---------- */
+  .pc-actions { display: grid; gap: 10px; margin: var(--space-4) var(--space-4) 0; }
+  .pc-btn { display: inline-flex; align-items: center; justify-content: center; gap: var(--space-2); min-height: 48px; padding: 10px var(--space-6); border: var(--border-hairline) solid var(--color-border-strong); border-radius: var(--radius-control); background: var(--color-surface); color: var(--color-text); font: 500 16px / 1.2 var(--font-ui); letter-spacing: -0.2px; text-decoration: none; white-space: nowrap; cursor: pointer; transition: background-color var(--duration-fast) var(--ease-standard), border-color var(--duration-fast) var(--ease-standard), color var(--duration-fast) var(--ease-standard); }
+  .pc-btn:hover { border-color: var(--color-text); }
+  .pc-btn iconify-icon { font-size: 18px; }
+  .pc-btn[data-variant="primary"] { min-height: 52px; border-color: var(--color-primary); background: var(--color-primary); color: var(--color-on-primary); }
+  .pc-btn[data-variant="primary"]:hover { border-color: var(--color-primary-hover); background: var(--color-primary-hover); }
+  .pc-btn[data-variant="primary"]:active { background: var(--color-primary-active); }
+  .pc-btn[data-block] { width: 100%; }
+
+  /* ---------- Kosong ---------- */
+  .pc-howto { display: grid; gap: var(--space-3); margin: 22px var(--space-4) 0; padding: var(--space-4) 18px; border: var(--border-hairline) solid var(--color-border); border-radius: var(--radius-card); background: var(--color-surface); counter-reset: pc-s; }
+  .pc-howto h2 { font: 600 var(--text-body-sm) / 1.4 var(--font-ui); color: var(--color-text-muted); }
+  .pc-howto li { display: flex; align-items: flex-start; gap: var(--space-3); font: 500 var(--text-body-sm) / 1.45 var(--font-ui); counter-increment: pc-s; }
+  .pc-howto li::before { content: counter(pc-s); flex: none; display: grid; place-items: center; width: 24px; height: 24px; border: var(--border-hairline) solid var(--color-text); border-radius: var(--radius-pill); font: 600 12px / 1 var(--font-ui); }
+  .pc-howto ol { display: grid; gap: var(--space-3); }
+
+  .pc-foot { padding: 28px var(--space-6) 0; text-align: center; font: 400 var(--text-label-sm) / 1.6 var(--font-ui); color: var(--color-text-muted); }
+  .pc-foot strong { font-weight: 600; color: var(--color-text); }
+
+  /* ---------- Toast ---------- */
+  .pc-toast { position: fixed; inset: auto auto calc(28px + env(safe-area-inset-bottom)) 50%; max-width: min(400px, calc(100% - 32px)); margin: 0; padding: 10px 18px; overflow: hidden; border: 0; border-radius: var(--radius-control); background: var(--color-primary); color: var(--color-on-primary); font: 500 var(--text-body-sm) / 1.4 var(--font-ui); white-space: nowrap; text-overflow: ellipsis; transform: translateX(-50%); box-shadow: var(--shadow-nav); }
+
+  @media (min-width: 480px) {
+    .p-pelanggan-status { background: var(--color-surface-muted); }
+    .pc-app { border-inline: var(--border-hairline) solid var(--color-border); }
+  }
+</style>
+
+<template data-slot="content">
+  <main aria-label="Status Pesanan" class="p-pelanggan-status" data-node-id="pelanggan-status">
+    <div class="pc-app" data-node-id="pelanggan-status.app">
+      <header class="pc-bar" data-node-id="pelanggan-status.bar">
+        <a class="pc-iconbtn" href="#/pelanggan" data-route-link aria-label="Kembali ke menu"><iconify-icon icon="lucide:chevron-left" aria-hidden="true"></iconify-icon></a>
+        <div class="pc-bar-title"><strong>Status pesanan</strong><span data-part="bar-sub">Kedai Senja · Meja 07</span></div>
+        <span class="pc-mono" aria-hidden="true">KS</span>
+      </header>
+
+      <section class="pc-st-head" aria-labelledby="pelanggan-status-title" data-node-id="pelanggan-status.head">
+        <span class="pc-st-icon" aria-hidden="true" data-part="icon">👩‍🍳</span>
+        <h1 id="pelanggan-status-title" data-part="title">Pesananmu sedang dibuat</h1>
+        <p data-part="sub">Dapur sedang menyiapkan pesanan. Tunggu sebentar, ya.</p>
+        <p class="pc-sr" role="status" aria-live="polite" data-part="announce"></p>
+      </section>
+
+      <div data-part="order-view" data-node-id="pelanggan-status.order">
+        <dl class="pc-st-meta" data-node-id="pelanggan-status.meta">
+          <div><dt>No. pesanan</dt><dd data-part="code">A-108</dd></div>
+          <div><dt>Meja</dt><dd data-part="table">07</dd></div>
+          <div><dt>Dipesan</dt><dd data-part="time">–</dd></div>
+        </dl>
+
+        <ol class="pc-timeline" aria-label="Progres pesanan" data-part="timeline" data-node-id="pelanggan-status.timeline"></ol>
+
+        <section class="pc-receipt" aria-labelledby="pelanggan-status-rc" data-part="receipt" data-node-id="pelanggan-status.receipt">
+          <div class="pc-receipt-head"><h2 id="pelanggan-status-rc">Rincian pesanan</h2><span class="pc-chip" data-tone="warning" data-part="pay">Belum dibayar</span></div>
+          <ul class="pc-r-items" data-part="items"></ul>
+          <div class="pc-sum" data-part="sum"></div>
+          <div class="pc-notice" data-part="pay-note"><iconify-icon icon="lucide:receipt" aria-hidden="true"></iconify-icon><span>Sebutkan nomor pesanan saat membayar di kasir.</span></div>
+        </section>
+
+        <div class="pc-sync" data-mode="sim" data-part="sync" data-node-id="pelanggan-status.sync"></div>
+
+        <div class="pc-actions">
+          <a class="pc-btn" data-block href="#/pelanggan" data-route-link data-node-id="pelanggan-status.more"><iconify-icon icon="lucide:plus" aria-hidden="true"></iconify-icon>Pesan menu lain</a>
+        </div>
+      </div>
+
+      <div data-part="empty-view" data-node-id="pelanggan-status.empty" hidden>
+        <section class="pc-howto" aria-labelledby="pelanggan-status-howto">
+          <h2 id="pelanggan-status-howto">Cara memesan dari meja</h2>
+          <ol>
+            <li>Pilih menu, atur jumlah, dan tambah catatan</li>
+            <li>Periksa keranjang, lalu kirim pesanan</li>
+            <li>Pantau statusnya di halaman ini sampai diantar</li>
+          </ol>
+        </section>
+        <div class="pc-actions">
+          <a class="pc-btn" data-variant="primary" data-block href="#/pelanggan" data-route-link><iconify-icon icon="lucide:utensils" aria-hidden="true"></iconify-icon>Lihat menu</a>
+        </div>
+      </div>
+
+      <p class="pc-foot">Pembayaran tunai atau non-tunai dilakukan di kasir.<br><br>Didukung oleh <strong>IUL FnB</strong></p>
+    </div>
+
+    <div class="pc-toast" popover="manual" role="status" data-part="toast"></div>
+  </main>
+</template>
+
+<script>
+  /* ===== Kontrak data lintas halaman (CONTRACTS.md — salinan apa adanya) ===== */
+  const KEY = { cust: "iulfnb:cust", pos: "iulfnb:pos", live: "iulfnb:orders-live", beat: "iulfnb:kasir-beat", seq: "iulfnb:seq", role: "iulfnb:role" };
+  const SEQ_BASE = 107;
+  const ls = {
+    get(k, d) { try { const v = localStorage.getItem(k); return v == null ? d : JSON.parse(v); } catch { return d; } },
+    set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch {} },
+    del(k) { try { localStorage.removeItem(k); } catch {} },
+  };
+  function nextOrderCode() {
+    const n = Math.max(ls.get(KEY.seq, SEQ_BASE), SEQ_BASE) + 1;
+    ls.set(KEY.seq, n);
+    return "A-" + String(n).padStart(3, "0");
+  }
+  const kasirOnline = () => Date.now() - ls.get(KEY.beat, 0) < 5000;
+  /** Jam operasional (sama dengan halaman Pengaturan): 0 = Minggu … 6 = Sabtu */
+  const HOURS = { 0: ["08:00", "22:00"], 1: ["08:00", "22:00"], 2: ["08:00", "22:00"], 3: ["08:00", "22:00"], 4: ["08:00", "22:00"], 5: ["08:00", "22:00"], 6: ["08:00", "23:00"] };
+  function isCafeOpen(d = new Date()) {
+    const [o, c] = HOURS[d.getDay()] || [];
+    if (!o) return false;
+    const m = d.getHours() * 60 + d.getMinutes(), t = (s) => +s.slice(0, 2) * 60 + +s.slice(3);
+    return m >= t(o) && m < t(c);
+  }
+
+  const custEmpty = (table = "07") => ({ v: 1, table, invalid_table: null, cart: [], selected: "m1", edit_key: null, order: null, browse_only: false, force_open: false, flash: null, demo: false });
+  const custDemo = () => ({ ...custEmpty("07"), demo: true, cart: [
+    { key: "m1|tidak pedas", menu_id: "m1", qty: 2, note: "Tidak pedas" },
+    { key: "d1|es sedikit", menu_id: "d1", qty: 1, note: "Es sedikit" },
+    { key: "s1|", menu_id: "s1", qty: 1, note: "" },
+  ] });
+  function loadCust(fallback = custEmpty) { const s = ls.get(KEY.cust, null); return s && s.v === 1 ? s : fallback(); }
+  function saveCust(s) { s.updated_at = new Date().toISOString(); ls.set(KEY.cust, s); }
+  const lineKey = (menuId, note) => menuId + "|" + String(note || "").trim().toLowerCase();
+
+  function pushLive(order) {
+    const live = ls.get(KEY.live, []).filter((x) => Date.now() - new Date(x.created_at) < 12 * 3600e3);
+    live.push({ code: order.code, table: order.table, order_type: "QR", status: "MENUNGGU", payment_status: "BELUM", created_at: order.created_at,
+      items: order.items.map((i) => ({ menu_id: i.menu_id, name: i.name, price: i.price, qty: i.qty, note: i.note })) });
+    ls.set(KEY.live, live);
+  }
+
+  const STEP_KEYS = ["MENUNGGU", "DIPROSES", "SIAP", "DIANTAR"];
+  const SIM_MS = [6000, 13000, 20000]; // simulasi tanpa kasir: Diproses, Siap, Diantar sejak dipesan
+  /** Kembalikan { idx 0..3, cancelled, paid } dan perbarui order.times (mutasi; simpan sesi bila berubah) */
+  function orderStatus(order) {
+    const live = ls.get(KEY.live, []).find((x) => x.code === order.code);
+    const created = Date.parse(order.created_at);
+    let idx = 0;
+    if (!order.driven) idx = SIM_MS.filter((ms) => Date.now() - created >= ms).length;
+    if (live) idx = Math.max(idx, Math.min(3, Math.max(0, ["MENUNGGU", "DIPROSES", "SIAP", "DIANTAR", "SELESAI"].indexOf(live.status))));
+    const cancelled = live?.status === "DIBATALKAN";
+    const paid = live?.payment_status === "LUNAS";
+    for (let i = 1; i <= idx; i++) if (!order.times[i]) order.times[i] = !order.driven && i <= SIM_MS.length ? new Date(created + SIM_MS[i - 1]).toISOString() : new Date().toISOString();
+    if (live && !order.driven && live.status !== STEP_KEYS[idx] && !cancelled && !["SELESAI"].includes(live.status)) { live.status = STEP_KEYS[idx]; ls.set(KEY.live, ls.get(KEY.live, []).map((x) => x.code === live.code ? live : x)); }
+    return { idx, cancelled, paid };
+  }
+
+  /* ===== Data tiruan (sama dengan halaman pelanggan) ===== */
+  const SETTINGS = { cafe_name: "Kedai Senja", address: "Jl. Kaliurang Km 5, Yogyakarta", tax_percent: 10 };
+  const MENUS = [
+    { id: "m1", category_id: "makanan", name: "Nasi Goreng Kampung", price: 32000, image_url: "https://images.unsplash.com/photo-1680674774705-90b4904b3a7f?w=640&h=640&fit=crop&auto=format&q=75" },
+    { id: "m2", category_id: "makanan", name: "Ayam Geprek Sambal Matah", price: 35000, image_url: "https://images.unsplash.com/photo-1569058242252-623df46b5025?w=640&h=640&fit=crop&auto=format&q=75" },
+    { id: "m3", category_id: "makanan", name: "Mie Goreng Jawa", price: 30000, image_url: "https://images.unsplash.com/photo-1645696329525-8ec3bee460a9?w=640&h=640&fit=crop&auto=format&q=75" },
+    { id: "m4", category_id: "makanan", name: "Rice Bowl Chicken Teriyaki", price: 36000, image_url: "https://images.unsplash.com/photo-1636401870585-a8852371e84a?w=640&h=640&fit=crop&auto=format&q=75" },
+    { id: "m5", category_id: "makanan", name: "Nasi Ayam Bakar Madu", price: 38000, image_url: "https://images.unsplash.com/photo-1672856399675-8c099efbe0e2?w=640&h=640&fit=crop&auto=format&q=75" },
+    { id: "d1", category_id: "minuman", name: "Kopi Susu Gula Aren", price: 22000, image_url: "https://images.unsplash.com/photo-1589985902809-39d25db22101?w=640&h=640&fit=crop&auto=format&q=75" },
+    { id: "d2", category_id: "minuman", name: "Es Americano", price: 20000, image_url: "https://images.unsplash.com/photo-1581996323441-538096e854b9?w=640&h=640&fit=crop&auto=format&q=75" },
+    { id: "d3", category_id: "minuman", name: "Matcha Latte", price: 28000, image_url: "https://images.unsplash.com/photo-1749280447307-31a68eb38673?w=640&h=640&fit=crop&auto=format&q=75" },
+    { id: "d4", category_id: "minuman", name: "Es Teh Manis", price: 10000, image_url: "https://images.unsplash.com/photo-1556679343-c7306c1976bc?w=640&h=640&fit=crop&auto=format&q=75" },
+    { id: "d5", category_id: "minuman", name: "Lemon Tea", price: 15000, image_url: "https://images.unsplash.com/photo-1758705206938-a196ac3ae3bb?w=640&h=640&fit=crop&auto=format&q=75" },
+    { id: "d6", category_id: "minuman", name: "Jus Alpukat", price: 25000, image_url: "https://images.unsplash.com/photo-1630252595285-3bbcb51378d8?w=640&h=640&fit=crop&auto=format&q=75" },
+    { id: "s1", category_id: "lainnya", name: "Kentang Goreng", price: 20000, image_url: "https://images.unsplash.com/photo-1518013431117-eb1465fa5752?w=640&h=640&fit=crop&auto=format&q=75" },
+    { id: "s2", category_id: "lainnya", name: "Pisang Goreng Keju", price: 18000, image_url: "https://images.unsplash.com/photo-1762941904142-9d91ca413e66?w=640&h=640&fit=crop&auto=format&q=75" },
+    { id: "s3", category_id: "lainnya", name: "Roti Bakar Cokelat Keju", price: 22000, image_url: "https://images.unsplash.com/photo-1693835791992-ae0c42f7074d?w=640&h=640&fit=crop&auto=format&q=75" },
+    { id: "s4", category_id: "lainnya", name: "Croissant Butter", price: 24000, image_url: "https://images.unsplash.com/photo-1691480162735-9b91238080f6?w=640&h=640&fit=crop&auto=format&q=75" },
+    { id: "s5", category_id: "lainnya", name: "Air Mineral", price: 8000, image_url: "https://images.unsplash.com/photo-1616118132534-381148898bb4?w=640&h=640&fit=crop&auto=format&q=75" },
+  ];
+  const menuById = Object.fromEntries(MENUS.map((m) => [m.id, m]));
+  const STEPS = [
+    { icon: "🧾", label: "Pesanan diterima", desc: "Kasir sudah menerima pesananmu", title: "Pesanan terkirim!", sub: "Kasir sudah menerima pesananmu dan akan segera memprosesnya." },
+    { icon: "👩‍🍳", label: "Sedang diproses", desc: "Dapur sedang menyiapkan pesanan", title: "Pesananmu sedang dibuat", sub: "Dapur sedang menyiapkan pesanan. Tunggu sebentar, ya." },
+    { icon: "🛎️", label: "Siap diantar", desc: "Pesanan sudah siap dan segera diantar", title: "Pesanan siap!", sub: "Pesananmu segera diantar ke mejamu." },
+    { icon: "🍽️", label: "Sudah diantar", desc: "Selamat menikmati!", title: "Selamat menikmati!", sub: "Pesanan sudah diantar. Jangan lupa bayar di kasir, ya." },
+  ];
+
+  /* ===== Util ===== */
+  const $ = (part) => root.querySelector(`[data-part="${part}"]`);
+  const rp = (n) => "Rp " + Math.round(n).toLocaleString("id-ID");
+  const esc = (s) => String(s ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+  const hhmm = (d) => new Date(d).toLocaleTimeString("id-ID", { hour: "2-digit", minute: "2-digit" });
+  const icon = (name, size = 18) => `<iconify-icon icon="lucide:${name}" aria-hidden="true" style="font-size:${size}px"></iconify-icon>`;
+  const reduceMotion = () => matchMedia("(prefers-reduced-motion: reduce)").matches;
+  const motion = (el, frames, opts = {}) => {
+    if (!el?.animate || reduceMotion()) return;
+    try { el.animate(frames, { duration: 280, easing: "cubic-bezier(.2,.8,.2,1)", ...opts }); } catch {}
+  };
+  const totalsOf = (items) => {
+    const sub = items.reduce((a, l) => a + l.price * l.qty, 0);
+    const tax = Math.round(sub * SETTINGS.tax_percent / 100);
+    return { sub, tax, total: sub + tax, count: items.reduce((a, l) => a + l.qty, 0) };
+  };
+  /** Isi DOM hanya bila berubah (tick tiap detik tidak mengganggu fokus/hover). */
+  const painted = {};
+  function put(part, value, prop = "innerHTML") {
+    const k = part + ":" + prop;
+    if (painted[k] === value) return false;
+    painted[k] = value;
+    $(part)[prop] = value;
+    return true;
+  }
+
+  /* ===== Toast ===== */
+  const toastEl = $("toast");
+  let toastTimer;
+  function toast(msg) {
+    toastEl.textContent = msg;
+    try { if (toastEl.matches(":popover-open")) toastEl.hidePopover(); toastEl.showPopover(); } catch {}
+    motion(toastEl, [{ opacity: 0, transform: "translate(-50%, 12px)" }, { opacity: 1, transform: "translate(-50%, 0)" }], { duration: 200 });
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(hideToast, 2600);
+  }
+  function hideToast() { try { if (toastEl.matches(":popover-open")) toastEl.hidePopover(); } catch {} }
+  onCleanup(() => { clearTimeout(toastTimer); hideToast(); });
+
+  /* ===== Sesi & pesanan demo (frame kanvas) ===== */
+  function demoOrder() {
+    const created = new Date(Date.now() - 8000).toISOString();
+    const items = custDemo().cart.map((l) => { const m = menuById[l.menu_id]; return { menu_id: l.menu_id, name: m.name, price: m.price, qty: l.qty, note: l.note }; });
+    return { code: "A-108", table: "07", created_at: created, items, ...totalsOf(items), driven: false, times: [created, null, null, null], payment_status: "BELUM", cancelled: false };
+  }
+  function seedDemo(base) {
+    const s = { ...base, demo: true, order: demoOrder() };
+    // Buang entri jembatan lama dengan kode yang sama agar status lama (mis. batal) tidak terbawa
+    ls.set(KEY.live, ls.get(KEY.live, []).filter((x) => x.code !== s.order.code));
+    pushLive(s.order);
+    ls.set(KEY.seq, Math.max(ls.get(KEY.seq, SEQ_BASE), 108));
+    saveCust(s);
+    return s;
+  }
+  /** Tanpa sesi, atau sesi demo tanpa pesanan → pesanan demo. Sesi nyata tanpa pesanan → kosong. */
+  function session() {
+    const s = ls.get(KEY.cust, null);
+    if (!s || s.v !== 1) return seedDemo(custDemo());
+    if (!s.order && s.demo) return seedDemo(s);
+    return s;
+  }
+
+  /* ===== Render ===== */
+  let lastMark = null;
+  function stepRow(st, state, t) {
+    const dot = state === "done" ? icon("check", 16) : state === "cancelled" ? icon("x", 16) : `<span>${st.icon}</span>`;
+    const sr = { done: " (selesai)", current: " (sekarang)", todo: " (belum)", cancelled: "" }[state];
+    return `<li class="pc-step" data-state="${state}"${state === "current" ? ' aria-current="step"' : ""}>
+      <span class="pc-dot" aria-hidden="true">${dot}</span>
+      <div><strong>${esc(st.label)}<span class="pc-sr">${sr}</span></strong><p>${esc(st.desc)}</p></div>
+      ${t ? `<time datetime="${esc(t)}">${hhmm(t)}</time>` : "<span></span>"}
+    </li>`;
+  }
+  function paintEmpty(s) {
+    const table = s.table || "07";
+    put("bar-sub", `${SETTINGS.cafe_name} · Meja ${table}`, "textContent");
+    put("icon", "🧾", "textContent");
+    put("title", "Belum ada pesanan", "textContent");
+    put("sub", `Pesanan yang kamu kirim dari Meja ${table} akan muncul di sini, lengkap dengan statusnya.`, "textContent");
+    $("order-view").hidden = true;
+    $("empty-view").hidden = false;
+    document.title = `Status pesanan — ${SETTINGS.cafe_name} | IUL FnB`;
+    lastMark = "empty";
+  }
+  function paintOrder(o, st) {
+    const cancelled = !!o.cancelled, paid = o.payment_status === "LUNAS", idx = st.idx;
+    const step = STEPS[idx], t = o.sub != null ? o : { ...o, ...totalsOf(o.items) };
+    $("order-view").hidden = false;
+    $("empty-view").hidden = true;
+
+    // Kepala editorial
+    const title = cancelled ? "Pesanan dibatalkan" : step.title;
+    const sub = cancelled
+      ? (paid ? "Kasir membatalkan pesanan ini. Pembayaranmu sudah tercatat, kasir akan membantu mengembalikannya."
+              : "Kasir membatalkan pesanan ini, biasanya karena ada menu yang habis. Kamu tidak perlu membayar apa pun. Tanyakan ke kasir bila ingin memesan ulang.")
+      : idx === 2 ? `Pesananmu segera diantar ke Meja ${o.table}.`
+      : idx === 3 && paid ? "Pesanan sudah diantar dan pembayaran lunas. Terima kasih sudah mampir!"
+      : step.sub;
+    put("icon", cancelled ? "🙏" : step.icon, "textContent");
+    put("title", title, "textContent");
+    put("sub", sub, "textContent");
+    put("bar-sub", `${SETTINGS.cafe_name} · Meja ${o.table}`, "textContent");
+    const mark = `${o.code}|${idx}|${cancelled}|${paid}`;
+    if (mark !== lastMark) {
+      if (lastMark && lastMark !== "empty") motion($("icon"), [{ opacity: 0, transform: "scale(.6)" }, { opacity: 1, transform: "scale(1)" }], { duration: 300 });
+      $("announce").textContent = cancelled ? `Pesanan ${o.code} dibatalkan kasir` : `Pesanan ${o.code}: ${step.label}${paid ? ", sudah lunas" : ""}`;
+      lastMark = mark;
+    }
+
+    // Ringkasan
+    put("code", o.code, "textContent");
+    put("table", o.table, "textContent");
+    put("time", hhmm(o.created_at), "textContent");
+
+    // Linimasa
+    let rows;
+    if (cancelled) {
+      const cut = Date.parse(o.cancelled_at) || Date.now();
+      let n = 1;
+      while (n < STEPS.length && o.times[n] && Date.parse(o.times[n]) <= cut) n++;
+      rows = STEPS.slice(0, n).map((s, i) => stepRow(s, "done", o.times[i])).join("")
+        + stepRow({ label: "Dibatalkan kasir", desc: "Pesanan tidak dilanjutkan" }, "cancelled", o.cancelled_at);
+    } else {
+      rows = STEPS.map((s, i) => stepRow(s, i < idx ? "done" : i === idx ? (i === STEPS.length - 1 ? "done" : "current") : "todo", i <= idx ? o.times[i] : null)).join("");
+    }
+    put("timeline", rows);
+
+    // Rincian & pembayaran
+    if (cancelled) $("receipt").dataset.cancelled = ""; else delete $("receipt").dataset.cancelled;
+    const pay = $("pay");
+    pay.textContent = paid ? "Lunas" : cancelled ? "Tidak ditagih" : "Belum dibayar";
+    pay.dataset.tone = paid ? "positive" : cancelled ? "plain" : "warning";
+    put("items", o.items.map((l) => `<li>
+        <span class="q">${l.qty}×</span>
+        <span>${esc(l.name)}${l.note ? `<small>${icon("sticky-note", 12)}${esc(l.note)}</small>` : ""}</span>
+        <span class="p">${rp(l.price * l.qty)}</span>
+      </li>`).join(""));
+    put("sum", `<div><span>Subtotal (${t.count} item)</span><span>${rp(t.sub)}</span></div>
+      <div><span>Pajak &amp; layanan (${SETTINGS.tax_percent}%)</span><span>${rp(t.tax)}</span></div>
+      <div class="pc-total"><span>Total</span><span>${rp(t.total)}</span></div>`);
+    const note = $("pay-note");
+    note.dataset.tone = paid && !cancelled ? "positive" : "";
+    put("pay-note", cancelled
+      ? (paid ? `${icon("info")}<span>Pembayaran untuk <strong>${esc(o.code)}</strong> sudah tercatat. Tunjukkan halaman ini ke kasir untuk pengembalian dana.</span>`
+              : `${icon("info")}<span>Pesanan dibatalkan, jadi tidak ada tagihan untuk <strong>${esc(o.code)}</strong>.</span>`)
+      : paid ? `${icon("circle-check")}<span>Pembayaran sudah diterima kasir. Terima kasih!</span>`
+      : `${icon("receipt")}<span>Sebutkan nomor pesanan <strong>${esc(o.code)}</strong> saat membayar di kasir, tunai atau non-tunai.</span>`);
+
+    // Sumber status: kasir langsung vs simulasi
+    const sync = $("sync");
+    sync.dataset.mode = o.driven ? "live" : "sim";
+    put("sync", o.driven
+      ? `${icon("link")}<span><strong>Terhubung ke layar kasir</strong>Status berubah mengikuti update dari kasir secara langsung.${kasirOnline() ? "" : " Layar kasir sedang tidak terbuka; status diperbarui begitu kasir mengubahnya."}</span>`
+      : cancelled
+      ? `${icon("zap")}<span><strong>Prototipe · status disimulasikan</strong>Progres pesanan ini disimulasikan, tetapi pembatalannya datang dari kasir lewat jembatan prototipe.</span>`
+      : `${icon("zap")}<span><strong>Prototipe · status disimulasikan</strong>Saat dipesan, layar kasir tidak terbuka, jadi status berpindah otomatis tiap beberapa detik. Perubahan dari kasir tetap ikut tampil. Buka <a href="#/kasir" target="_blank" rel="noopener">layar Pesanan kasir</a> di tab lain sebelum memesan agar kasir yang mengendalikan status.</span>`);
+
+    document.title = `Pesanan ${o.code} — ${SETTINGS.cafe_name} | IUL FnB`;
+  }
+
+  /* ===== Sinkronisasi (tiap detik + event storage) ===== */
+  function tick() {
+    const s = session(), o = s.order;
+    if (!o) return paintEmpty(s);
+    if (!Array.isArray(o.times) || !o.times[0]) o.times = [o.created_at, null, null, null];
+    const snap = () => JSON.stringify([o.times, o.payment_status, !!o.cancelled, o.cancelled_at || null]);
+    const before = snap();
+    const st = orderStatus(o);
+    const live = ls.get(KEY.live, []).find((x) => x.code === o.code);
+    if (live) { o.payment_status = st.paid ? "LUNAS" : "BELUM"; o.cancelled = st.cancelled; }
+    if (o.cancelled && !o.cancelled_at) o.cancelled_at = new Date(live?.updated_at || Date.now()).toISOString();
+    if (!o.cancelled && o.cancelled_at) delete o.cancelled_at;
+    if (snap() !== before) saveCust(s);
+    paintOrder(o, st);
+  }
+  const timer = setInterval(tick, 1000);
+  onCleanup(() => clearInterval(timer));
+  addEventListener("storage", (e) => { if (e.key === null || e.key === KEY.live || e.key === KEY.cust) tick(); }, { signal });
+
+  /* ===== Mulai ===== */
+  const prevTitle = document.title;
+  onCleanup(() => { document.title = prevTitle; });
+  scrollTo({ top: 0 });
+  const s0 = session();
+  if (s0.flash) { const msg = s0.flash; s0.flash = null; saveCust(s0); toast(msg); }
+  tick();
+</script>

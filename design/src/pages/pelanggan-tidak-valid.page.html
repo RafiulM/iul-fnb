@@ -1,0 +1,233 @@
+<!-- dpai:page {"scoped":true,"typography":true} -->
+<style>
+  .p-pelanggan-tidak-valid { min-height: 100vh; min-height: 100dvh; background: var(--color-canvas); color: var(--color-text); font: 400 var(--text-body-md) / var(--leading-body-md) var(--font-ui); letter-spacing: -0.14px; -webkit-tap-highlight-color: transparent; }
+  :where(button, input, textarea) { font: inherit; color: inherit; letter-spacing: inherit; }
+  :where(h1, h2, h3, p, dl, dd) { margin: 0; }
+  :where(ul, ol) { margin: 0; padding: 0; list-style: none; }
+  .pc-sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+
+  .pc-app { position: relative; max-width: 440px; min-height: 100vh; min-height: 100dvh; margin: 0 auto; padding-bottom: calc(28px + env(safe-area-inset-bottom)); background: var(--color-canvas); }
+
+  /* ---------- Kepala editorial (sama dengan halaman pelanggan) ---------- */
+  .pc-head { padding: var(--spacing-20) var(--space-4) 0; }
+  .pc-brand { display: flex; align-items: center; gap: var(--space-3); min-width: 0; }
+  .pc-brand > div { min-width: 0; }
+  .pc-mono { flex: none; display: grid; place-items: center; width: 40px; height: 40px; border-radius: var(--radius-compact); background: var(--color-primary); color: var(--color-on-primary); font: 600 14px / 1 var(--font-ui); letter-spacing: 0.5px; }
+  .pc-brand-name { font: 600 17px / 1.2 var(--font-ui); letter-spacing: -0.2px; }
+  .pc-brand-addr { margin-top: 2px; overflow: hidden; font: 400 var(--text-label-sm) / 1.35 var(--font-ui); color: var(--color-text-muted); white-space: nowrap; text-overflow: ellipsis; }
+  .pc-greet { display: flex; align-items: center; gap: 6px; margin-top: 28px; font: 500 var(--text-body-sm) / 1.4 var(--font-ui); color: var(--color-text-muted); }
+  .pc-greet iconify-icon { font-size: 16px; }
+  .pc-thesis { margin-top: 6px; font: 400 38px / 1.08 var(--font-editorial); letter-spacing: -1.2px; text-wrap: balance; }
+  .pc-lead { margin-top: var(--space-3); font: 400 15px / 1.5 var(--font-ui); letter-spacing: -0.15px; color: var(--color-text-soft); text-wrap: pretty; }
+
+  /* ---------- Chip ---------- */
+  .pc-chip { display: inline-flex; align-items: center; gap: 6px; padding: 3px 10px; border: var(--border-hairline) solid var(--color-border); border-radius: var(--radius-pill); background: var(--color-surface-muted); color: var(--color-text-soft); font: 600 var(--text-label-sm) / var(--leading-label-sm) var(--font-ui); white-space: nowrap; }
+  .pc-chip::before { content: ""; flex: none; width: 6px; height: 6px; border-radius: var(--radius-pill); background: var(--pc-tone, var(--color-border-strong)); }
+  .pc-chip[data-tone="positive"] { --pc-tone: var(--color-positive); }
+  .pc-chip[data-tone="warning"] { --pc-tone: var(--color-warning); }
+  .pc-chip[data-tone="danger"] { --pc-tone: var(--color-danger); }
+  .pc-chip[data-tone="accent"] { --pc-tone: var(--color-accent); }
+  .pc-chip[data-tone="dark"] { border-color: var(--color-primary); background: var(--color-primary); color: var(--color-on-primary); }
+  .pc-chip[data-tone="plain"]::before, .pc-chip[data-tone="dark"]::before { display: none; }
+
+  /* ---------- QR yang di-scan ---------- */
+  .pc-scan { display: flex; align-items: center; gap: 14px; margin: 22px var(--space-4) 0; padding: var(--space-3) var(--space-4) var(--space-3) var(--space-3); border: var(--border-hairline) solid var(--color-border); border-radius: var(--radius-image); background: var(--color-surface); }
+  .pc-scan-no { flex: none; display: grid; justify-items: center; min-width: 66px; padding: 6px 12px 8px; border: var(--border-hairline) dashed var(--color-border-strong); border-radius: var(--radius-compact); background: var(--color-surface-subtle); }
+  .pc-scan-no span { font: 600 11px / 1.3 var(--font-ui); color: var(--color-text-muted); }
+  .pc-scan-no strong { font: 500 24px / 1.05 var(--font-ui); letter-spacing: -0.6px; font-variant-numeric: tabular-nums; }
+  .pc-scan-txt { display: grid; justify-items: start; gap: 4px; min-width: 0; }
+  .pc-scan-txt b { font: 600 15px / 1.3 var(--font-ui); letter-spacing: -0.15px; }
+  .pc-scan-txt small { font: 400 13px / 1.4 var(--font-ui); color: var(--color-text-muted); }
+
+  /* ---------- Kartu ---------- */
+  .pc-card { margin: 14px var(--space-4) 0; padding: var(--space-4) 18px; border: var(--border-hairline) solid var(--color-border); border-radius: var(--radius-card); background: var(--color-surface); }
+  .pc-card-head { display: flex; align-items: center; justify-content: space-between; gap: var(--space-3); margin-bottom: var(--space-3); }
+  .pc-card h2 { font: 600 16px / 1.3 var(--font-ui); letter-spacing: -0.16px; white-space: nowrap; }
+
+  .pc-todo { display: grid; gap: var(--space-4); counter-reset: pc-s; }
+  .pc-todo li { display: grid; grid-template-columns: 24px minmax(0, 1fr); gap: var(--space-3); counter-increment: pc-s; }
+  .pc-todo li::before { content: counter(pc-s); display: grid; place-items: center; width: 24px; height: 24px; margin-top: 1px; border: var(--border-hairline) solid var(--color-text); border-radius: var(--radius-pill); font: 600 12px / 1 var(--font-ui); }
+  .pc-todo b { display: block; font: 600 15px / 1.35 var(--font-ui); letter-spacing: -0.15px; }
+  .pc-todo p { margin-top: 2px; font: 400 13px / 1.45 var(--font-ui); color: var(--color-text-muted); }
+
+  .pc-hours { display: grid; font: 400 var(--text-body-sm) / 1.4 var(--font-ui); }
+  .pc-hours div { display: flex; justify-content: space-between; gap: var(--space-3); padding: 9px 0; }
+  .pc-hours div + div { border-block-start: var(--border-hairline) solid var(--color-border); }
+  .pc-hours dt { color: var(--color-text-soft); }
+  .pc-hours dd { font-weight: 500; font-variant-numeric: tabular-nums; }
+  .pc-hours [data-today] dt, .pc-hours [data-today] dd { font-weight: 600; color: var(--color-text); }
+  .pc-hours [data-today] dt small { margin-inline-start: 6px; font: 500 var(--text-label-sm) / 1 var(--font-ui); color: var(--color-text-muted); }
+
+  /* ---------- Prototipe ---------- */
+  .pc-proto { display: grid; gap: 10px; margin: 22px var(--space-4) 0; padding: 14px var(--space-4) var(--space-4); border: var(--border-hairline) dashed var(--color-border-strong); border-radius: var(--radius-card); }
+  .pc-proto p { font: 400 13px / 1.5 var(--font-ui); color: var(--color-text-muted); }
+  .pc-proto .pc-chip { justify-self: start; }
+
+  .pc-btn { display: inline-flex; align-items: center; justify-content: center; gap: var(--space-2); min-height: 48px; padding: 10px var(--space-6); border: var(--border-hairline) solid var(--color-border-strong); border-radius: var(--radius-control); background: var(--color-surface); color: var(--color-text); font: 500 16px / 1.2 var(--font-ui); letter-spacing: -0.2px; text-decoration: none; white-space: nowrap; cursor: pointer; transition: background-color var(--duration-fast) var(--ease-standard), border-color var(--duration-fast) var(--ease-standard), color var(--duration-fast) var(--ease-standard); }
+  .pc-btn:hover { border-color: var(--color-text); }
+  .pc-btn iconify-icon { font-size: 18px; }
+  .pc-btn[data-block] { width: 100%; }
+
+  .pc-foot { padding: 28px var(--space-6) 0; text-align: center; font: 400 var(--text-label-sm) / 1.6 var(--font-ui); color: var(--color-text-muted); }
+  .pc-foot strong { font-weight: 600; color: var(--color-text); }
+
+  /* ---------- Toast ---------- */
+  .pc-toast { position: fixed; inset: auto auto calc(28px + env(safe-area-inset-bottom)) 50%; max-width: min(400px, calc(100% - 32px)); margin: 0; padding: 10px 18px; overflow: hidden; border: 0; border-radius: var(--radius-control); background: var(--color-primary); color: var(--color-on-primary); font: 500 var(--text-body-sm) / 1.4 var(--font-ui); white-space: nowrap; text-overflow: ellipsis; transform: translateX(-50%); box-shadow: var(--shadow-nav); }
+
+  @media (min-width: 480px) {
+    .p-pelanggan-tidak-valid { background: var(--color-surface-muted); }
+    .pc-app { border-inline: var(--border-hairline) solid var(--color-border); }
+  }
+</style>
+
+<template data-slot="content">
+  <main aria-label="QR Tidak Valid" class="p-pelanggan-tidak-valid" data-node-id="pelanggan-tidak-valid">
+    <div class="pc-app" data-node-id="pelanggan-tidak-valid.app">
+      <header class="pc-head" data-node-id="pelanggan-tidak-valid.header">
+        <div class="pc-brand">
+          <span class="pc-mono" aria-hidden="true">KS</span>
+          <div><p class="pc-brand-name">Kedai Senja</p><p class="pc-brand-addr">Jl. Kaliurang Km 5, Yogyakarta</p></div>
+        </div>
+        <p class="pc-greet"><iconify-icon icon="lucide:qr-code" aria-hidden="true"></iconify-icon>QR meja tidak dikenali</p>
+        <h1 class="pc-thesis">QR ini belum bisa dipakai</h1>
+        <p class="pc-lead">QR ini mungkin sudah diganti atau mejanya sedang tidak dipakai. Tenang, kamu tetap bisa pesan dengan bantuan kami.</p>
+      </header>
+
+      <div class="pc-scan" role="group" aria-labelledby="pelanggan-tidak-valid-scan" data-node-id="pelanggan-tidak-valid.scanned">
+        <div class="pc-scan-no" aria-hidden="true"><span>Meja</span><strong data-part="scanned">12</strong></div>
+        <div class="pc-scan-txt">
+          <b id="pelanggan-tidak-valid-scan" data-part="scanned-label">QR Meja 12</b>
+          <small>Tidak terdaftar atau sedang tidak aktif di Kedai Senja.</small>
+          <span class="pc-chip" data-tone="danger">QR tidak valid</span>
+        </div>
+      </div>
+
+      <section class="pc-card" aria-labelledby="pelanggan-tidak-valid-todo" data-node-id="pelanggan-tidak-valid.next">
+        <div class="pc-card-head"><h2 id="pelanggan-tidak-valid-todo">Yang bisa kamu lakukan</h2></div>
+        <ol class="pc-todo">
+          <li><div><b>Minta bantuan kasir atau pelayan</b><p>Kasir bisa mencatat pesananmu langsung, atau menunjukkan QR meja yang benar.</p></div></li>
+          <li><div><b>Scan QR di meja lain</b><p>Pindah ke meja yang kosong, lalu scan QR yang menempel di meja itu.</p></div></li>
+        </ol>
+      </section>
+
+      <section class="pc-card" aria-labelledby="pelanggan-tidak-valid-hours" data-node-id="pelanggan-tidak-valid.hours">
+        <div class="pc-card-head"><h2 id="pelanggan-tidak-valid-hours">Jam operasional</h2><span class="pc-chip" data-tone="positive" data-part="now">Buka sekarang</span></div>
+        <dl class="pc-hours" data-part="hours"></dl>
+      </section>
+
+      <div class="pc-proto" data-node-id="pelanggan-tidak-valid.proto">
+        <span class="pc-chip" data-tone="dark">Prototipe</span>
+        <p>Di aplikasi asli, meja aktif diatur pemilik di halaman Menu &amp; Meja. Untuk mencoba alur pesan, buka menu sebagai meja yang valid.</p>
+        <a class="pc-btn" data-block href="#/pelanggan" data-route-link data-part="as-07"><iconify-icon icon="lucide:qr-code" aria-hidden="true"></iconify-icon>Prototipe: buka sebagai Meja 07</a>
+      </div>
+
+      <p class="pc-foot">Didukung oleh <strong>IUL FnB</strong></p>
+    </div>
+
+    <div class="pc-toast" popover="manual" role="status" data-part="toast"></div>
+  </main>
+</template>
+
+<script>
+  /* ===== Kontrak data lintas halaman (CONTRACTS.md — salinan apa adanya) ===== */
+  const KEY = { cust: "iulfnb:cust", pos: "iulfnb:pos", live: "iulfnb:orders-live", beat: "iulfnb:kasir-beat", seq: "iulfnb:seq", role: "iulfnb:role" };
+  const SEQ_BASE = 107;
+  const ls = {
+    get(k, d) { try { const v = localStorage.getItem(k); return v == null ? d : JSON.parse(v); } catch { return d; } },
+    set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch {} },
+    del(k) { try { localStorage.removeItem(k); } catch {} },
+  };
+  function nextOrderCode() {
+    const n = Math.max(ls.get(KEY.seq, SEQ_BASE), SEQ_BASE) + 1;
+    ls.set(KEY.seq, n);
+    return "A-" + String(n).padStart(3, "0");
+  }
+  const kasirOnline = () => Date.now() - ls.get(KEY.beat, 0) < 5000;
+  /** Jam operasional (sama dengan halaman Pengaturan): 0 = Minggu … 6 = Sabtu */
+  const HOURS = { 0: ["08:00", "22:00"], 1: ["08:00", "22:00"], 2: ["08:00", "22:00"], 3: ["08:00", "22:00"], 4: ["08:00", "22:00"], 5: ["08:00", "22:00"], 6: ["08:00", "23:00"] };
+  function isCafeOpen(d = new Date()) {
+    const [o, c] = HOURS[d.getDay()] || [];
+    if (!o) return false;
+    const m = d.getHours() * 60 + d.getMinutes(), t = (s) => +s.slice(0, 2) * 60 + +s.slice(3);
+    return m >= t(o) && m < t(c);
+  }
+
+  const custEmpty = (table = "07") => ({ v: 1, table, invalid_table: null, cart: [], selected: "m1", edit_key: null, order: null, browse_only: false, force_open: false, flash: null, demo: false });
+  function loadCust(fallback = custEmpty) { const s = ls.get(KEY.cust, null); return s && s.v === 1 ? s : fallback(); }
+  function saveCust(s) { s.updated_at = new Date().toISOString(); ls.set(KEY.cust, s); }
+
+  /* ===== Util ===== */
+  const $ = (part) => root.querySelector(`[data-part="${part}"]`);
+  const esc = (s) => String(s ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+  const DAY = ["Minggu", "Senin", "Selasa", "Rabu", "Kamis", "Jumat", "Sabtu"];
+  const WEEK = [1, 2, 3, 4, 5, 6, 0]; // Senin dulu, seperti halaman Pengaturan
+  const dotT = (t) => String(t || "").replace(":", ".");
+  const range = (h) => h ? `${dotT(h[0])}–${dotT(h[1])}` : "Tutup";
+  const reduceMotion = () => matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+  /* ===== Toast ===== */
+  const toastEl = $("toast");
+  let toastTimer;
+  function toast(msg) {
+    toastEl.textContent = msg;
+    try { if (toastEl.matches(":popover-open")) toastEl.hidePopover(); toastEl.showPopover(); } catch {}
+    if (toastEl.animate && !reduceMotion()) try { toastEl.animate([{ opacity: 0, transform: "translate(-50%, 12px)" }, { opacity: 1, transform: "translate(-50%, 0)" }], { duration: 200, easing: "ease" }); } catch {}
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(hideToast, 2600);
+  }
+  function hideToast() { try { if (toastEl.matches(":popover-open")) toastEl.hidePopover(); } catch {} }
+  onCleanup(() => { clearTimeout(toastTimer); hideToast(); });
+
+  /* ===== Render ===== */
+  /** Nomor yang di-scan: dari sesi (invalid_table), selain itu contoh "12" untuk frame kanvas. */
+  function scannedNo() {
+    const s = ls.get(KEY.cust, null);
+    const raw = s && s.v === 1 && s.invalid_table ? String(s.invalid_table) : "12";
+    return raw.replace(/[^\w-]/g, "").slice(0, 6) || "12";
+  }
+  function render() {
+    const no = scannedNo();
+    $("scanned").textContent = no;
+    $("scanned-label").textContent = `QR Meja ${no}`;
+    root.querySelector(".pc-scan-no").setAttribute("aria-label", `Nomor meja dari QR: ${no}`);
+
+    // Jam operasional: kelompokkan hari berurutan dengan jam yang sama
+    const now = new Date(), today = now.getDay(), groups = [];
+    for (const d of WEEK) {
+      const r = range(HOURS[d]), last = groups[groups.length - 1];
+      if (last && last.r === r) last.days.push(d); else groups.push({ r, days: [d] });
+    }
+    $("hours").innerHTML = groups.map((g) => {
+      const label = g.days.length > 2 ? `${DAY[g.days[0]]}–${DAY[g.days[g.days.length - 1]]}` : g.days.map((d) => DAY[d]).join(" & ");
+      const isToday = g.days.includes(today);
+      return `<div${isToday ? " data-today" : ""}><dt>${esc(label)}${isToday ? `<small>· hari ini</small>` : ""}</dt><dd>${esc(g.r)}</dd></div>`;
+    }).join("");
+    const open = isCafeOpen(now), h = HOURS[today];
+    const chip = $("now");
+    chip.dataset.tone = open ? "positive" : "plain";
+    chip.textContent = open ? "Buka sekarang" : "Sedang tutup";
+  }
+
+  /* ===== Aksi prototipe ===== */
+  $("as-07").addEventListener("click", () => {
+    const s = loadCust();
+    s.table = "07";
+    s.invalid_table = null;
+    s.flash = "Prototipe: menu dibuka sebagai Meja 07";
+    saveCust(s);
+    // tautan menuju #/pelanggan; bila hash sudah sama, router tetap menampilkan menu
+  }, { signal });
+
+  addEventListener("storage", (e) => { if (e.key === null || e.key === KEY.cust) render(); }, { signal });
+  const tick = setInterval(render, 60000);
+  onCleanup(() => clearInterval(tick));
+
+  /* ===== Mulai ===== */
+  const prevTitle = document.title;
+  document.title = `QR tidak valid — Kedai Senja | IUL FnB`;
+  onCleanup(() => { document.title = prevTitle; });
+  scrollTo({ top: 0 });
+  render();
+  const s0 = ls.get(KEY.cust, null);
+  if (s0 && s0.v === 1 && s0.flash) { const msg = s0.flash; s0.flash = null; saveCust(s0); toast(msg); }
+</script>

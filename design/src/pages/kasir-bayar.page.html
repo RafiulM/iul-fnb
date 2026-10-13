@@ -1,0 +1,509 @@
+<!-- dpai:page {"scoped":true,"typography":true} -->
+<style>
+  .p-kasir-bayar { display: grid; grid-template-columns: minmax(0, 1fr) minmax(360px, 420px); align-items: start; gap: var(--space-6); font-family: var(--font-ui); }
+  .b-left { display: grid; gap: var(--space-6); min-width: 0; }
+
+  /* Pilih pesanan */
+  .b-queue .l-staf-card-head { align-items: center; }
+  .b-orders { display: grid; grid-template-columns: repeat(auto-fill, minmax(196px, 1fr)); gap: var(--space-2); margin: 0; padding: 0; list-style: none; }
+  .b-ord { display: grid; gap: 4px; width: 100%; padding: var(--space-3) var(--space-4); border: var(--border-hairline) solid var(--color-border); border-radius: var(--radius-image); background: var(--color-surface); color: var(--color-text); font: inherit; text-align: start; cursor: pointer; transition: border-color var(--duration-fast) var(--ease-standard); }
+  .b-ord:hover { border-color: var(--color-border-strong); }
+  .b-ord:focus-visible { outline: 2px solid var(--color-focus-ring); outline-offset: 3px; }
+  .b-ord[aria-pressed="true"] { border-color: var(--color-primary); box-shadow: inset 0 0 0 1px var(--color-primary); }
+  .b-ord-top, .b-ord-bot { display: flex; align-items: center; justify-content: space-between; gap: var(--space-2); }
+  .b-ord-top strong { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font: 600 var(--text-body-md) / 1.25 var(--font-ui); letter-spacing: -0.32px; }
+  .b-ord-meta { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font: 400 var(--text-label-sm) / var(--leading-label-sm) var(--font-ui); color: var(--color-text-muted); }
+  .b-ord-bot { margin-top: 4px; }
+  .b-ord-total { font: 600 var(--text-body-sm) / 1.2 var(--font-ui); font-variant-numeric: tabular-nums; }
+  .b-ord-time { display: inline-flex; align-items: center; gap: 4px; font: 500 var(--text-label-sm) / 1 var(--font-ui); color: var(--color-text-muted); white-space: nowrap; }
+  .b-none { grid-column: 1 / -1; display: flex; align-items: center; gap: var(--space-2); padding: var(--space-4); border: var(--border-hairline) dashed var(--color-border-strong); border-radius: var(--radius-image); font: 500 var(--text-body-sm) / 1.4 var(--font-ui); color: var(--color-text-muted); }
+  .b-none iconify-icon { color: var(--color-positive); }
+
+  /* Rincian */
+  .b-title { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-2); }
+  .b-items { display: grid; gap: var(--space-3); margin: 0; padding: 0; list-style: none; }
+  .b-item { display: flex; align-items: flex-start; gap: var(--space-3); }
+  .b-item > div { flex: 1; min-width: 0; }
+  .b-item strong { display: block; font: 600 var(--text-body-sm) / 1.35 var(--font-ui); }
+  .b-item small { font: 400 var(--text-label-sm) / var(--leading-label-sm) var(--font-ui); color: var(--color-text-muted); font-variant-numeric: tabular-nums; }
+  .b-item .l-staf-num { font: 600 var(--text-body-sm) / 1.35 var(--font-ui); }
+  .b-note { display: flex; align-items: center; gap: 4px; margin-top: 4px; font: 500 var(--text-label-sm) / var(--leading-label-sm) var(--font-ui); font-style: italic; color: var(--color-warning-text); }
+  .b-sum { display: grid; gap: 6px; margin-top: var(--space-4); padding-top: var(--space-4); border-block-start: var(--border-hairline) dashed var(--color-border-strong); font: 400 var(--text-body-sm) / 1.4 var(--font-ui); color: var(--color-text-muted); }
+  .b-sum div { display: flex; justify-content: space-between; gap: var(--space-3); }
+  .b-sum span:last-child { font-variant-numeric: tabular-nums; }
+  .b-sum .b-sum-total { padding-top: var(--space-1); font: 600 17px / 1.3 var(--font-ui); color: var(--color-text); }
+  .b-meta { display: flex; flex-wrap: wrap; gap: var(--space-2) var(--space-4); margin: var(--space-4) 0 0; padding: 0; list-style: none; font: 400 var(--text-label-sm) / var(--leading-label-sm) var(--font-ui); color: var(--color-text-muted); }
+  .b-meta li { display: inline-flex; align-items: center; gap: 6px; }
+
+  /* Panel pembayaran */
+  .b-pay { position: sticky; top: var(--space-6); }
+  .b-pay .l-staf-card-head h2:focus { outline: none; }
+  .b-pay .l-staf-card-head h2:focus-visible { outline: 2px solid var(--color-focus-ring); outline-offset: 3px; }
+  .b-paytotal { padding: var(--space-1) 0 var(--spacing-20); text-align: center; }
+  .b-paytotal span { font: 500 var(--text-body-sm) / 1.3 var(--font-ui); color: var(--color-text-muted); }
+  .b-paytotal strong { display: block; margin-top: 2px; font: 400 44px / 1.1 var(--font-ui); letter-spacing: -1.4px; font-variant-numeric: tabular-nums; }
+  .b-panel { display: grid; gap: var(--space-3); margin-top: var(--spacing-20); }
+  .b-panel .l-staf-affix input { font-size: 22px; font-weight: 500; font-variant-numeric: tabular-nums; }
+  .b-quick { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: var(--space-2); }
+  .b-quick .l-staf-btn { padding-inline: var(--space-2); font-variant-numeric: tabular-nums; }
+  .b-change { display: flex; align-items: center; justify-content: space-between; gap: var(--space-3); padding: var(--space-3) var(--space-4); border: var(--border-hairline) solid var(--color-border); border-radius: var(--radius-image); background: var(--color-surface-subtle); font: 500 var(--text-body-sm) / 1.3 var(--font-ui); }
+  .b-change strong { font: 500 22px / 1 var(--font-ui); font-variant-numeric: tabular-nums; }
+  .b-change[data-state="ok"] { border-color: var(--color-positive); }
+  .b-change[data-state="short"] { border-color: var(--color-danger); }
+  .b-change[data-state="short"] span::before { content: "!"; display: inline-grid; place-items: center; width: 16px; height: 16px; margin-inline-end: 6px; border-radius: var(--radius-pill); background: var(--color-danger); color: var(--color-on-primary); font: 700 11px / 1 var(--font-ui); vertical-align: 1px; }
+  .b-methods { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--space-2); margin: 0; padding: 0; border: 0; min-width: 0; }
+  .b-methods legend { margin-bottom: var(--space-2); padding: 0; font: 600 var(--text-body-sm) / var(--leading-body-sm) var(--font-ui); }
+  .b-method { position: relative; display: grid; justify-items: center; gap: 6px; padding: var(--space-4) var(--space-2); border: var(--border-hairline) solid var(--color-border-strong); border-radius: var(--radius-image); background: var(--color-surface); font: 500 var(--text-body-sm) / 1.2 var(--font-ui); cursor: pointer; transition: border-color var(--duration-fast) var(--ease-standard); }
+  .b-method iconify-icon { font-size: 22px; }
+  .b-method input { position: absolute; opacity: 0; pointer-events: none; }
+  .b-method:has(input:checked) { border-color: var(--color-primary); box-shadow: inset 0 0 0 1px var(--color-primary); }
+  .b-method:has(input:focus-visible) { outline: 2px solid var(--color-focus-ring); outline-offset: 3px; }
+  .b-confirm { margin-top: var(--space-6); }
+  .b-after { margin-top: var(--space-3); text-align: center; }
+
+  /* Struk / sukses */
+  .b-paid { display: grid; justify-items: center; gap: var(--space-1); margin-bottom: var(--spacing-20); text-align: center; }
+  .b-paid > iconify-icon { display: grid; place-items: center; width: 52px; height: 52px; margin-bottom: var(--space-2); border-radius: var(--radius-pill); background: var(--color-positive); color: var(--color-on-primary); font-size: 26px; }
+  .b-paid strong { font: 500 var(--text-heading-sm) / 1.2 var(--font-ui); letter-spacing: -0.66px; font-variant-numeric: tabular-nums; }
+  .b-paid span { font: 400 var(--text-body-sm) / 1.4 var(--font-ui); color: var(--color-text-muted); }
+  .b-paidline { display: flex; align-items: center; gap: var(--space-3); margin-bottom: var(--space-4); padding: var(--space-3) var(--space-4); border: var(--border-hairline) solid var(--color-border); border-radius: var(--radius-image); background: var(--color-surface-subtle); }
+  .b-paidline > iconify-icon { flex: none; font-size: 22px; color: var(--color-positive); }
+  .b-paidline strong { display: block; font: 600 var(--text-body-sm) / 1.3 var(--font-ui); }
+  .b-paidline small { font: 400 var(--text-label-sm) / var(--leading-label-sm) var(--font-ui); color: var(--color-text-muted); }
+  .b-paper { max-height: max(220px, calc(100vh - 540px)); padding: var(--spacing-20) var(--space-3) var(--space-6); overflow: auto; border-radius: var(--radius-image); background: var(--color-surface-muted); scrollbar-width: thin; }
+  .b-rc-actions { display: grid; grid-template-columns: minmax(0, 1fr); gap: var(--space-2); margin-top: var(--spacing-20); }
+  .b-rc-row { display: flex; flex-wrap: wrap; gap: var(--space-2); }
+  .b-rc-row > .l-staf-btn { flex: 1 1 auto; padding-inline: var(--space-4); }
+  .b-rc-actions .l-staf-btn small { font: 500 var(--text-label-sm) / 1 var(--font-ui); opacity: .8; }
+
+  /* Kosong */
+  .b-empty { grid-column: 1 / -1; }
+  .b-empty .l-staf-empty { padding-block: var(--spacing-64); }
+  .b-empty-actions { display: flex; flex-wrap: wrap; justify-content: center; gap: var(--space-3); margin-top: var(--space-3); }
+
+  @media (max-width: 1100px) {
+    .p-kasir-bayar { grid-template-columns: minmax(0, 1fr) minmax(340px, 380px); gap: var(--space-4); }
+    .b-left { gap: var(--space-4); }
+    .b-orders { grid-template-columns: repeat(auto-fill, minmax(176px, 1fr)); }
+    .b-paytotal strong { font-size: 38px; }
+  }
+  @media (max-width: 860px) {
+    .p-kasir-bayar { grid-template-columns: minmax(0, 1fr); }
+    .b-pay { position: static; }
+  }
+  @media (max-width: 560px) {
+    .b-quick { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .b-rc-row { flex-direction: column; }
+  }
+</style>
+
+<template data-slot="header-actions">
+  <a class="l-staf-btn" href="#/kasir" data-route-link><iconify-icon icon="lucide:arrow-left" aria-hidden="true"></iconify-icon>Kembali ke pesanan</a>
+</template>
+
+<template data-slot="content">
+  <main aria-label="Pembayaran" class="p-kasir-bayar" data-node-id="kasir-bayar">
+    <div class="b-left" data-part="left">
+      <section class="l-staf-card b-queue" aria-labelledby="kasir-bayar-q-title" data-node-id="kasir-bayar.queue">
+        <div class="l-staf-card-head">
+          <div><h2 id="kasir-bayar-q-title">Belum dibayar</h2><p data-part="q-sub"></p></div>
+          <span class="l-staf-chip" data-tone="warning" data-part="q-count"></span>
+        </div>
+        <div class="l-staf-card-body"><ul class="b-orders" aria-label="Pilih pesanan yang dibayar" data-part="orders"></ul></div>
+      </section>
+
+      <section class="l-staf-card" aria-labelledby="kasir-bayar-s-title" data-node-id="kasir-bayar.summary">
+        <div class="l-staf-card-head">
+          <div>
+            <div class="b-title"><h2 id="kasir-bayar-s-title" data-part="s-title"></h2><span class="l-staf-chip" data-part="s-status"></span><span class="l-staf-chip" data-part="s-pay"></span></div>
+            <p data-part="s-meta"></p>
+          </div>
+        </div>
+        <div class="l-staf-card-body" data-part="s-body"></div>
+      </section>
+    </div>
+
+    <section class="l-staf-card b-pay" aria-labelledby="kasir-bayar-p-title" data-part="paycard" data-node-id="kasir-bayar.pay">
+      <div class="l-staf-card-head">
+        <div><h2 id="kasir-bayar-p-title" tabindex="-1" data-part="p-title">Terima pembayaran</h2><p data-part="p-sub"></p></div>
+      </div>
+      <div class="l-staf-card-body" data-part="pay-view">
+        <div class="b-paytotal"><span>Total tagihan</span><strong data-part="pay-total"></strong></div>
+        <div class="l-staf-seg" data-block role="tablist" aria-label="Metode pembayaran">
+          <button type="button" role="tab" data-method="CASH" aria-selected="true"><iconify-icon icon="lucide:banknote" aria-hidden="true"></iconify-icon>Tunai</button>
+          <button type="button" role="tab" data-method="NON_CASH" aria-selected="false"><iconify-icon icon="lucide:credit-card" aria-hidden="true"></iconify-icon>Non-tunai</button>
+        </div>
+        <div class="b-panel" data-part="cash-panel">
+          <div class="l-staf-field">
+            <label for="kasir-bayar-input">Uang diterima</label>
+            <div class="l-staf-affix"><span>Rp</span><input id="kasir-bayar-input" inputmode="numeric" autocomplete="off" placeholder="0" aria-describedby="kasir-bayar-change" data-part="pay-input"></div>
+          </div>
+          <div class="b-quick" role="group" aria-label="Nominal cepat" data-part="quick"></div>
+          <div class="b-change" id="kasir-bayar-change" role="status" data-part="change"><span>Kembalian</span><strong>—</strong></div>
+        </div>
+        <div class="b-panel" data-part="noncash-panel" hidden>
+          <fieldset class="b-methods">
+            <legend>Jenis pembayaran non-tunai</legend>
+            <label class="b-method"><input type="radio" name="kasir-bayar-channel" value="QRIS" checked><iconify-icon icon="lucide:qr-code" aria-hidden="true"></iconify-icon>QRIS</label>
+            <label class="b-method"><input type="radio" name="kasir-bayar-channel" value="Kartu debit/kredit"><iconify-icon icon="lucide:credit-card" aria-hidden="true"></iconify-icon>Kartu</label>
+            <label class="b-method"><input type="radio" name="kasir-bayar-channel" value="Transfer bank"><iconify-icon icon="lucide:landmark" aria-hidden="true"></iconify-icon>Transfer</label>
+          </fieldset>
+          <div class="l-staf-alert" data-tone="neutral"><iconify-icon icon="lucide:info" aria-hidden="true"></iconify-icon><span>Pastikan pembayaran berhasil di mesin EDC atau aplikasi sebelum menekan konfirmasi.</span></div>
+        </div>
+        <button class="l-staf-btn b-confirm" data-variant="primary" data-block type="button" data-part="confirm"><iconify-icon icon="lucide:check" aria-hidden="true"></iconify-icon>Konfirmasi lunas</button>
+        <p class="l-staf-hint b-after" data-part="after"></p>
+      </div>
+      <div class="l-staf-card-body" data-part="rc-view" hidden></div>
+    </section>
+
+    <section class="l-staf-card b-empty" aria-labelledby="kasir-bayar-e-title" data-part="empty" data-node-id="kasir-bayar.empty" hidden>
+      <div class="l-staf-empty">
+        <iconify-icon icon="lucide:circle-check" aria-hidden="true"></iconify-icon>
+        <strong id="kasir-bayar-e-title">Semua pesanan sudah lunas</strong>
+        <span>Tidak ada tagihan yang menunggu pembayaran. Pesanan baru akan muncul di sini setelah dicatat.</span>
+        <div class="b-empty-actions">
+          <a class="l-staf-btn" data-variant="primary" href="#/kasir" data-route-link><iconify-icon icon="lucide:clipboard-list" aria-hidden="true"></iconify-icon>Kembali ke pesanan</a>
+          <a class="l-staf-btn" href="#/riwayat" data-route-link><iconify-icon icon="lucide:history" aria-hidden="true"></iconify-icon>Lihat riwayat transaksi</a>
+        </div>
+      </div>
+    </section>
+
+    <div class="l-staf-toast" popover="manual" role="status" data-part="toast"></div>
+    <div class="l-staf-print-area" aria-hidden="true" data-part="print"></div>
+  </main>
+</template>
+
+<script>
+  /* ===== Data tiruan (sama dengan halaman Pesanan) ===== */
+  const SETTINGS = { cafe_name: "Kedai Senja", address: "Jl. Kaliurang Km 5, Yogyakarta", phone: "0812-2700-1234", tax_percent: 10, footer: "Terima kasih, sampai jumpa lagi!" };
+  const MENUS = [
+    ["m1", "makanan", "Nasi Goreng Kampung", 32000, "🍳", true], ["m2", "makanan", "Ayam Geprek Sambal Matah", 35000, "🍗", true],
+    ["m3", "makanan", "Mie Goreng Jawa", 30000, "🍜", true], ["m4", "makanan", "Rice Bowl Chicken Teriyaki", 36000, "🍱", true],
+    ["m5", "makanan", "Nasi Ayam Bakar Madu", 38000, "🍖", false], ["d1", "minuman", "Kopi Susu Gula Aren", 22000, "☕", true],
+    ["d2", "minuman", "Es Americano", 20000, "🧊", true], ["d3", "minuman", "Matcha Latte", 28000, "🍵", true],
+    ["d4", "minuman", "Es Teh Manis", 10000, "🥤", true], ["d5", "minuman", "Lemon Tea", 15000, "🍋", true],
+    ["d6", "minuman", "Jus Alpukat", 25000, "🥑", false], ["s1", "lainnya", "Kentang Goreng", 20000, "🍟", true],
+    ["s2", "lainnya", "Pisang Goreng Keju", 18000, "🍌", true], ["s3", "lainnya", "Roti Bakar Cokelat Keju", 22000, "🍞", true],
+    ["s4", "lainnya", "Croissant Butter", 24000, "🥐", true], ["s5", "lainnya", "Air Mineral", 8000, "💧", true],
+  ].map(([id, category_id, name, price, image_url, is_available]) => ({ id, category_id, name, price, image_url, is_available }));
+  const menuById = Object.fromEntries(MENUS.map((m) => [m.id, m]));
+  const USERS = { OWNER: "Iul Rahman", CASHIER: "Rina Kartika" };
+
+  /* ===== Kontrak data lintas halaman (CONTRACTS.md — salinan apa adanya) ===== */
+  const KEY = { cust: "iulfnb:cust", pos: "iulfnb:pos", live: "iulfnb:orders-live", beat: "iulfnb:kasir-beat", seq: "iulfnb:seq", role: "iulfnb:role" };
+  const SEQ_BASE = 107;
+  const ls = {
+    get(k, d) { try { const v = localStorage.getItem(k); return v == null ? d : JSON.parse(v); } catch { return d; } },
+    set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch {} },
+    del(k) { try { localStorage.removeItem(k); } catch {} },
+  };
+  function posSeed() {
+    const ago = (m) => new Date(Date.now() - m * 60000).toISOString();
+    const L = (id, qty, note = "") => { const m = menuById[id]; return { menu_id: id, name: m.name, image_url: m.image_url, price: m.price, qty, note }; };
+    const base = { customer: null, payment_status: "BELUM", payment_method: null, payment_channel: null, paid_amount: null, cashier: null, paid_at: null, completed_at: null, cancel_reason: null, live: false };
+    return [
+      { ...base, code: "A-101", order_type: "QR", table: "05", items: [L("m3", 1), L("d2", 1), L("s5", 1)], status: "DIANTAR", created_at: ago(38) },
+      { ...base, code: "A-102", order_type: "QR", table: "02", items: [L("m4", 2), L("d5", 2)], status: "DIANTAR", created_at: ago(31) },
+      { ...base, code: "A-103", order_type: "QR", table: "09", items: [L("d1", 2, "1 panas, 1 dingin"), L("s1", 1)], status: "SIAP", created_at: ago(19) },
+      { ...base, code: "A-104", order_type: "MANUAL", table: null, customer: "Budi", items: [L("m1", 1, "Dibungkus"), L("d4", 1)], status: "DIPROSES", payment_status: "LUNAS", payment_method: "NON_CASH", payment_channel: "QRIS", paid_amount: 46200, cashier: "Rina Kartika", paid_at: ago(13), created_at: ago(14) },
+      { ...base, code: "A-105", order_type: "QR", table: "07", items: [L("m2", 1, "Ekstra pedas"), L("d4", 2)], status: "DIPROSES", created_at: ago(17) },
+      { ...base, code: "A-106", order_type: "QR", table: "03", items: [L("m1", 2, "Tidak pedas"), L("d3", 1), L("s2", 1)], status: "MENUNGGU", created_at: ago(3) },
+      { ...base, code: "A-107", order_type: "QR", table: "10", items: [L("d1", 1, "Es sedikit"), L("s4", 1)], status: "MENUNGGU", created_at: ago(1) },
+    ];
+  }
+  function loadPos() {
+    let p = ls.get(KEY.pos, null);
+    if (!p || p.v !== 1 || Date.now() - Date.parse(p.seeded_at) > 12 * 3600e3) {
+      p = { v: 1, seeded_at: new Date().toISOString(), orders: posSeed(), done: [], pay_code: null, manual_draft: null, flash: null };
+      ls.set(KEY.pos, p);
+      ls.set(KEY.seq, Math.max(ls.get(KEY.seq, SEQ_BASE), SEQ_BASE));
+    }
+    return p;
+  }
+  const savePos = (p) => ls.set(KEY.pos, p);
+  /** Tarik pesanan QR dari jembatan yang belum ada di pos.orders/pos.done (mutasi p, kembalikan yang baru) */
+  function pullLive(p) {
+    const known = new Set([...p.orders, ...p.done].map((o) => o.code)), added = [];
+    for (const l of ls.get(KEY.live, [])) {
+      if (known.has(l.code) || Date.now() - Date.parse(l.created_at) > 12 * 3600e3 || ["SELESAI", "DIBATALKAN"].includes(l.status)) continue;
+      const o = { code: l.code, order_type: "QR", table: l.table, customer: null, live: true, status: l.status || "MENUNGGU", payment_status: l.payment_status || "BELUM",
+        payment_method: null, payment_channel: null, paid_amount: null, cashier: null, created_at: l.created_at, paid_at: null, completed_at: null, cancel_reason: null,
+        items: l.items.map((i) => ({ menu_id: i.menu_id, name: i.name, image_url: menuById[i.menu_id]?.image_url || "🍽️", price: i.price, qty: i.qty, note: i.note || "" })) };
+      p.orders.push(o); added.push(o);
+    }
+    return added;
+  }
+  /** Setelah status/pembayaran pesanan live berubah, tulis balik ke jembatan */
+  function syncLive(o) {
+    if (!o.live) return;
+    ls.set(KEY.live, ls.get(KEY.live, []).map((x) => x.code === o.code ? { ...x, status: o.status, payment_status: o.payment_status, updated_at: Date.now() } : x));
+  }
+  /** Pindahkan pesanan ke done saat SELESAI/DIBATALKAN */
+  function finishOrder(p, o, status) {
+    o.status = status; o.completed_at = new Date().toISOString();
+    p.orders = p.orders.filter((x) => x.code !== o.code);
+    p.done.push(o);
+    syncLive(o);
+  }
+
+  /* ===== Util ===== */
+  const $ = (part) => root.querySelector(`[data-part="${part}"]`);
+  const $$ = (sel, el = root) => [...el.querySelectorAll(sel)];
+  const rp = (n) => "Rp " + Math.round(n).toLocaleString("id-ID");
+  const esc = (s) => String(s ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+  const hhmm = (d) => new Date(d).toLocaleTimeString("id-ID", { hour: "2-digit", minute: "2-digit" });
+  const minsSince = (d) => Math.max(0, Math.floor((Date.now() - new Date(d)) / 60000));
+  const ago = (d) => { const m = minsSince(d); return m < 1 ? "baru saja" : m < 60 ? m + " mnt lalu" : Math.floor(m / 60) + " jam lalu"; };
+  const shortAgo = (d) => { const m = minsSince(d); return m < 1 ? "Baru" : m < 60 ? m + " mnt" : Math.floor(m / 60) + " j " + (m % 60) + " m"; };
+  const sum = (arr, f) => arr.reduce((a, x) => a + f(x), 0);
+  const icon = (name, size = 18) => `<iconify-icon icon="lucide:${name}" aria-hidden="true" style="font-size:${size}px"></iconify-icon>`;
+  const me = USERS[ls.get(KEY.role, "OWNER") === "CASHIER" ? "CASHIER" : "OWNER"];
+  const totals = (items) => {
+    const sub = sum(items, (i) => i.price * i.qty);
+    const tax = Math.round(sub * SETTINGS.tax_percent / 100);
+    return { sub, tax, total: sub + tax, count: sum(items, (i) => i.qty) };
+  };
+  const STATUS = { MENUNGGU: ["Baru", "accent"], DIPROSES: ["Diproses", "plain"], SIAP: ["Siap", "positive"], DIANTAR: ["Diantar", "plain"], SELESAI: ["Selesai", "positive"], DIBATALKAN: ["Dibatalkan", "danger"] };
+  const whereLabel = (o) => o.table ? "Meja " + o.table : "Bawa pulang";
+  const srcLabel = (o) => o.order_type === "QR" ? "Pesanan QR" : "Kasir" + (o.customer ? " · a.n. " + o.customer : "");
+  const methodLabel = (o) => o.payment_method === "CASH" ? "Tunai" : "Non-tunai" + (o.payment_channel ? " · " + o.payment_channel : "");
+
+  /* ===== State: pesanan di iulfnb:pos (pay_code = pesanan yang dibuka), input bayar di root ===== */
+  let p = loadPos();
+  const S = root.kasirBayarState ??= { code: null, method: "CASH", received: 0, channel: "QRIS" };
+  let justPaid = null; // kode pesanan yang baru saja dilunasi pada kunjungan ini
+  const find = (code) => p.orders.find((o) => o.code === code) || p.done.find((o) => o.code === code);
+  const unpaidList = () => p.orders.filter((o) => o.payment_status === "BELUM").sort((a, b) => Date.parse(a.created_at) - Date.parse(b.created_at));
+  /** Pesanan terpilih: pay_code (lunas → tampilan struk) atau pesanan belum lunas pertama */
+  function selected() {
+    const list = unpaidList();
+    let o = find(p.pay_code);
+    if (o && o.payment_status !== "LUNAS" && !p.orders.includes(o)) o = null; // dibatalkan sebelum dibayar
+    return { list, o: o || list[0] || null };
+  }
+  function nextUnpaid(after) {
+    const list = unpaidList().filter((o) => o.code !== after.code);
+    return list.find((o) => Date.parse(o.created_at) > Date.parse(after.created_at)) || list[0] || null;
+  }
+
+  /* ===== Toast & cetak ===== */
+  const toastEl = $("toast");
+  let toastTimer;
+  function toast(msg) {
+    toastEl.textContent = msg;
+    try { if (toastEl.matches(":popover-open")) toastEl.hidePopover(); toastEl.showPopover(); } catch {}
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => { try { toastEl.hidePopover(); } catch {} }, 2600);
+  }
+  onCleanup(() => { clearTimeout(toastTimer); try { toastEl.hidePopover(); } catch {} });
+  function receiptHTML(o) {
+    const t = totals(o.items), num = (n) => Math.round(n).toLocaleString("id-ID");
+    const paid = o.payment_status === "LUNAS", d = new Date(o.created_at);
+    return `<div class="l-staf-receipt">
+      <div class="rc-logo">KS</div>
+      <div class="rc-c"><div class="rc-name">${esc(SETTINGS.cafe_name)}</div>${esc(SETTINGS.address)}<br>${esc(SETTINGS.phone)}</div>
+      <div class="rc-sep"></div>
+      <div class="rc-row"><span>${esc(o.code)}</span><span>${d.toLocaleDateString("id-ID", { day: "2-digit", month: "2-digit", year: "numeric" })} ${hhmm(d)}</span></div>
+      <div class="rc-row"><span>${esc(whereLabel(o))}</span><span>${o.order_type === "QR" ? "QR" : "Kasir"}</span></div>
+      ${o.customer ? `<div class="rc-row"><span>Pelanggan</span><span>${esc(o.customer)}</span></div>` : ""}
+      <div class="rc-row"><span>Kasir</span><span>${esc(o.cashier || me)}</span></div>
+      <div class="rc-sep"></div>
+      ${o.items.map((i) => `<div class="rc-item"><div>${esc(i.name)}</div><div class="rc-row"><span>${i.qty} x ${num(i.price)}</span><span>${num(i.price * i.qty)}</span></div>${i.note ? `<div class="rc-note">* ${esc(i.note)}</div>` : ""}</div>`).join("")}
+      <div class="rc-sep"></div>
+      <div class="rc-row"><span>Subtotal</span><span>${num(t.sub)}</span></div>
+      <div class="rc-row"><span>Pajak ${SETTINGS.tax_percent}%</span><span>${num(t.tax)}</span></div>
+      <div class="rc-row rc-total"><span>TOTAL</span><span>${num(t.total)}</span></div>
+      ${paid ? `<div class="rc-row"><span>${o.payment_method === "CASH" ? "Tunai" : "Non-tunai" + (o.payment_channel ? " (" + esc(o.payment_channel) + ")" : "")}</span><span>${num(o.paid_amount)}</span></div>
+        ${o.payment_method === "CASH" ? `<div class="rc-row"><span>Kembali</span><span>${num(o.paid_amount - t.total)}</span></div>` : ""}
+        <div class="rc-c" style="margin-top:6px;font-weight:700">** LUNAS **</div>` : `<div class="rc-c" style="margin-top:6px">BELUM DIBAYAR</div>`}
+      <div class="rc-sep"></div>
+      <div class="rc-c">${esc(SETTINGS.footer)}</div>
+    </div>`;
+  }
+  function printHTML(html) {
+    const area = $("print");
+    area.innerHTML = html;
+    const doc = document.documentElement;
+    doc.dataset.lStafPrinting = "";
+    const done = () => { delete doc.dataset.lStafPrinting; area.innerHTML = ""; };
+    addEventListener("afterprint", done, { once: true, signal });
+    print();
+  }
+
+  /* ===== Render ===== */
+  function renderList(list, o) {
+    $("q-count").textContent = `${list.length} pesanan`;
+    $("q-count").dataset.tone = list.length ? "warning" : "positive";
+    $("q-sub").textContent = list.length ? `Total ${rp(sum(list, (x) => totals(x.items).total))} · pilih pesanan yang akan dibayar` : "Tidak ada tagihan tersisa";
+    $("orders").innerHTML = list.length ? list.map((x) => {
+      const t = totals(x.items), [st, tone] = STATUS[x.status], on = x.code === o.code;
+      return `<li><button type="button" class="b-ord" data-pick="${esc(x.code)}" aria-pressed="${on}" aria-label="${esc(whereLabel(x))}, ${esc(x.code)}, ${st}, ${rp(t.total)}">
+        <span class="b-ord-top"><strong>${esc(whereLabel(x))}</strong><span class="l-staf-chip" data-tone="${tone}">${st}</span></span>
+        <span class="b-ord-meta">${esc(x.code)} · ${esc(srcLabel(x))} · ${t.count} item</span>
+        <span class="b-ord-bot"><span class="b-ord-total">${rp(t.total)}</span><span class="b-ord-time">${icon("clock", 13)}${shortAgo(x.created_at)}</span></span>
+      </button></li>`;
+    }).join("") : `<li class="b-none">${icon("circle-check", 18)}Semua pesanan sudah lunas</li>`;
+  }
+  function renderSummary(o) {
+    const t = totals(o.items), [st, tone] = STATUS[o.status], paid = o.payment_status === "LUNAS";
+    $("s-title").textContent = whereLabel(o);
+    $("s-status").textContent = st; $("s-status").dataset.tone = tone;
+    $("s-pay").textContent = paid ? "Lunas" : "Belum bayar"; $("s-pay").dataset.tone = paid ? "positive" : "warning";
+    $("s-meta").textContent = `${o.code} · ${srcLabel(o)} · masuk ${hhmm(o.created_at)} (${ago(o.created_at)})`;
+    $("s-body").innerHTML = `
+      <ul class="b-items" aria-label="Item pesanan">${o.items.map((i) => `<li class="b-item"><span class="l-staf-thumb" aria-hidden="true">${esc(i.image_url)}</span>
+        <div><strong>${esc(i.name)}</strong><small>${i.qty} × ${rp(i.price)}</small>${i.note ? `<span class="b-note">${icon("sticky-note", 12)}${esc(i.note)}</span>` : ""}</div>
+        <span class="l-staf-num">${rp(i.price * i.qty)}</span></li>`).join("")}</ul>
+      <div class="b-sum">
+        <div><span>Subtotal (${t.count} item)</span><span>${rp(t.sub)}</span></div>
+        <div><span>Pajak ${SETTINGS.tax_percent}%</span><span>${rp(t.tax)}</span></div>
+        <div class="b-sum-total"><span>Total</span><span>${rp(t.total)}</span></div>
+        ${paid ? `<div><span>Dibayar · ${esc(methodLabel(o))}</span><span>${rp(o.paid_amount)}</span></div>${o.payment_method === "CASH" ? `<div><span>Kembalian</span><span>${rp(o.paid_amount - t.total)}</span></div>` : ""}` : ""}
+      </div>
+      <ul class="b-meta">
+        <li>${icon(o.order_type === "QR" ? "qr-code" : "user", 14)}${o.order_type === "QR" ? "Scan QR di meja" : "Dicatat kasir"}</li>
+        <li>${icon(o.table ? "utensils" : "shopping-bag", 14)}${o.table ? "Makan di tempat" : "Bawa pulang"}</li>
+        ${o.customer ? `<li>${icon("user-round", 14)}a.n. ${esc(o.customer)}</li>` : ""}
+        ${o.cashier ? `<li>${icon("badge-check", 14)}Kasir: ${esc(o.cashier)}</li>` : ""}
+      </ul>`;
+  }
+  function quickAmounts(total) {
+    const s = new Set([total]);
+    [5000, 10000, 50000, 100000].forEach((step) => s.add(Math.ceil(total / step) * step));
+    [50000, 100000, 200000].forEach((v) => { if (v >= total) s.add(v); });
+    return [...s].sort((a, b) => a - b).slice(0, 4);
+  }
+  function renderPay(o) {
+    const t = totals(o.items);
+    $("p-title").textContent = "Terima pembayaran";
+    $("p-sub").textContent = `${o.code} · ${whereLabel(o)} · ${t.count} item`;
+    $("pay-total").textContent = rp(t.total);
+    $("quick").innerHTML = quickAmounts(t.total).map((v, i) => `<button type="button" class="l-staf-btn" data-size="sm" data-amt="${v}"${i === 0 ? ` aria-label="Uang pas, ${rp(v)}"` : ""}>${i === 0 ? "Uang pas" : rp(v).replace("Rp ", "")}</button>`).join("");
+    $("pay-input").value = S.received ? S.received.toLocaleString("id-ID") : "";
+    const ch = root.querySelector(`input[name="kasir-bayar-channel"][value="${S.channel}"]`);
+    if (ch) ch.checked = true;
+    $("after").textContent = o.status === "DIANTAR"
+      ? "Pesanan sudah diantar — setelah lunas langsung selesai dan masuk riwayat."
+      : `Pesanan masih ${STATUS[o.status][0].toLowerCase()} — setelah lunas tetap di antrean sampai diantar.`;
+    paintMethod();
+  }
+  function paintMethod() {
+    $$("[data-method]").forEach((b) => b.setAttribute("aria-selected", b.dataset.method === S.method));
+    $("cash-panel").hidden = S.method !== "CASH";
+    $("noncash-panel").hidden = S.method === "CASH";
+    updateChange();
+  }
+  function updateChange() {
+    const o = find(S.code), ch = $("change"), btn = $("confirm");
+    if (!o) return;
+    if (S.method !== "CASH") { btn.disabled = false; return; }
+    const diff = S.received - totals(o.items).total;
+    ch.dataset.state = !S.received ? "" : diff >= 0 ? "ok" : "short";
+    ch.innerHTML = !S.received ? "<span>Kembalian</span><strong>—</strong>" : diff >= 0 ? `<span>Kembalian</span><strong>${rp(diff)}</strong>` : `<span>Uang kurang</span><strong>${rp(-diff)}</strong>`;
+    btn.disabled = diff < 0 || !S.received;
+  }
+  function renderReceipt(o) {
+    const t = totals(o.items), fresh = justPaid === o.code, next = nextUnpaid(o);
+    const finished = o.status === "SELESAI";
+    const row = (html) => `<div class="b-rc-row">${html}</div>`;
+    const nextBtn = (primary) => !next ? "" : `<button type="button" class="l-staf-btn"${primary ? ' data-variant="primary" data-block' : ""} data-pick="${esc(next.code)}" title="${esc(whereLabel(next))} · ${esc(next.code)}">${icon("arrow-right", 18)}Pesanan berikutnya${primary ? ` <small>${esc(whereLabel(next))} · ${esc(next.code)}</small>` : ""}</button>`;
+    const printBtn = (primary) => `<button type="button" class="l-staf-btn"${primary ? ' data-variant="primary" data-block' : ""} data-act="print" data-code="${esc(o.code)}">${icon("printer", 18)}Cetak struk</button>`;
+    const backLink = (primary) => `<a class="l-staf-btn"${primary ? ' data-variant="primary"' : ""} href="#/kasir" data-route-link>${icon("clipboard-list", 18)}Kembali ke pesanan</a>`;
+    $("p-title").textContent = fresh ? "Pembayaran berhasil" : "Struk " + o.code;
+    $("p-sub").textContent = `${o.code} · ${whereLabel(o)} · ${t.count} item`;
+    $("rc-view").innerHTML = `
+      ${fresh ? `<div class="b-paid">${icon("check", 26)}<strong>${rp(t.total)} lunas</strong>
+          <span>${o.payment_method === "CASH" ? `Tunai ${rp(o.paid_amount)} · kembalian ${rp(o.paid_amount - t.total)}` : esc(methodLabel(o))}</span>
+          <span>${finished ? "Pesanan selesai dan masuk riwayat transaksi." : "Pesanan tetap di antrean sampai diantar."}</span></div>`
+        : `<div class="b-paidline">${icon("circle-check", 22)}<div><strong>Lunas · ${esc(methodLabel(o))}</strong><small>Dibayar ${o.paid_at ? hhmm(o.paid_at) : "—"}${o.cashier ? " · kasir " + esc(o.cashier) : ""}</small></div></div>`}
+      <div class="b-paper" role="region" tabindex="0" aria-label="Pratinjau struk ${esc(o.code)}">${receiptHTML(o)}</div>
+      <div class="b-rc-actions">${fresh
+        ? (next ? nextBtn(true) + row(printBtn(false) + backLink(false)) : row(printBtn(false) + backLink(true)))
+        : printBtn(true) + row(nextBtn(false) + backLink(false))}
+      </div>`;
+  }
+  function render() {
+    const { list, o } = selected();
+    $("empty").hidden = !!o;
+    $("left").hidden = $("paycard").hidden = !o;
+    if (!o) return;
+    if (S.code !== o.code) Object.assign(S, { code: o.code, method: "CASH", received: 0, channel: "QRIS" });
+    renderList(list, o);
+    renderSummary(o);
+    const paid = o.payment_status === "LUNAS";
+    $("pay-view").hidden = paid;
+    $("rc-view").hidden = !paid;
+    if (paid) renderReceipt(o); else renderPay(o);
+  }
+
+  /* ===== Aksi ===== */
+  function pick(code) {
+    if (!find(code)) return;
+    p.pay_code = code;
+    savePos(p);
+    justPaid = null;
+    render();
+    if (S.method === "CASH") $("pay-input").focus({ preventScroll: true });
+  }
+  function confirmPay() {
+    const o = find(S.code);
+    if (!o || o.payment_status === "LUNAS") return;
+    const t = totals(o.items);
+    if (S.method === "CASH" && (!S.received || S.received < t.total)) return;
+    o.payment_status = "LUNAS";
+    o.payment_method = S.method;
+    o.payment_channel = S.method === "NON_CASH" ? root.querySelector('input[name="kasir-bayar-channel"]:checked').value : null;
+    o.paid_amount = S.method === "CASH" ? S.received : t.total;
+    o.paid_at = new Date().toISOString();
+    o.cashier = o.cashier || me;
+    if (o.status === "DIANTAR") finishOrder(p, o, "SELESAI");
+    else syncLive(o);
+    p.pay_code = o.code;
+    savePos(p);
+    justPaid = o.code;
+    render();
+    $("p-title").focus({ preventScroll: true });
+  }
+
+  /* ===== Event ===== */
+  root.addEventListener("click", (e) => {
+    const b = e.target.closest("button");
+    if (!b || b.disabled) return;
+    const d = b.dataset;
+    if (d.pick) return pick(d.pick);
+    if (d.method) { S.method = d.method; paintMethod(); if (S.method === "CASH") $("pay-input").focus({ preventScroll: true }); return; }
+    if (d.amt) { S.received = +d.amt; $("pay-input").value = S.received.toLocaleString("id-ID"); updateChange(); return; }
+    if (d.part === "confirm") return confirmPay();
+    if (d.act === "print") { const o = find(d.code); if (o) printHTML(receiptHTML(o)); }
+  }, { signal });
+  root.addEventListener("input", (e) => {
+    const el = e.target;
+    if (el.dataset.part !== "pay-input") return;
+    S.received = Math.min(parseInt(el.value.replace(/\D/g, ""), 10) || 0, 99999999);
+    el.value = S.received ? S.received.toLocaleString("id-ID") : "";
+    updateChange();
+  }, { signal });
+  root.addEventListener("change", (e) => { if (e.target.name === "kasir-bayar-channel") S.channel = e.target.value; }, { signal });
+  $("pay-input").addEventListener("keydown", (e) => { if (e.key === "Enter" && !$("confirm").disabled) confirmPay(); }, { signal });
+
+  /* ===== Sinkron antar-tab & detak kasir ===== */
+  addEventListener("storage", (e) => {
+    if (e.key !== null && e.key !== KEY.pos && e.key !== KEY.live) return;
+    p = loadPos();
+    const added = pullLive(p);
+    if (added.length) { savePos(p); toast(`Pesanan QR baru — Meja ${added[0].table} (${added[0].code}) masuk antrean`); }
+    render();
+  }, { signal });
+  const beat = () => ls.set(KEY.beat, Date.now());
+  beat();
+  const beatTimer = setInterval(beat, 2000);
+  onCleanup(() => clearInterval(beatTimer));
+  const tick = setInterval(() => { const { list, o } = selected(); if (o) renderList(list, o); }, 30000);
+  onCleanup(() => clearInterval(tick));
+
+  /* ===== Mulai ===== */
+  scrollTo(0, 0); // halaman baru selalu dibuka dari atas
+  if (pullLive(p).length) savePos(p);
+  render();
+  if (p.flash) { const msg = p.flash; p.flash = null; savePos(p); toast(msg); }
+</script>

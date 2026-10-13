@@ -1,70 +1,72 @@
-@import "tailwindcss";
+/* Tailwind theme + utilities only — no preflight. The IUL FnB design (DesainPakeAI
+   "Sunlit Ledger", see design/) is plain CSS that expects browser defaults, the
+   same as its prototype runtime. The shadcn tokens below keep the starter's
+   leftover ui/ components readable. */
+@layer theme, base, components, utilities;
+@import "tailwindcss/theme.css" layer(theme);
+@import "tailwindcss/utilities.css" layer(utilities);
 @import "tw-animate-css";
+
+/* Design tokens (fonts, colors, spacing, radii) and the shared staf kit. */
+@import "./tokens.css" layer(base);
+@import "./staf-kit.css" layer(components);
+/* One file per screen, each scoped under [data-page="<id>"]. */
+@import "./pages/login.css" layer(components);
+@import "./pages/kasir.css" layer(components);
+@import "./pages/kasir-manual.css" layer(components);
+@import "./pages/kasir-bayar.css" layer(components);
+@import "./pages/riwayat.css" layer(components);
+@import "./pages/stok.css" layer(components);
+@import "./pages/menu-meja.css" layer(components);
+@import "./pages/penjualan.css" layer(components);
+@import "./pages/staf.css" layer(components);
+@import "./pages/pengaturan.css" layer(components);
 
 @custom-variant dark (&:is(.dark *));
 
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --color-card: var(--card);
-  --color-card-foreground: var(--card-foreground);
-  --color-popover: var(--card);
-  --color-popover-foreground: var(--foreground);
-  --color-primary: var(--primary);
-  --color-primary-foreground: var(--primary-foreground);
-  --color-secondary: var(--secondary);
-  --color-secondary-foreground: var(--foreground);
-  --color-muted: var(--muted);
-  --color-muted-foreground: var(--muted-foreground);
-  --color-accent: var(--secondary);
-  --color-accent-foreground: var(--foreground);
-  --color-destructive: var(--destructive);
-  --color-border: var(--border);
-  --color-input: var(--border);
-  --color-ring: var(--primary);
-  --radius-sm: calc(var(--radius) - 4px);
-  --radius-md: calc(var(--radius) - 2px);
-  --radius-lg: var(--radius);
-  --radius-xl: calc(var(--radius) + 4px);
-  --font-sans: Arial, Helvetica, sans-serif;
-  --font-mono: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
-}
-
-:root {
-  --radius: 0.75rem;
-  --background: #fafafa;
-  --foreground: #191919;
-  --card: #ffffff;
-  --card-foreground: #191919;
-  --primary: #bb371e;
-  --primary-foreground: #ffffff;
-  --secondary: #f0f0ef;
-  --muted: #f4f4f3;
-  --muted-foreground: #656561;
-  --border: #e4e4e1;
-  --destructive: #b91c1c;
-}
-
-.dark {
-  --background: #161616;
-  --foreground: #f5f5f4;
-  --card: #202020;
-  --card-foreground: #f5f5f4;
-  --primary: #fb846b;
-  --primary-foreground: #29100a;
-  --secondary: #2d2d2b;
-  --muted: #252525;
-  --muted-foreground: #b0b0aa;
-  --border: #3b3b37;
-  --destructive: #ff8a8a;
+  --color-background: var(--color-canvas);
+  --color-foreground: var(--color-text);
+  --color-card: var(--color-surface);
+  --color-card-foreground: var(--color-text);
+  --color-popover: var(--color-surface);
+  --color-popover-foreground: var(--color-text);
+  --color-primary: var(--color-primary);
+  --color-primary-foreground: var(--color-on-primary);
+  --color-secondary: var(--color-surface-muted);
+  --color-secondary-foreground: var(--color-text);
+  --color-muted: var(--color-surface-subtle);
+  --color-muted-foreground: var(--color-text-muted);
+  --color-accent: var(--color-surface-muted);
+  --color-accent-foreground: var(--color-text);
+  --color-destructive: var(--color-danger);
+  --color-border: var(--color-border);
+  --color-input: var(--color-border-strong);
+  --color-ring: var(--color-focus-ring);
+  --radius-sm: 8px;
+  --radius-md: 10px;
+  --radius-lg: 16px;
+  --radius-xl: 20px;
 }
 
 @layer base {
-  * {
-    @apply border-border;
-  }
+  /* Prototype runtime base: no page margin, hidden means hidden. */
+  html,
   body {
-    @apply bg-background text-foreground font-sans antialiased;
+    margin: 0;
+    padding: 0;
+  }
+  [hidden]:not([hidden="until-found"]),
+  dialog:not([open]) {
+    display: none !important;
+  }
+  /* lucide-react icons stand in for <iconify-icon>: size from font-size. */
+  svg.lucide {
+    display: inline-block;
+    flex: none;
+    width: 1em;
+    height: 1em;
+    vertical-align: -0.125em;
   }
   button,
   a,
@@ -72,12 +74,5 @@
   textarea,
   select {
     -webkit-tap-highlight-color: transparent;
-  }
-  button:not(:disabled),
-  a {
-    cursor: pointer;
-  }
-  ::selection {
-    background: #bb371e22;
   }
 }

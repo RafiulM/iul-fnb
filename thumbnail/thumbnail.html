@@ -1,0 +1,130 @@
+<!doctype html>
+<html lang="id">
+<head>
+<meta charset="utf-8" />
+<title>Thumbnail — Bikin App Kasir Pakai Claude</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { width: 1280px; height: 720px; overflow: hidden; }
+  body {
+    font-family: -apple-system, "SF Pro Display", "Helvetica Neue", sans-serif;
+    --glow:
+      radial-gradient(900px 520px at 38% 78%, rgba(255, 98, 20, 0.38), transparent 70%),
+      radial-gradient(520px 520px at 92% 55%, rgba(255, 150, 90, 0.22), transparent 70%);
+    --base: linear-gradient(160deg, #1c1512 0%, #120e0c 100%);
+    background: var(--glow), var(--base);
+    position: relative;
+    color: #fff;
+  }
+  /* subtle dot grid */
+  body::before {
+    content: ""; position: absolute; inset: 0;
+    background-image: radial-gradient(rgba(255,255,255,0.07) 1px, transparent 1px);
+    background-size: 22px 22px;
+    mask-image: linear-gradient(180deg, transparent 0%, #000 40%, #000 100%);
+  }
+
+  /* ---------- logo row (above the screenshots) ---------- */
+  .logos {
+    position: absolute; left: 40px; top: 23px; z-index: 5; /* icon tops line up with head top (y 39) */
+    display: flex; align-items: center; gap: 4px;
+  }
+  .logos img {
+    width: 164px; height: 164px;
+    filter: drop-shadow(0 10px 20px rgba(0,0,0,.5));
+  }
+
+  /* ---------- screenshots ---------- */
+  .stage { position: absolute; inset: 0; perspective: 1700px; }
+
+  .dashboard {
+    position: absolute; left: 80px; top: 272px; width: 725px;
+    border-radius: 16px; overflow: hidden;
+    border: 3px solid rgba(255,255,255,.9);
+    box-shadow: 0 30px 70px rgba(0,0,0,.6), 0 0 0 1px rgba(0,0,0,.2);
+    transform: rotateY(14deg) rotateX(3deg) rotateZ(-1.5deg);
+    transform-origin: left center;
+  }
+  .dashboard img { display: block; width: 100%; }
+
+  .phone {
+    position: absolute; left: 662px; top: 214px; width: 270px; height: 565px;
+    background: #0b0b0b; border-radius: 42px; padding: 10px;
+    box-shadow: 0 34px 80px rgba(0,0,0,.7), 0 0 0 2px #3a3a3a, inset 0 0 0 2px #222;
+    transform: rotate(5deg);
+    z-index: 3;
+  }
+  .phone .screen {
+    width: 100%; height: 100%; border-radius: 33px; overflow: hidden; background: #f7f2ed;
+  }
+  .phone .screen img { display: block; width: 100%; }
+  .phone::after { /* dynamic island */
+    content: ""; position: absolute; top: 18px; left: 50%; transform: translateX(-50%);
+    width: 86px; height: 24px; border-radius: 14px; background: #000;
+  }
+
+  .qr {
+    position: absolute; left: 44px; top: 492px; width: 190px;
+    border-radius: 18px; overflow: hidden;
+    box-shadow: 0 22px 50px rgba(0,0,0,.6);
+    transform: rotate(-8deg);
+    z-index: 4;
+  }
+  .qr img { display: block; width: 100%; }
+
+  /* "scan & pesan" sticker on the QR */
+  .tag {
+    position: absolute; left: 178px; top: 650px; z-index: 6;
+    background: #ff6a1f; color: #fff; font-weight: 800; font-size: 26px;
+    padding: 8px 16px; border-radius: 999px; transform: rotate(-6deg);
+    box-shadow: 0 10px 24px rgba(0,0,0,.45); letter-spacing: -.3px;
+  }
+
+  /* ---------- presenter cutout (file unchanged; Chrome applies its EXIF rotation) ---------- */
+  .presenter {
+    position: absolute; right: 0; bottom: 0; height: 899px; z-index: 6; /* head top at y 39 */
+    filter: drop-shadow(0 0 1.5px rgba(255, 220, 190, .45)) drop-shadow(0 24px 40px rgba(0,0,0,.55));
+  }
+  .presenter img { display: block; height: 100%; }
+
+  /* ---------- layer export mode (thumbnail.html#layer=background | group) ---------- */
+  body[data-layer] .logos, body[data-layer] .presenter { display: none; }
+  body[data-layer="background"] .stage, body[data-layer="background"] .phone,
+  body[data-layer="background"] .qr, body[data-layer="background"] .tag { display: none; }
+  /* group: transparent, roomy canvas so nothing is clipped at the bottom edge */
+  html:has(body[data-layer="group"]), body[data-layer="group"], html:has(body[data-layer="screens"]), body[data-layer="screens"], html:has(body[data-layer="sticker"]), body[data-layer="sticker"] { width: 1400px; height: 1000px; overflow: visible; }
+  html:has(body[data-layer="group"]), html:has(body[data-layer="screens"]), html:has(body[data-layer="sticker"]) { background: transparent; }
+  body[data-layer="group"], body[data-layer="screens"], body[data-layer="sticker"] { background: transparent; left: 100px; } /* room for the QR card's shadow */
+  body[data-layer="group"]::before, body[data-layer="screens"]::before, body[data-layer="sticker"]::before { display: none; }
+  /* background split: bg-base (dark gradient), bg-glow (orange glows), bg-dots (dot grid) */
+  body[data-layer^="bg-"] > :not(script) { display: none; }
+  body[data-layer="bg-base"] { background: var(--base); }
+  body[data-layer="bg-base"]::before, body[data-layer="bg-glow"]::before { display: none; }
+  body[data-layer="bg-glow"] { background: var(--glow); }
+  body[data-layer="bg-dots"] { background: transparent; }
+  /* screens: just the 3 screenshots; sticker: just the "Scan → Pesan" tag */
+  body[data-layer="screens"] .tag { display: none; }
+  body[data-layer="sticker"] .stage, body[data-layer="sticker"] .phone, body[data-layer="sticker"] .qr { display: none; }
+</style>
+</head>
+<body>
+  <div class="logos">
+    <img src="assets/claude-app.png" alt="Claude" />
+    <img src="assets/opencode-app.png" alt="OpenCode" />
+    <img src="assets/deepseek-app.png" alt="DeepSeek" />
+  </div>
+
+  <div class="stage">
+    <div class="dashboard"><img src="assets/dashboard.webp" alt="" /></div>
+  </div>
+  <div class="phone"><div class="screen"><img src="assets/menu.png" alt="" /></div></div>
+  <div class="qr"><img src="assets/qr.png" alt="" /></div>
+  <div class="tag">Scan → Pesan</div>
+
+  <div class="presenter"><img src="assets/presenter-cutout.png" alt="" /></div>
+  <script>
+    const layer = new URLSearchParams(location.hash.slice(1)).get("layer");
+    if (layer) document.body.dataset.layer = layer;
+  </script>
+</body>
+</html>

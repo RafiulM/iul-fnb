@@ -1,0 +1,253 @@
+<!-- dpai:page {"scoped":true,"typography":true} -->
+<style>
+  .p-pelanggan-tutup { min-height: 100vh; min-height: 100dvh; background: var(--color-canvas); color: var(--color-text); font: 400 var(--text-body-md) / var(--leading-body-md) var(--font-ui); letter-spacing: -0.14px; -webkit-tap-highlight-color: transparent; }
+  :where(button, input, textarea) { font: inherit; color: inherit; letter-spacing: inherit; }
+  :where(h1, h2, h3, p, dl, dd) { margin: 0; }
+  :where(ul, ol) { margin: 0; padding: 0; list-style: none; }
+  .pc-sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+
+  .pc-app { position: relative; max-width: 440px; min-height: 100vh; min-height: 100dvh; margin: 0 auto; padding-bottom: calc(28px + env(safe-area-inset-bottom)); background: var(--color-canvas); }
+
+  /* ---------- Kepala editorial (sama dengan halaman pelanggan) ---------- */
+  .pc-head { padding: var(--spacing-20) var(--space-4) 0; }
+  .pc-head-top { display: flex; align-items: center; justify-content: space-between; gap: var(--space-3); }
+  .pc-brand { display: flex; align-items: center; gap: var(--space-3); min-width: 0; }
+  .pc-brand > div { min-width: 0; }
+  .pc-mono { flex: none; display: grid; place-items: center; width: 40px; height: 40px; border-radius: var(--radius-compact); background: var(--color-primary); color: var(--color-on-primary); font: 600 14px / 1 var(--font-ui); letter-spacing: 0.5px; }
+  .pc-brand-name { font: 600 17px / 1.2 var(--font-ui); letter-spacing: -0.2px; }
+  .pc-brand-addr { margin-top: 2px; overflow: hidden; font: 400 var(--text-label-sm) / 1.35 var(--font-ui); color: var(--color-text-muted); white-space: nowrap; text-overflow: ellipsis; }
+  .pc-table { flex: none; display: grid; justify-items: center; min-width: 66px; padding: 6px 12px 8px; border: var(--border-hairline) solid var(--color-border); border-radius: var(--radius-image); background: var(--color-surface); }
+  .pc-table span { font: 600 11px / 1.3 var(--font-ui); color: var(--color-text-muted); }
+  .pc-table strong { font: 500 24px / 1.05 var(--font-ui); letter-spacing: -0.6px; font-variant-numeric: tabular-nums; }
+  .pc-greet { margin-top: 28px; font: 500 var(--text-body-sm) / 1.4 var(--font-ui); color: var(--color-text-muted); }
+  .pc-thesis { margin-top: 6px; font: 400 38px / 1.08 var(--font-editorial); letter-spacing: -1.2px; text-wrap: balance; }
+  .pc-lead { margin-top: var(--space-3); font: 400 15px / 1.5 var(--font-ui); letter-spacing: -0.15px; color: var(--color-text-soft); text-wrap: pretty; }
+  .pc-meta { display: flex; flex-wrap: wrap; gap: var(--space-2); margin-top: var(--space-4); }
+  .pc-meta .pc-chip { background: var(--color-surface); }
+
+  /* ---------- Chip ---------- */
+  .pc-chip { display: inline-flex; align-items: center; gap: 6px; padding: 3px 10px; border: var(--border-hairline) solid var(--color-border); border-radius: var(--radius-pill); background: var(--color-surface-muted); color: var(--color-text-soft); font: 600 var(--text-label-sm) / var(--leading-label-sm) var(--font-ui); white-space: nowrap; }
+  .pc-chip::before { content: ""; flex: none; width: 6px; height: 6px; border-radius: var(--radius-pill); background: var(--pc-tone, var(--color-border-strong)); }
+  .pc-chip[data-tone="positive"] { --pc-tone: var(--color-positive); }
+  .pc-chip[data-tone="warning"] { --pc-tone: var(--color-warning); }
+  .pc-chip[data-tone="danger"] { --pc-tone: var(--color-danger); }
+  .pc-chip[data-tone="accent"] { --pc-tone: var(--color-accent); }
+  .pc-chip[data-tone="dark"] { border-color: var(--color-primary); background: var(--color-primary); color: var(--color-on-primary); }
+  .pc-chip[data-tone="plain"]::before, .pc-chip[data-tone="dark"]::before { display: none; }
+  .pc-chip iconify-icon { font-size: 14px; }
+
+  /* ---------- Ringkasan hari ini ---------- */
+  .pc-now { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); margin: 22px var(--space-4) 0; padding: var(--space-3) 4px; border: var(--border-hairline) solid var(--color-border); border-radius: var(--radius-image); background: var(--color-surface); text-align: center; }
+  .pc-now div + div { border-inline-start: var(--border-hairline) solid var(--color-border); }
+  .pc-now dt { font: 500 var(--text-label-sm) / 1.3 var(--font-ui); color: var(--color-text-muted); }
+  .pc-now dd { margin-top: 3px; font: 600 17px / 1.2 var(--font-ui); font-variant-numeric: tabular-nums; }
+  .pc-now dd small { display: block; margin-top: 2px; font: 500 var(--text-label-sm) / 1.3 var(--font-ui); color: var(--color-text-muted); }
+
+  /* ---------- Jam mingguan ---------- */
+  .pc-card { margin: 14px var(--space-4) 0; padding: var(--space-2) 6px; border: var(--border-hairline) solid var(--color-border); border-radius: var(--radius-card); background: var(--color-surface); }
+  .pc-card h2 { padding: 10px var(--space-3) 6px; font: 600 16px / 1.3 var(--font-ui); letter-spacing: -0.16px; }
+  .pc-week { display: grid; }
+  .pc-week li { position: relative; display: flex; align-items: center; justify-content: space-between; gap: var(--space-3); min-height: 44px; padding: 0 var(--space-3); border-block-start: var(--border-hairline) solid var(--color-border); font: 400 var(--text-body-sm) / 1.4 var(--font-ui); color: var(--color-text-soft); }
+  .pc-week li:first-child { border-block-start-color: transparent; }
+  .pc-week li > span:first-child { display: inline-flex; align-items: center; gap: var(--space-2); }
+  .pc-week li > span:last-child { font-weight: 500; font-variant-numeric: tabular-nums; color: var(--color-text); }
+  .pc-week li[aria-current] { border-block-start-color: transparent; border-radius: var(--radius-compact); background: var(--color-surface-subtle); color: var(--color-text); font-weight: 600; }
+  .pc-week li[aria-current] + li { border-block-start-color: transparent; }
+  .pc-week li[aria-current]::before { content: ""; position: absolute; inset-block: 10px; inset-inline-start: 0; width: 3px; border-radius: var(--radius-pill); background: var(--color-accent); }
+  .pc-week li[aria-current] > span:last-child { font-weight: 600; }
+  .pc-week .pc-chip { padding: 1px 8px; font-size: 11px; background: var(--color-surface); }
+
+  .pc-notice { display: flex; align-items: flex-start; gap: 10px; margin: 14px var(--space-4) 0; padding: var(--space-3) 14px; border: var(--border-hairline) solid var(--color-border); border-radius: var(--radius-compact); background: var(--color-surface-subtle); font: 400 13px / 1.5 var(--font-ui); color: var(--color-text-soft); }
+  .pc-notice > iconify-icon { flex: none; margin-top: 1px; font-size: 18px; color: var(--color-text-muted); }
+
+  /* ---------- Tombol ---------- */
+  .pc-actions { display: grid; gap: 10px; margin: var(--space-4) var(--space-4) 0; }
+  .pc-btn { display: inline-flex; align-items: center; justify-content: center; gap: var(--space-2); min-height: 48px; padding: 10px var(--space-6); border: var(--border-hairline) solid var(--color-border-strong); border-radius: var(--radius-control); background: var(--color-surface); color: var(--color-text); font: 500 16px / 1.2 var(--font-ui); letter-spacing: -0.2px; text-decoration: none; white-space: nowrap; cursor: pointer; transition: background-color var(--duration-fast) var(--ease-standard), border-color var(--duration-fast) var(--ease-standard), color var(--duration-fast) var(--ease-standard); }
+  .pc-btn:hover { border-color: var(--color-text); }
+  .pc-btn iconify-icon { font-size: 18px; }
+  .pc-btn[data-block] { width: 100%; }
+
+  /* ---------- Prototipe ---------- */
+  .pc-demo { display: flex; justify-content: center; gap: 6px; margin: var(--space-4) var(--space-6) 0; text-align: center; font: 400 var(--text-label-sm) / 1.5 var(--font-ui); color: var(--color-text-muted); }
+  .pc-demo > iconify-icon { flex: none; margin-top: 2px; font-size: 14px; }
+  .pc-demo a { color: var(--color-text); font-weight: 600; text-underline-offset: 3px; }
+
+  .pc-foot { padding: 28px var(--space-6) 0; text-align: center; font: 400 var(--text-label-sm) / 1.6 var(--font-ui); color: var(--color-text-muted); }
+  .pc-foot strong { font-weight: 600; color: var(--color-text); }
+
+  /* ---------- Toast ---------- */
+  .pc-toast { position: fixed; inset: auto auto calc(28px + env(safe-area-inset-bottom)) 50%; max-width: min(400px, calc(100% - 32px)); margin: 0; padding: 10px 18px; overflow: hidden; border: 0; border-radius: var(--radius-control); background: var(--color-primary); color: var(--color-on-primary); font: 500 var(--text-body-sm) / 1.4 var(--font-ui); white-space: nowrap; text-overflow: ellipsis; transform: translateX(-50%); box-shadow: var(--shadow-nav); }
+
+  @media (min-width: 480px) {
+    .p-pelanggan-tutup { background: var(--color-surface-muted); }
+    .pc-app { border-inline: var(--border-hairline) solid var(--color-border); }
+  }
+</style>
+
+<template data-slot="content">
+  <main aria-label="Kafe Tutup" class="p-pelanggan-tutup" data-node-id="pelanggan-tutup">
+    <div class="pc-app" data-node-id="pelanggan-tutup.app">
+      <header class="pc-head" data-node-id="pelanggan-tutup.header">
+        <div class="pc-head-top">
+          <div class="pc-brand">
+            <span class="pc-mono" aria-hidden="true">KS</span>
+            <div><p class="pc-brand-name">Kedai Senja</p><p class="pc-brand-addr">Jl. Kaliurang Km 5, Yogyakarta</p></div>
+          </div>
+          <div class="pc-table" role="group" aria-label="Nomor meja 07" data-part="table-box"><span aria-hidden="true">Meja</span><strong data-part="table">07</strong></div>
+        </div>
+        <p class="pc-greet" data-part="greet">Selamat malam 👋</p>
+        <h1 class="pc-thesis">Kafe sedang tutup</h1>
+        <p class="pc-lead" data-part="lead">Kami sudah tutup pukul 22.00 malam ini. Buka lagi besok pukul 08.00.</p>
+        <div class="pc-meta">
+          <span class="pc-chip" data-part="chip">Tutup · buka besok 08.00</span>
+          <span class="pc-chip" data-tone="plain"><iconify-icon icon="lucide:credit-card" aria-hidden="true"></iconify-icon>Bayar di kasir</span>
+        </div>
+      </header>
+
+      <dl class="pc-now" data-node-id="pelanggan-tutup.today">
+        <div><dt data-part="today-label">Jam hari ini</dt><dd data-part="today-hours">08.00–22.00</dd></div>
+        <div><dt>Buka lagi</dt><dd><span data-part="next">Besok 08.00</span><small data-part="next-rel"></small></dd></div>
+      </dl>
+
+      <section class="pc-card" aria-labelledby="pelanggan-tutup-week" data-node-id="pelanggan-tutup.week">
+        <h2 id="pelanggan-tutup-week">Jam operasional</h2>
+        <ul class="pc-week" data-part="week"></ul>
+      </section>
+
+      <div class="pc-notice"><iconify-icon icon="lucide:info" aria-hidden="true"></iconify-icon><span>Menu dan harga tetap bisa kamu lihat sekarang. Pesanan baru bisa dikirim lagi saat kafe buka.</span></div>
+
+      <div class="pc-actions">
+        <a class="pc-btn" data-block href="#/pelanggan" data-route-link data-part="browse" data-node-id="pelanggan-tutup.browse"><iconify-icon icon="lucide:eye" aria-hidden="true"></iconify-icon>Lihat menu saja</a>
+      </div>
+
+      <p class="pc-demo" data-node-id="pelanggan-tutup.proto"><iconify-icon icon="lucide:zap" aria-hidden="true"></iconify-icon><span><span data-part="proto-note">Halaman ini muncul otomatis di luar jam buka.</span> <a href="#/pelanggan" data-route-link data-part="force-open">Prototipe: anggap kafe sedang buka</a></span></p>
+
+      <p class="pc-foot">Didukung oleh <strong>IUL FnB</strong></p>
+    </div>
+
+    <div class="pc-toast" popover="manual" role="status" data-part="toast"></div>
+  </main>
+</template>
+
+<script>
+  /* ===== Kontrak data lintas halaman (CONTRACTS.md — salinan apa adanya) ===== */
+  const KEY = { cust: "iulfnb:cust", pos: "iulfnb:pos", live: "iulfnb:orders-live", beat: "iulfnb:kasir-beat", seq: "iulfnb:seq", role: "iulfnb:role" };
+  const SEQ_BASE = 107;
+  const ls = {
+    get(k, d) { try { const v = localStorage.getItem(k); return v == null ? d : JSON.parse(v); } catch { return d; } },
+    set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch {} },
+    del(k) { try { localStorage.removeItem(k); } catch {} },
+  };
+  function nextOrderCode() {
+    const n = Math.max(ls.get(KEY.seq, SEQ_BASE), SEQ_BASE) + 1;
+    ls.set(KEY.seq, n);
+    return "A-" + String(n).padStart(3, "0");
+  }
+  const kasirOnline = () => Date.now() - ls.get(KEY.beat, 0) < 5000;
+  /** Jam operasional (sama dengan halaman Pengaturan): 0 = Minggu … 6 = Sabtu */
+  const HOURS = { 0: ["08:00", "22:00"], 1: ["08:00", "22:00"], 2: ["08:00", "22:00"], 3: ["08:00", "22:00"], 4: ["08:00", "22:00"], 5: ["08:00", "22:00"], 6: ["08:00", "23:00"] };
+  function isCafeOpen(d = new Date()) {
+    const [o, c] = HOURS[d.getDay()] || [];
+    if (!o) return false;
+    const m = d.getHours() * 60 + d.getMinutes(), t = (s) => +s.slice(0, 2) * 60 + +s.slice(3);
+    return m >= t(o) && m < t(c);
+  }
+
+  const custEmpty = (table = "07") => ({ v: 1, table, invalid_table: null, cart: [], selected: "m1", edit_key: null, order: null, browse_only: false, force_open: false, flash: null, demo: false });
+  function loadCust(fallback = custEmpty) { const s = ls.get(KEY.cust, null); return s && s.v === 1 ? s : fallback(); }
+  function saveCust(s) { s.updated_at = new Date().toISOString(); ls.set(KEY.cust, s); }
+
+  /* ===== Util ===== */
+  const $ = (part) => root.querySelector(`[data-part="${part}"]`);
+  const esc = (s) => String(s ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+  const DAY = ["Minggu", "Senin", "Selasa", "Rabu", "Kamis", "Jumat", "Sabtu"];
+  const WEEK = [1, 2, 3, 4, 5, 6, 0]; // Senin dulu, seperti halaman Pengaturan
+  const dotT = (t) => String(t || "").replace(":", ".");
+  const toMin = (t) => +t.slice(0, 2) * 60 + +t.slice(3);
+  const range = (h) => h ? `${dotT(h[0])}–${dotT(h[1])}` : "Tutup";
+  const reduceMotion = () => matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+  /* ===== Toast ===== */
+  const toastEl = $("toast");
+  let toastTimer;
+  function toast(msg) {
+    toastEl.textContent = msg;
+    try { if (toastEl.matches(":popover-open")) toastEl.hidePopover(); toastEl.showPopover(); } catch {}
+    if (toastEl.animate && !reduceMotion()) try { toastEl.animate([{ opacity: 0, transform: "translate(-50%, 12px)" }, { opacity: 1, transform: "translate(-50%, 0)" }], { duration: 200, easing: "ease" }); } catch {}
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(hideToast, 2600);
+  }
+  function hideToast() { try { if (toastEl.matches(":popover-open")) toastEl.hidePopover(); } catch {} }
+  onCleanup(() => { clearTimeout(toastTimer); hideToast(); });
+
+  /* ===== Kapan buka lagi (dihitung dari HOURS) ===== */
+  /** Saat kafe sebenarnya buka (pratinjau kanvas), hitung seolah-olah sekarang = jam tutup hari ini. */
+  function plan(now = new Date()) {
+    const preview = isCafeOpen(now);
+    const day = now.getDay(), today = HOURS[day] || null;
+    const m = preview ? toMin(today[1]) : now.getHours() * 60 + now.getMinutes();
+    let off = null, time = null;
+    if (today && m < toMin(today[0])) { off = 0; time = today[0]; }
+    else for (let k = 1; k <= 7; k++) { const h = HOURS[(day + k) % 7]; if (h) { off = k; time = h[0]; break; } }
+    const phase = !today ? "libur" : m < toMin(today[0]) ? "pagi" : "malam";
+    const mins = off == null ? null : off * 1440 + toMin(time) - m;
+    return { preview, day, today, m, phase, off, nextDay: off == null ? null : (day + off) % 7, time, mins };
+  }
+  const rel = (mins) => mins < 60 ? `${Math.max(1, mins)} menit lagi` : mins < 90 ? "sekitar 1 jam lagi" : `sekitar ${Math.round(mins / 60)} jam lagi`;
+
+  function render() {
+    const s = loadCust(), p = plan();
+    $("table").textContent = s.table || "07";
+    $("table-box").setAttribute("aria-label", `Nomor meja ${s.table || "07"}`);
+    const h = p.m / 60;
+    $("greet").textContent = `${h < 11 ? "Selamat pagi" : h < 15 ? "Selamat siang" : h < 18 ? "Selamat sore" : "Selamat malam"} 👋`;
+
+    const nextWhen = p.off == null ? "" : p.off === 0 ? "pagi ini" : p.off === 1 ? `besok, ${DAY[p.nextDay]},` : `hari ${DAY[p.nextDay]}`;
+    $("lead").textContent = p.off == null ? "Jadwal buka berikutnya belum tersedia. Tanyakan ke kasir, ya."
+      : p.phase === "pagi" ? `Kami belum buka. Buka ${nextWhen} pukul ${dotT(p.time)}${p.preview ? "" : `, ${rel(p.mins)}`}.`
+      : p.phase === "malam" ? `Kami sudah tutup pukul ${dotT(p.today[1])} malam ini. Buka lagi ${nextWhen} pukul ${dotT(p.time)}.`
+      : `Hari ini kami libur. Buka lagi ${nextWhen} pukul ${dotT(p.time)}.`;
+    const short = p.off == null ? "" : p.off === 0 ? "Hari ini" : p.off === 1 ? "Besok" : DAY[p.nextDay];
+    $("chip").textContent = p.off == null ? "Tutup" : `Tutup · buka ${short.toLowerCase()} ${dotT(p.time)}`;
+    $("today-label").textContent = `Hari ini · ${DAY[p.day]}`;
+    $("today-hours").textContent = range(p.today);
+    $("next").textContent = p.off == null ? "–" : `${short} ${dotT(p.time)}`;
+    $("next-rel").textContent = p.off == null || p.preview ? "" : rel(p.mins);
+    $("next-rel").hidden = !$("next-rel").textContent;
+
+    $("week").innerHTML = WEEK.map((d) => {
+      const cur = d === p.day;
+      return `<li${cur ? ' aria-current="date"' : ""}><span>${DAY[d]}${cur ? '<span class="pc-chip" data-tone="accent">Hari ini</span>' : ""}</span><span>${esc(range(HOURS[d]))}</span></li>`;
+    }).join("");
+
+    $("proto-note").textContent = p.preview
+      ? `Saat ini kafe sebenarnya buka (${range(p.today)}); tampilan memakai keadaan setelah tutup pukul ${dotT(p.today[1])}.`
+      : "Halaman ini muncul otomatis di luar jam buka.";
+  }
+
+  /* ===== Aksi ===== */
+  function go(patch, flash) {
+    const s = loadCust();
+    Object.assign(s, patch, { flash });
+    saveCust(s);
+    // tautan sendiri yang menavigasi ke #/pelanggan
+  }
+  $("browse").addEventListener("click", () => {
+    const p = plan();
+    go({ browse_only: true }, p.off == null ? "Mode lihat menu: pemesanan sedang ditutup" : `Mode lihat menu: pesan lagi mulai pukul ${dotT(p.time)}`);
+  }, { signal });
+  $("force-open").addEventListener("click", () => go({ force_open: true, browse_only: false }, "Prototipe: kafe dianggap sedang buka"), { signal });
+
+  addEventListener("storage", (e) => { if (e.key === null || e.key === KEY.cust) render(); }, { signal });
+  const tick = setInterval(render, 30000);
+  onCleanup(() => clearInterval(tick));
+
+  /* ===== Mulai ===== */
+  const prevTitle = document.title;
+  document.title = `Kafe tutup — Kedai Senja | IUL FnB`;
+  onCleanup(() => { document.title = prevTitle; });
+  scrollTo({ top: 0 });
+  render();
+  const s0 = ls.get(KEY.cust, null);
+  if (s0 && s0.v === 1 && s0.flash) { const msg = s0.flash; s0.flash = null; saveCust(s0); toast(msg); }
+</script>

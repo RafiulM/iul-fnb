@@ -1,0 +1,484 @@
+<!-- dpai:page {"scoped":true,"typography":true} -->
+<style>
+  .p-login { display: grid; grid-template-columns: minmax(400px, 45%) minmax(0, 1fr); min-height: 100vh; min-height: 100dvh; background: var(--color-canvas); color: var(--color-text); font: 400 var(--text-body-md) / var(--leading-body-md) var(--font-ui); letter-spacing: -0.14px; }
+  :where(button, input) { font: inherit; color: inherit; letter-spacing: inherit; }
+  :where(h1, h2, p) { margin: 0; }
+  :where(ul) { margin: 0; padding: 0; list-style: none; }
+
+  /* ---------- Panel merek ---------- */
+  .lg-brand { display: flex; flex-direction: column; gap: 28px; min-width: 0; padding: 32px clamp(28px, 4vw, 64px) 28px; border-inline-end: var(--border-hairline) solid var(--color-border); background: var(--color-surface-muted); }
+  .lg-brand-top { display: flex; align-items: center; gap: var(--space-3); }
+  .lg-mono { flex: none; display: grid; place-items: center; width: 44px; height: 44px; border-radius: var(--radius-compact); background: var(--color-primary); color: var(--color-on-primary); font: 600 15px / 1 var(--font-ui); letter-spacing: 0.5px; }
+  .lg-brand-top strong { display: block; font: 600 17px / 1.2 var(--font-ui); letter-spacing: -0.2px; }
+  .lg-brand-top small { display: block; margin-top: 2px; font: 500 var(--text-label-sm) / 1.35 var(--font-ui); color: var(--color-text-muted); }
+  .lg-brand-mid { flex: 1; display: flex; flex-direction: column; justify-content: center; }
+  .lg-thesis { max-width: 540px; margin-top: 18px; font: 400 clamp(40px, 3.8vw, 56px) / 1.06 var(--font-editorial); letter-spacing: -1.8px; text-wrap: balance; }
+  .lg-lede { max-width: 460px; margin-top: 14px; font: 400 17px / 1.5 var(--font-ui); letter-spacing: -0.3px; color: var(--color-text-muted); }
+  .lg-props { display: grid; gap: 14px; max-width: 470px; margin-top: 28px; }
+  .lg-props li { display: flex; align-items: flex-start; gap: 14px; }
+  .lg-pi { flex: none; display: grid; place-items: center; width: 40px; height: 40px; border: var(--border-hairline) solid var(--color-border); border-radius: var(--radius-pill); background: var(--color-surface); color: var(--color-text); }
+  .lg-pi iconify-icon { font-size: 18px; }
+  .lg-props strong { display: block; margin-top: 1px; font: 600 15px / 1.35 var(--font-ui); letter-spacing: -0.15px; }
+  .lg-props small { display: block; margin-top: 1px; font: 400 var(--text-body-sm) / 1.45 var(--font-ui); color: var(--color-text-muted); }
+  .lg-brand-foot { font: 500 var(--text-label-sm) / 1.4 var(--font-ui); color: var(--color-text-muted); }
+  .lg-brand-foot strong { color: var(--color-text); }
+
+  /* Bukti produk: kartu pesanan baru */
+  .lg-proof { position: relative; width: min(100%, 360px); margin-top: 30px; padding: var(--space-4) 18px var(--space-4) var(--spacing-20); border: var(--border-hairline) solid var(--color-border); border-radius: var(--radius-card); background: var(--color-surface); box-shadow: var(--shadow-md); }
+  .lg-proof::before { content: ""; position: absolute; inset-block: 18px; inset-inline-start: 0; width: 3px; border-radius: var(--radius-pill); background: var(--color-accent); }
+  .lg-proof-head { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+  .lg-proof-time { display: inline-flex; align-items: center; gap: 4px; font: 500 var(--text-label-sm) / 1 var(--font-ui); color: var(--color-text-muted); }
+  .lg-proof-title { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; margin-top: var(--space-3); }
+  .lg-proof-title strong { font: 600 18px / 1.2 var(--font-ui); letter-spacing: -0.3px; }
+  .lg-proof-title span { display: inline-flex; align-items: center; gap: 4px; font: 500 var(--text-label-sm) / 1.3 var(--font-ui); color: var(--color-text-muted); }
+  .lg-proof ul { display: grid; gap: 6px; margin: var(--space-3) 0; padding: var(--space-3) 0; border-block: var(--border-hairline) dashed var(--color-border); font: 400 var(--text-body-sm) / 1.4 var(--font-ui); }
+  .lg-proof li b { display: inline-block; min-width: 26px; font-weight: 600; }
+  .lg-proof-note { display: flex; align-items: center; gap: 4px; margin: 2px 0 0 26px; font: 500 var(--text-label-sm) / 1.33 var(--font-ui); font-style: italic; color: var(--color-warning-text); }
+  .lg-proof-foot { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+  .lg-proof-foot strong { font: 600 16px / 1 var(--font-ui); font-variant-numeric: tabular-nums; }
+  .lg-proof-act { display: flex; align-items: center; justify-content: center; min-height: 36px; margin-top: var(--space-3); border: var(--border-hairline) solid var(--color-border-strong); border-radius: var(--radius-control); font: 500 var(--text-body-sm) / 1.2 var(--font-ui); }
+
+  /* ---------- Chip ---------- */
+  .lg-chip { display: inline-flex; align-items: center; gap: 6px; padding: 3px 10px; border: var(--border-hairline) solid var(--color-border); border-radius: var(--radius-pill); background: var(--color-surface-muted); color: var(--color-text-soft); font: 600 var(--text-label-sm) / var(--leading-label-sm) var(--font-ui); white-space: nowrap; }
+  .lg-chip::before { content: ""; flex: none; width: 6px; height: 6px; border-radius: var(--radius-pill); background: var(--lg-tone, var(--color-border-strong)); }
+  .lg-chip[data-tone="warning"] { --lg-tone: var(--color-warning); }
+  .lg-chip[data-tone="accent"] { --lg-tone: var(--color-accent); }
+  .lg-chip[data-tone="plain"]::before { display: none; }
+  .lg-chip iconify-icon { font-size: 14px; }
+  .lg-kicker { align-self: flex-start; background: var(--color-surface); }
+
+  /* ---------- Formulir ---------- */
+  .lg-main { display: flex; flex-direction: column; align-items: center; justify-content: center; min-width: 0; padding: 32px 28px; }
+  .lg-card { width: min(100%, 440px); padding: 32px 32px 26px; border: var(--border-hairline) solid var(--color-border); border-radius: var(--radius-card); background: var(--color-surface); }
+  .lg-card h1 { font: 400 var(--text-heading-md) / 1.2 var(--font-ui); letter-spacing: var(--tracking-heading); }
+  .lg-sub { margin-top: 6px; font: 400 var(--text-body-sm) / 1.5 var(--font-ui); color: var(--color-text-muted); }
+  .lg-alert { display: flex; align-items: flex-start; gap: 10px; margin-top: 18px; padding: var(--space-3) 14px; border: var(--border-hairline) solid var(--color-danger); border-radius: var(--radius-compact); background: color-mix(in srgb, var(--color-danger) 8%, var(--color-surface)); font: 400 var(--text-body-sm) / 1.5 var(--font-ui); }
+  .lg-alert > iconify-icon { flex: none; margin-top: 2px; font-size: 18px; color: var(--color-danger); }
+  .lg-form { display: grid; gap: var(--space-4); margin-top: 22px; }
+  .lg-field { display: grid; align-content: start; gap: 6px; min-width: 0; }
+  .lg-field > label { font: 600 var(--text-body-sm) / 1.5 var(--font-ui); }
+  .lg-affix { display: flex; align-items: center; min-height: 48px; border: var(--border-hairline) solid var(--color-border-strong); border-radius: var(--radius-image); background: var(--color-surface); color: var(--color-text-muted); transition: border-color var(--duration-fast) var(--ease-standard); }
+  .lg-affix:hover { border-color: var(--color-text-muted); }
+  .lg-affix:focus-within { outline: 2px solid var(--color-focus-ring); outline-offset: 3px; }
+  .lg-affix[data-invalid] { border-color: var(--color-danger); }
+  .lg-affix > iconify-icon { flex: none; margin-inline: var(--space-4) 10px; font-size: 18px; }
+  .lg-affix input { flex: 1; min-width: 0; height: 46px; padding: 0 var(--space-4) 0 0; border: 0; outline: 0; background: transparent; color: var(--color-text); font: 400 16px / 1.2 var(--font-ui); letter-spacing: -0.2px; }
+  .lg-affix input::placeholder { color: var(--color-text-muted); }
+  .lg-pw-toggle { flex: none; display: grid; place-items: center; width: 46px; height: 46px; margin-inline-start: -8px; padding: 0; border: 0; border-radius: 0 15px 15px 0; background: transparent; color: var(--color-text-muted); cursor: pointer; transition: color var(--duration-fast) var(--ease-standard); }
+  .lg-pw-toggle:hover { color: var(--color-text); }
+  .lg-pw-toggle:focus-visible { outline-offset: -4px; }
+  .lg-pw-toggle iconify-icon { font-size: 18px; }
+  .lg-err { display: flex; align-items: flex-start; gap: 6px; font: 500 13px / 1.4 var(--font-ui); color: var(--color-text); }
+  .lg-err > iconify-icon { flex: none; margin-top: 2px; color: var(--color-danger); }
+  .lg-hint { font: 400 var(--text-label-sm) / 1.45 var(--font-ui); color: var(--color-text-muted); }
+  .lg-row { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 10px; }
+  .lg-check { display: inline-flex; align-items: center; gap: var(--space-2); font: 500 var(--text-body-sm) / 1.4 var(--font-ui); cursor: pointer; }
+  .lg-check input { width: 18px; height: 18px; margin: 0; accent-color: var(--color-primary); cursor: pointer; }
+  .lg-link { padding: 4px 2px; border: 0; background: none; font: 600 var(--text-body-sm) / 1.4 var(--font-ui); color: var(--color-text); text-decoration: underline; text-decoration-color: var(--color-border-strong); text-underline-offset: 3px; cursor: pointer; transition: text-decoration-color var(--duration-fast) var(--ease-standard); }
+  .lg-link:hover { text-decoration-color: currentColor; }
+
+  .lg-btn { display: inline-flex; align-items: center; justify-content: center; gap: var(--space-2); min-height: 44px; padding: var(--space-2) var(--space-6); border: var(--border-hairline) solid var(--color-border-strong); border-radius: var(--radius-control); background: var(--color-surface); color: var(--color-text); font: 500 15px / 1.2 var(--font-ui); letter-spacing: -0.15px; white-space: nowrap; cursor: pointer; transition: background-color var(--duration-fast) var(--ease-standard), border-color var(--duration-fast) var(--ease-standard), color var(--duration-fast) var(--ease-standard); }
+  .lg-btn:hover { border-color: var(--color-text); }
+  .lg-btn iconify-icon { font-size: 18px; }
+  .lg-btn[data-variant="ghost"] { border-color: transparent; background: transparent; }
+  .lg-btn[data-variant="ghost"]:hover { background: var(--color-surface-muted); }
+  .lg-btn[data-variant="primary"] { border-color: var(--color-primary); background: var(--color-primary); color: var(--color-on-primary); }
+  .lg-btn[data-variant="primary"]:hover { border-color: var(--color-primary-hover); background: var(--color-primary-hover); }
+  .lg-btn[data-variant="primary"]:active { background: var(--color-primary-active); }
+  .lg-btn[data-variant="primary"]:disabled { border-color: var(--color-primary-active); background: var(--color-primary-active); cursor: progress; }
+  .lg-btn[data-variant="primary"][data-state="done"] { cursor: default; }
+  .lg-btn[data-size="lg"] { min-height: 52px; font-size: 16px; }
+  .lg-btn[data-block] { width: 100%; }
+  .lg-submit { margin-top: 2px; }
+
+  .lg-divider { display: flex; align-items: center; gap: var(--space-3); margin: 22px 0 14px; font: 500 var(--text-label-sm) / 1 var(--font-ui); color: var(--color-text-muted); }
+  .lg-divider::before, .lg-divider::after { content: ""; flex: 1; height: 1px; background: var(--color-border); }
+
+  .lg-demo { padding: 14px; border: var(--border-hairline) dashed var(--color-border-strong); border-radius: var(--radius-image); background: var(--color-surface-subtle); }
+  .lg-demo-head { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-2); }
+  .lg-demo-head h2 { font: 600 var(--text-body-sm) / 1.3 var(--font-ui); }
+  .lg-demo > p { margin-top: 4px; font: 400 13px / 1.45 var(--font-ui); color: var(--color-text-muted); }
+  .lg-demo-btns { display: grid; gap: var(--space-2); margin-top: var(--space-3); }
+  .lg-demo-btn { display: flex; align-items: center; gap: var(--space-3); width: 100%; padding: 10px var(--space-3); border: var(--border-hairline) solid var(--color-border); border-radius: var(--radius-image); background: var(--color-surface); text-align: start; cursor: pointer; transition: border-color var(--duration-fast) var(--ease-standard), background-color var(--duration-fast) var(--ease-standard); }
+  .lg-demo-btn:hover { border-color: var(--color-text); }
+  .lg-demo-btn:disabled { background: var(--color-surface-subtle); color: var(--color-text-muted); cursor: progress; }
+  .lg-demo-btn:disabled:hover { border-color: var(--color-border); }
+  .lg-demo-btn > iconify-icon { flex: none; font-size: 16px; color: var(--color-text-muted); }
+  .lg-avatar { flex: none; display: grid; place-items: center; width: 36px; height: 36px; border: var(--border-hairline) solid var(--color-border); border-radius: var(--radius-pill); background: var(--color-surface-muted); font: 600 13px / 1 var(--font-ui); letter-spacing: 0.3px; }
+  .lg-grow { flex: 1; min-width: 0; }
+  .lg-demo-btn strong { display: block; font: 600 var(--text-body-sm) / 1.3 var(--font-ui); }
+  .lg-demo-btn small { display: block; margin-top: 1px; font: 400 var(--text-label-sm) / 1.35 var(--font-ui); color: var(--color-text-muted); }
+  .lg-cust { display: flex; align-items: center; justify-content: center; gap: var(--space-2); margin-top: 18px; font: 600 var(--text-body-sm) / 1.4 var(--font-ui); color: var(--color-text); text-decoration: none; text-underline-offset: 3px; }
+  .lg-cust:hover { text-decoration: underline; }
+  .lg-cust iconify-icon { font-size: 16px; }
+  .lg-foot { display: none; margin-top: 18px; text-align: center; font: 500 var(--text-label-sm) / 1.4 var(--font-ui); color: var(--color-text-muted); }
+  .lg-foot strong { color: var(--color-text); }
+
+  /* ---------- Dialog lupa kata sandi ---------- */
+  .lg-dialog { width: min(420px, calc(100% - 32px)); max-height: calc(100vh - 48px); padding: 0; border: var(--border-hairline) solid var(--color-border); border-radius: var(--radius-card); background: var(--color-surface); color: var(--color-text); box-shadow: var(--shadow-nav); }
+  .lg-dialog::backdrop { background: rgb(29 30 28 / 45%); }
+  .lg-dialog[open] { display: flex; flex-direction: column; }
+  .lg-dialog-form { display: flex; flex-direction: column; min-height: 0; }
+  .lg-dialog-head { display: flex; align-items: flex-start; justify-content: space-between; gap: var(--space-3); padding: var(--spacing-20) var(--space-6) var(--space-4); border-block-end: var(--border-hairline) solid var(--color-border); }
+  .lg-dialog-head h2 { font: 500 var(--text-heading-sm) / var(--leading-heading-sm) var(--font-ui); letter-spacing: -0.66px; }
+  .lg-dialog-head p { margin-top: var(--space-1); font: 400 var(--text-body-sm) / var(--leading-body-sm) var(--font-ui); color: var(--color-text-muted); }
+  .lg-dialog-body { flex: 1; min-height: 0; padding: var(--spacing-20) var(--space-6); overflow-y: auto; }
+  .lg-dialog-foot { display: flex; flex-wrap: wrap; align-items: center; justify-content: flex-end; gap: var(--space-3); padding: var(--space-4) var(--space-6); border-block-start: var(--border-hairline) solid var(--color-border); }
+  .lg-iconbtn { flex: none; display: grid; place-items: center; width: 40px; height: 40px; padding: 0; border: var(--border-hairline) solid var(--color-border); border-radius: var(--radius-pill); background: var(--color-surface); color: var(--color-text-muted); cursor: pointer; transition: color var(--duration-fast) var(--ease-standard), border-color var(--duration-fast) var(--ease-standard); }
+  .lg-iconbtn:hover { border-color: var(--color-border-strong); color: var(--color-text); }
+  .lg-iconbtn iconify-icon { font-size: 18px; }
+  .lg-input { width: 100%; min-height: 48px; padding: var(--space-3) var(--space-4); border: var(--border-hairline) solid var(--color-border-strong); border-radius: var(--radius-image); background: var(--color-surface); color: var(--color-text); font: 400 16px / 24px var(--font-ui); letter-spacing: -0.32px; transition: border-color var(--duration-fast) var(--ease-standard); }
+  .lg-input:hover { border-color: var(--color-text-muted); }
+  .lg-input::placeholder { color: var(--color-text-muted); }
+  .lg-input[aria-invalid="true"] { border-color: var(--color-danger); }
+
+  /* ---------- Toast ---------- */
+  .lg-toast { position: fixed; inset: auto auto 24px 50%; max-width: min(560px, calc(100% - 32px)); margin: 0; padding: var(--space-3) var(--spacing-20); border: 0; border-radius: var(--radius-control); background: var(--color-primary); color: var(--color-on-primary); font: 500 var(--text-body-sm) / 1.4 var(--font-ui); transform: translateX(-50%); box-shadow: var(--shadow-nav); }
+
+  /* ---------- Responsif ---------- */
+  @media (max-height: 900px) and (min-width: 900px) {
+    .lg-brand { gap: 22px; padding-block: 28px 24px; }
+    .lg-props { gap: 10px; margin-top: 22px; }
+    .lg-proof { margin-top: 24px; }
+  }
+  @media (max-height: 820px) and (min-width: 900px) {
+    .lg-brand { gap: var(--space-4); padding-block: var(--space-6) var(--spacing-20); }
+    .lg-props { gap: 6px; margin-top: 18px; }
+    .lg-props small { display: none; }
+    .lg-props li { align-items: center; }
+    .lg-lede { font-size: 16px; }
+    .lg-proof { margin-top: 18px; padding-block: 14px; }
+    .lg-proof ul { margin: 10px 0; padding: 10px 0; }
+    .lg-proof-act { margin-top: 10px; }
+    .lg-main { padding-block: var(--space-4); }
+    .lg-card { padding-block: var(--space-6) var(--spacing-20); }
+    .lg-divider { margin-block: 18px 12px; }
+  }
+  @media (max-height: 780px) and (min-width: 900px) {
+    .lg-lede { display: none; }
+  }
+  @media (max-width: 899px) {
+    .p-login { grid-template-columns: minmax(0, 1fr); align-content: start; }
+    .lg-brand { gap: 18px; padding: var(--spacing-20) var(--spacing-20) var(--space-6); border-inline-end: 0; border-block-end: var(--border-hairline) solid var(--color-border); }
+    .lg-brand-mid { flex: none; }
+    .lg-kicker, .lg-lede, .lg-props, .lg-proof, .lg-brand-foot { display: none; }
+    .lg-thesis { max-width: none; margin-top: 0; font-size: 32px; letter-spacing: -1px; }
+    .lg-main { justify-content: flex-start; padding: var(--spacing-20) var(--space-4) 28px; }
+    .lg-foot { display: block; }
+  }
+  @media (max-width: 480px) {
+    .lg-brand-top .lg-mono { width: 40px; height: 40px; font-size: 14px; }
+    .lg-card { padding: 24px 18px 20px; }
+    .lg-card h1 { font-size: 26px; letter-spacing: -0.7px; }
+    .lg-demo { padding: var(--space-3); }
+    .lg-demo-btn { padding: 10px; }
+  }
+</style>
+
+<template data-slot="content">
+  <main aria-label="Masuk" class="p-login" data-node-id="login">
+    <aside class="lg-brand" aria-label="Tentang Kedai Senja" data-node-id="login.brand">
+      <div class="lg-brand-top">
+        <span class="lg-mono" aria-hidden="true">KS</span>
+        <div><strong>Kedai Senja</strong><small>Kasir &amp; Pemilik · IUL FnB</small></div>
+      </div>
+      <div class="lg-brand-mid">
+        <span class="lg-chip lg-kicker" data-tone="plain"><iconify-icon icon="lucide:zap" aria-hidden="true"></iconify-icon>Aplikasi kasir</span>
+        <p class="lg-thesis">Semua pesanan di satu layar.</p>
+        <p class="lg-lede">Pesanan dari QR meja dan dari kasir masuk ke tempat yang sama. Rapi, cepat, dan tidak ada yang terlewat.</p>
+        <ul class="lg-props">
+          <li><span class="lg-pi" aria-hidden="true"><iconify-icon icon="lucide:qr-code"></iconify-icon></span><div><strong>Pesanan QR langsung masuk ke kasir</strong><small>Lengkap dengan nomor meja dan catatan pelanggan.</small></div></li>
+          <li><span class="lg-pi" aria-hidden="true"><iconify-icon icon="lucide:package"></iconify-icon></span><div><strong>Stok bahan berkurang otomatis</strong><small>Setiap menu terjual, bahan yang terpakai langsung tercatat.</small></div></li>
+          <li><span class="lg-pi" aria-hidden="true"><iconify-icon icon="lucide:chart-column"></iconify-icon></span><div><strong>Laporan harian tanpa hitung manual</strong><small>Penjualan, menu terlaris, dan pajak siap diunduh.</small></div></li>
+        </ul>
+        <div class="lg-proof" role="img" aria-label="Contoh kartu pesanan baru: Meja 07, 2 Nasi Goreng Kampung tidak pedas dan 1 Kopi Susu Gula Aren, total Rp 94.600" data-node-id="login.proof">
+          <div class="lg-proof-head"><span class="lg-chip" data-tone="accent">Pesanan baru</span><span class="lg-proof-time"><iconify-icon icon="lucide:clock" aria-hidden="true"></iconify-icon>baru saja</span></div>
+          <div class="lg-proof-title"><strong>Meja 07</strong><span>A-027 · <iconify-icon icon="lucide:qr-code" aria-hidden="true"></iconify-icon>Pesanan QR</span></div>
+          <ul>
+            <li><b>2×</b>Nasi Goreng Kampung<span class="lg-proof-note"><iconify-icon icon="lucide:sticky-note" aria-hidden="true"></iconify-icon>Tidak pedas</span></li>
+            <li><b>1×</b>Kopi Susu Gula Aren</li>
+          </ul>
+          <div class="lg-proof-foot"><strong>Rp 94.600</strong><span class="lg-chip" data-tone="warning">Belum bayar</span></div>
+          <span class="lg-proof-act">Terima &amp; proses</span>
+        </div>
+      </div>
+      <p class="lg-brand-foot">Didukung oleh <strong>IUL FnB</strong></p>
+    </aside>
+
+    <div class="lg-main">
+      <div class="lg-card" data-node-id="login.form">
+        <h1>Masuk ke akun</h1>
+        <p class="lg-sub">Untuk kasir dan pemilik Kedai Senja</p>
+
+        <div class="lg-alert" role="alert" data-part="alert" hidden></div>
+
+        <form class="lg-form" novalidate data-part="form">
+          <div class="lg-field">
+            <label for="login-email">Email</label>
+            <div class="lg-affix">
+              <iconify-icon icon="lucide:mail" aria-hidden="true"></iconify-icon>
+              <input id="login-email" name="email" type="email" inputmode="email" autocomplete="username" autocapitalize="off" spellcheck="false" placeholder="nama@kedaisenja.id" required aria-required="true" aria-describedby="login-email-err" data-err="email-err" data-part="email">
+            </div>
+            <p class="lg-err" id="login-email-err" data-part="email-err" hidden></p>
+          </div>
+          <div class="lg-field">
+            <label for="login-pw">Kata sandi</label>
+            <div class="lg-affix">
+              <iconify-icon icon="lucide:lock" aria-hidden="true"></iconify-icon>
+              <input id="login-pw" name="password" type="password" autocomplete="current-password" placeholder="Masukkan kata sandi" required aria-required="true" aria-describedby="login-pw-err" data-err="pw-err" data-part="pw">
+              <button type="button" class="lg-pw-toggle" aria-label="Tampilkan kata sandi" aria-pressed="false" aria-controls="login-pw" title="Tampilkan kata sandi" data-part="pw-toggle"><iconify-icon icon="lucide:eye" aria-hidden="true"></iconify-icon></button>
+            </div>
+            <p class="lg-err" id="login-pw-err" data-part="pw-err" hidden></p>
+          </div>
+          <div class="lg-row">
+            <label class="lg-check"><input type="checkbox" name="remember">Ingat saya</label>
+            <button type="button" class="lg-link" aria-haspopup="dialog" data-part="forgot">Lupa kata sandi?</button>
+          </div>
+          <button type="submit" class="lg-btn lg-submit" data-variant="primary" data-size="lg" data-block data-part="submit">Masuk</button>
+        </form>
+
+        <div class="lg-divider" aria-hidden="true">atau</div>
+
+        <section class="lg-demo" aria-labelledby="login-demo-title" data-node-id="login.demo">
+          <div class="lg-demo-head"><span class="lg-chip" data-tone="warning">Prototipe</span><h2 id="login-demo-title">Masuk cepat (demo prototipe)</h2></div>
+          <p>Tanpa kata sandi, hanya untuk mencoba tampilan tiap peran.</p>
+          <div class="lg-demo-btns" data-part="demo"></div>
+        </section>
+
+        <a class="lg-cust" href="#/pelanggan" data-route-link><iconify-icon icon="lucide:qr-code" aria-hidden="true"></iconify-icon>Lihat halaman pelanggan (QR)</a>
+      </div>
+      <p class="lg-foot">Didukung oleh <strong>IUL FnB</strong></p>
+    </div>
+
+    <!-- Lupa kata sandi -->
+    <dialog class="lg-dialog" aria-labelledby="login-f-title" aria-describedby="login-f-desc" data-part="forgot-dlg" data-node-id="login.forgot">
+      <form class="lg-dialog-form" novalidate data-part="forgot-form">
+        <div class="lg-dialog-head">
+          <div><h2 id="login-f-title">Atur ulang kata sandi</h2><p id="login-f-desc">Masukkan email akunmu. Kami kirim tautan untuk membuat kata sandi baru.</p></div>
+          <button type="button" class="lg-iconbtn" data-close aria-label="Tutup"><iconify-icon icon="lucide:x" aria-hidden="true"></iconify-icon></button>
+        </div>
+        <div class="lg-dialog-body">
+          <div class="lg-field">
+            <label for="login-f-email">Email akun</label>
+            <input class="lg-input" id="login-f-email" type="email" inputmode="email" autocomplete="email" autocapitalize="off" spellcheck="false" placeholder="nama@kedaisenja.id" autofocus aria-describedby="login-f-email-err login-f-hint" data-err="f-email-err" data-part="f-email">
+            <p class="lg-err" id="login-f-email-err" data-part="f-email-err" hidden></p>
+            <p class="lg-hint" id="login-f-hint">Belum menerima email dalam 5 menit? Cek folder spam atau minta bantuan pemilik kafe.</p>
+          </div>
+        </div>
+        <div class="lg-dialog-foot">
+          <button type="button" class="lg-btn" data-variant="ghost" data-close>Batal</button>
+          <button type="submit" class="lg-btn" data-variant="primary" data-part="f-submit">Kirim tautan</button>
+        </div>
+      </form>
+    </dialog>
+
+    <div class="lg-toast" popover="manual" role="status" data-part="toast"></div>
+  </main>
+</template>
+
+<script>
+  /* PROTOTIPE: tidak ada autentikasi sungguhan. Kata sandi tidak pernah dibaca isinya,
+     disimpan, dicatat, atau dikirim ke mana pun — hanya dicek "sudah diisi" lalu dikosongkan. */
+
+  /* ===== Data tiruan (sama dengan halaman Akun & Staf) ===== */
+  const STAFF = [
+    { id: "u1", name: "Iul Rahman", email: "iul@kedaisenja.id", role: "OWNER", is_active: true },
+    { id: "u2", name: "Rina Kartika", email: "rina@kedaisenja.id", role: "CASHIER", is_active: true },
+    { id: "u3", name: "Dimas Pratama", email: "dimas@kedaisenja.id", role: "CASHIER", is_active: true },
+    { id: "u4", name: "Sari Wulandari", email: "sari@kedaisenja.id", role: "CASHIER", is_active: false },
+  ];
+  const ROLE_LABEL = { OWNER: "Pemilik", CASHIER: "Kasir" };
+  const KEYS = { role: "iulfnb:role" };
+  const DEST = { OWNER: "#/penjualan", CASHIER: "#/kasir" };
+  const DEST_LABEL = { OWNER: "Penjualan", CASHIER: "layar Pesanan" };
+  const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
+
+  /* ===== Util ===== */
+  const $ = (part) => root.querySelector(`[data-part="${part}"]`);
+  const $$ = (sel, el = root) => [...el.querySelectorAll(sel)];
+  const esc = (s) => String(s ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+  const icon = (name, size = 18, cls = "") => `<iconify-icon icon="lucide:${name}" aria-hidden="true"${cls ? ` class="${cls}"` : ""} style="font-size:${size}px"></iconify-icon>`;
+  const initials = (name) => name.split(/\s+/).map((w) => w[0]).slice(0, 2).join("").toUpperCase();
+  const store = {
+    get(k, d) { try { const v = localStorage.getItem(k); return v == null ? d : JSON.parse(v); } catch { return d; } },
+    set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch {} },
+  };
+  const reduceMotion = () => matchMedia("(prefers-reduced-motion: reduce)").matches;
+  const spin = (el) => { if (!el?.animate || reduceMotion()) return; try { el.animate([{ transform: "rotate(0)" }, { transform: "rotate(360deg)" }], { duration: 800, iterations: Infinity }); } catch {} };
+
+  /* ===== Toast ===== */
+  const toastEl = $("toast");
+  let toastTimer;
+  function toast(msg) {
+    toastEl.textContent = msg;
+    try { if (toastEl.matches(":popover-open")) toastEl.hidePopover(); toastEl.showPopover(); } catch {}
+    if (toastEl.animate && !reduceMotion()) toastEl.animate([{ opacity: 0, transform: "translate(-50%, 12px)" }, { opacity: 1, transform: "translate(-50%, 0)" }], { duration: 200, easing: "ease" });
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(hideToast, 2600);
+  }
+  function hideToast() { try { if (toastEl.matches(":popover-open")) toastEl.hidePopover(); } catch {} }
+  onCleanup(() => { clearTimeout(toastTimer); hideToast(); });
+
+  /* ===== Dialog ===== */
+  for (const d of $$("dialog")) {
+    d.addEventListener("click", (e) => {
+      if (e.target === d || e.target.closest("[data-close]")) d.close();
+    }, { signal });
+  }
+  onCleanup(() => { for (const d of $$("dialog")) if (d.open) d.close(); });
+
+  /* ===== Formulir masuk ===== */
+  const form = $("form"), email = $("email"), pw = $("pw"), toggle = $("pw-toggle"), submit = $("submit"), alertBox = $("alert");
+  let tried = false, busy = false, checkTimer, navTimer, fTimer;
+  onCleanup(() => { clearTimeout(checkTimer); clearTimeout(navTimer); clearTimeout(fTimer); });
+
+  function setErr(input, msg) {
+    input.setAttribute("aria-invalid", msg ? "true" : "false");
+    input.closest(".lg-affix")?.toggleAttribute("data-invalid", !!msg);
+    const err = $(input.dataset.err);
+    err.innerHTML = msg ? `${icon("circle-alert", 14)}<span>${esc(msg)}</span>` : "";
+    err.hidden = !msg;
+  }
+  function showAlert(msg) {
+    alertBox.innerHTML = msg ? `${icon("triangle-alert", 18)}<div>${esc(msg)}</div>` : "";
+    alertBox.hidden = !msg;
+  }
+  const emailMsg = (v) => !v ? "Masukkan email kamu." : !EMAIL_RE.test(v) ? "Format email belum benar, contoh: nama@kedaisenja.id" : "";
+  const pwMsg = () => pw.value ? "" : "Masukkan kata sandi.";
+  const isInvalid = (el) => el.getAttribute("aria-invalid") === "true";
+
+  email.addEventListener("input", () => {
+    showAlert("");
+    if (tried || isInvalid(email)) setErr(email, emailMsg(email.value.trim()));
+  }, { signal });
+  email.addEventListener("blur", () => { if (email.value.trim()) setErr(email, emailMsg(email.value.trim())); }, { signal });
+  pw.addEventListener("input", () => {
+    showAlert("");
+    if (tried || isInvalid(pw)) setErr(pw, pwMsg());
+  }, { signal });
+
+  /* Tampilkan / sembunyikan kata sandi */
+  function paintToggle(show) {
+    toggle.setAttribute("aria-pressed", String(show));
+    toggle.title = show ? "Sembunyikan kata sandi" : "Tampilkan kata sandi";
+    toggle.innerHTML = icon(show ? "eye-off" : "eye");
+  }
+  toggle.addEventListener("click", () => {
+    const show = toggle.getAttribute("aria-pressed") !== "true";
+    pw.type = show ? "text" : "password";
+    paintToggle(show);
+  }, { signal });
+  function forgetPassword() {
+    pw.value = "";
+    pw.type = "password";
+    paintToggle(false);
+  }
+
+  /* Masuk */
+  function setBusy(on) {
+    busy = on;
+    submit.disabled = on;
+    submit.setAttribute("aria-busy", String(on));
+    delete submit.dataset.state;
+    submit.innerHTML = on ? `${icon("loader-circle", 18, "lg-spin")}Memeriksa…` : "Masuk";
+    if (on) spin(submit.querySelector(".lg-spin"));
+    $$(".lg-demo-btn").forEach((b) => { b.disabled = on; });
+  }
+  function signIn(user) {
+    busy = true;
+    forgetPassword();
+    store.set(KEYS.role, user.role);
+    submit.disabled = true;
+    submit.removeAttribute("aria-busy");
+    submit.dataset.state = "done";
+    submit.innerHTML = `${icon("check")}Berhasil masuk`;
+    $$(".lg-demo-btn").forEach((b) => { b.disabled = true; });
+    toast(`Halo, ${user.name.split(" ")[0]}! Membuka ${DEST_LABEL[user.role]}…`);
+    navTimer = setTimeout(() => { location.hash = DEST[user.role]; }, 500);
+  }
+  form.addEventListener("submit", (e) => {
+    e.preventDefault();
+    if (busy) return;
+    tried = true;
+    showAlert("");
+    const addr = email.value.trim();
+    const eMsg = emailMsg(addr), pMsg = pwMsg();
+    setErr(email, eMsg);
+    setErr(pw, pMsg);
+    if (eMsg || pMsg) { (eMsg ? email : pw).focus(); return; }
+    setBusy(true);
+    checkTimer = setTimeout(() => {
+      const user = STAFF.find((s) => s.email.toLowerCase() === addr.toLowerCase());
+      if (!user) {
+        setBusy(false);
+        setErr(email, "Email belum terdaftar. Minta pemilik menambahkan akunmu.");
+        email.focus();
+        return;
+      }
+      if (!user.is_active) {
+        setBusy(false);
+        showAlert("Akun ini sudah dinonaktifkan pemilik.");
+        email.focus();
+        return;
+      }
+      signIn(user);
+    }, 700);
+  }, { signal });
+
+  /* Masuk cepat (demo, tanpa kata sandi) */
+  $("demo").innerHTML = ["u1", "u2"].map((id) => STAFF.find((s) => s.id === id)).filter(Boolean).map((u) => `
+    <button type="button" class="lg-demo-btn" data-uid="${esc(u.id)}">
+      <span class="lg-avatar" aria-hidden="true">${esc(initials(u.name))}</span>
+      <span class="lg-grow"><strong>Masuk sebagai ${esc(ROLE_LABEL[u.role])} · ${esc(u.name)}</strong>
+        <small>${u.role === "OWNER" ? "Penjualan, menu, stok, staf &amp; pengaturan" : "Layar pesanan, pembayaran &amp; stok bahan"}</small></span>
+      ${icon("chevron-right", 16)}
+    </button>`).join("");
+  $("demo").addEventListener("click", (e) => {
+    const b = e.target.closest("[data-uid]");
+    if (!b || busy) return;
+    const user = STAFF.find((s) => s.id === b.dataset.uid);
+    if (user) signIn(user);
+  }, { signal });
+
+  /* ===== Lupa kata sandi (simulasi) ===== */
+  const fDlg = $("forgot-dlg"), fEmail = $("f-email"), fSubmit = $("f-submit");
+  let fBusy = false;
+  const fMsg = (v) => emailMsg(v).replace("email kamu", "email akunmu");
+  $("forgot").addEventListener("click", () => {
+    setErr(fEmail, "");
+    const v = email.value.trim();
+    fEmail.value = EMAIL_RE.test(v) ? v : "";
+    if (!fDlg.open) fDlg.showModal();
+  }, { signal });
+  fEmail.addEventListener("input", () => { if (isInvalid(fEmail)) setErr(fEmail, fMsg(fEmail.value.trim())); }, { signal });
+  $("forgot-form").addEventListener("submit", (e) => {
+    e.preventDefault();
+    if (fBusy) return;
+    const v = fEmail.value.trim();
+    const msg = fMsg(v);
+    setErr(fEmail, msg);
+    if (msg) { fEmail.focus(); return; }
+    fBusy = true;
+    fSubmit.disabled = true;
+    fSubmit.innerHTML = `${icon("loader-circle", 18, "lg-spin")}Mengirim…`;
+    spin(fSubmit.querySelector(".lg-spin"));
+    fTimer = setTimeout(() => {
+      fBusy = false;
+      fSubmit.disabled = false;
+      fSubmit.textContent = "Kirim tautan";
+      fDlg.close();
+      toast(`Tautan atur ulang dikirim ke ${v}`);
+    }, 650);
+  }, { signal });
+  onCleanup(() => { fBusy = false; fSubmit.disabled = false; fSubmit.textContent = "Kirim tautan"; });
+
+  /* ===== Mulai: setiap kali halaman dibuka, formulir kembali bersih ===== */
+  tried = false;
+  forgetPassword();
+  setBusy(false);
+  setErr(email, "");
+  setErr(pw, "");
+  showAlert("");
+  // Fokus otomatis ke email hanya di layar lebar (di ponsel keyboard akan menutupi layar)
+  if (matchMedia("(min-width: 900px)").matches) email.focus({ preventScroll: true });
+</script>

@@ -15,8 +15,16 @@ import { Route as ProtectedRouteImport } from './routes/_protected'
 import { Route as AuthSignInRouteImport } from './routes/_auth/sign-in'
 import { Route as AuthSignUpRouteImport } from './routes/_auth/sign-up'
 import { Route as ProtectedAdminRouteImport } from './routes/_protected/admin'
-import { Route as ProtectedAppRouteImport } from './routes/_protected/app'
+import { Route as ProtectedMenuMejaRouteImport } from './routes/_protected/menu-meja'
 import { Route as ProtectedNotesRouteImport } from './routes/_protected/notes'
+import { Route as ProtectedPengaturanRouteImport } from './routes/_protected/pengaturan'
+import { Route as ProtectedPenjualanRouteImport } from './routes/_protected/penjualan'
+import { Route as ProtectedRiwayatRouteImport } from './routes/_protected/riwayat'
+import { Route as ProtectedStafRouteImport } from './routes/_protected/staf'
+import { Route as ProtectedStokRouteImport } from './routes/_protected/stok'
+import { Route as ProtectedKasirIndexRouteImport } from './routes/_protected/kasir.index'
+import { Route as ProtectedKasirBayarRouteImport } from './routes/_protected/kasir.bayar'
+import { Route as ProtectedKasirManualRouteImport } from './routes/_protected/kasir.manual'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -46,14 +54,54 @@ const ProtectedAdminRoute = ProtectedAdminRouteImport.update({
   path: '/admin',
   getParentRoute: () => ProtectedRoute,
 } as any)
-const ProtectedAppRoute = ProtectedAppRouteImport.update({
-  id: '/app',
-  path: '/app',
+const ProtectedMenuMejaRoute = ProtectedMenuMejaRouteImport.update({
+  id: '/menu-meja',
+  path: '/menu-meja',
   getParentRoute: () => ProtectedRoute,
 } as any)
 const ProtectedNotesRoute = ProtectedNotesRouteImport.update({
   id: '/notes',
   path: '/notes',
+  getParentRoute: () => ProtectedRoute,
+} as any)
+const ProtectedPengaturanRoute = ProtectedPengaturanRouteImport.update({
+  id: '/pengaturan',
+  path: '/pengaturan',
+  getParentRoute: () => ProtectedRoute,
+} as any)
+const ProtectedPenjualanRoute = ProtectedPenjualanRouteImport.update({
+  id: '/penjualan',
+  path: '/penjualan',
+  getParentRoute: () => ProtectedRoute,
+} as any)
+const ProtectedRiwayatRoute = ProtectedRiwayatRouteImport.update({
+  id: '/riwayat',
+  path: '/riwayat',
+  getParentRoute: () => ProtectedRoute,
+} as any)
+const ProtectedStafRoute = ProtectedStafRouteImport.update({
+  id: '/staf',
+  path: '/staf',
+  getParentRoute: () => ProtectedRoute,
+} as any)
+const ProtectedStokRoute = ProtectedStokRouteImport.update({
+  id: '/stok',
+  path: '/stok',
+  getParentRoute: () => ProtectedRoute,
+} as any)
+const ProtectedKasirIndexRoute = ProtectedKasirIndexRouteImport.update({
+  id: '/kasir/',
+  path: '/kasir/',
+  getParentRoute: () => ProtectedRoute,
+} as any)
+const ProtectedKasirBayarRoute = ProtectedKasirBayarRouteImport.update({
+  id: '/kasir/bayar',
+  path: '/kasir/bayar',
+  getParentRoute: () => ProtectedRoute,
+} as any)
+const ProtectedKasirManualRoute = ProtectedKasirManualRouteImport.update({
+  id: '/kasir/manual',
+  path: '/kasir/manual',
   getParentRoute: () => ProtectedRoute,
 } as any)
 
@@ -62,16 +110,32 @@ export interface FileRoutesByFullPath {
   '/sign-in': typeof AuthSignInRoute
   '/sign-up': typeof AuthSignUpRoute
   '/admin': typeof ProtectedAdminRoute
-  '/app': typeof ProtectedAppRoute
+  '/menu-meja': typeof ProtectedMenuMejaRoute
   '/notes': typeof ProtectedNotesRoute
+  '/pengaturan': typeof ProtectedPengaturanRoute
+  '/penjualan': typeof ProtectedPenjualanRoute
+  '/riwayat': typeof ProtectedRiwayatRoute
+  '/staf': typeof ProtectedStafRoute
+  '/stok': typeof ProtectedStokRoute
+  '/kasir/bayar': typeof ProtectedKasirBayarRoute
+  '/kasir/manual': typeof ProtectedKasirManualRoute
+  '/kasir/': typeof ProtectedKasirIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/sign-in': typeof AuthSignInRoute
   '/sign-up': typeof AuthSignUpRoute
   '/admin': typeof ProtectedAdminRoute
-  '/app': typeof ProtectedAppRoute
+  '/menu-meja': typeof ProtectedMenuMejaRoute
   '/notes': typeof ProtectedNotesRoute
+  '/pengaturan': typeof ProtectedPengaturanRoute
+  '/penjualan': typeof ProtectedPenjualanRoute
+  '/riwayat': typeof ProtectedRiwayatRoute
+  '/staf': typeof ProtectedStafRoute
+  '/stok': typeof ProtectedStokRoute
+  '/kasir/bayar': typeof ProtectedKasirBayarRoute
+  '/kasir/manual': typeof ProtectedKasirManualRoute
+  '/kasir': typeof ProtectedKasirIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -81,14 +145,50 @@ export interface FileRoutesById {
   '/_auth/sign-in': typeof AuthSignInRoute
   '/_auth/sign-up': typeof AuthSignUpRoute
   '/_protected/admin': typeof ProtectedAdminRoute
-  '/_protected/app': typeof ProtectedAppRoute
+  '/_protected/menu-meja': typeof ProtectedMenuMejaRoute
   '/_protected/notes': typeof ProtectedNotesRoute
+  '/_protected/pengaturan': typeof ProtectedPengaturanRoute
+  '/_protected/penjualan': typeof ProtectedPenjualanRoute
+  '/_protected/riwayat': typeof ProtectedRiwayatRoute
+  '/_protected/staf': typeof ProtectedStafRoute
+  '/_protected/stok': typeof ProtectedStokRoute
+  '/_protected/kasir/bayar': typeof ProtectedKasirBayarRoute
+  '/_protected/kasir/manual': typeof ProtectedKasirManualRoute
+  '/_protected/kasir/': typeof ProtectedKasirIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/sign-in' | '/sign-up' | '/admin' | '/app' | '/notes'
+  fullPaths:
+    | '/'
+    | '/sign-in'
+    | '/sign-up'
+    | '/admin'
+    | '/menu-meja'
+    | '/notes'
+    | '/pengaturan'
+    | '/penjualan'
+    | '/riwayat'
+    | '/staf'
+    | '/stok'
+    | '/kasir/bayar'
+    | '/kasir/manual'
+    | '/kasir/'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/sign-in' | '/sign-up' | '/admin' | '/app' | '/notes'
+  to:
+    | '/'
+    | '/sign-in'
+    | '/sign-up'
+    | '/admin'
+    | '/menu-meja'
+    | '/notes'
+    | '/pengaturan'
+    | '/penjualan'
+    | '/riwayat'
+    | '/staf'
+    | '/stok'
+    | '/kasir/bayar'
+    | '/kasir/manual'
+    | '/kasir'
   id:
     | '__root__'
     | '/'
@@ -97,8 +197,16 @@ export interface FileRouteTypes {
     | '/_auth/sign-in'
     | '/_auth/sign-up'
     | '/_protected/admin'
-    | '/_protected/app'
+    | '/_protected/menu-meja'
     | '/_protected/notes'
+    | '/_protected/pengaturan'
+    | '/_protected/penjualan'
+    | '/_protected/riwayat'
+    | '/_protected/staf'
+    | '/_protected/stok'
+    | '/_protected/kasir/bayar'
+    | '/_protected/kasir/manual'
+    | '/_protected/kasir/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -151,11 +259,11 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ProtectedAdminRouteImport
       parentRoute: typeof ProtectedRoute
     }
-    '/_protected/app': {
-      id: '/_protected/app'
-      path: '/app'
-      fullPath: '/app'
-      preLoaderRoute: typeof ProtectedAppRouteImport
+    '/_protected/menu-meja': {
+      id: '/_protected/menu-meja'
+      path: '/menu-meja'
+      fullPath: '/menu-meja'
+      preLoaderRoute: typeof ProtectedMenuMejaRouteImport
       parentRoute: typeof ProtectedRoute
     }
     '/_protected/notes': {
@@ -163,6 +271,62 @@ declare module '@tanstack/react-router' {
       path: '/notes'
       fullPath: '/notes'
       preLoaderRoute: typeof ProtectedNotesRouteImport
+      parentRoute: typeof ProtectedRoute
+    }
+    '/_protected/pengaturan': {
+      id: '/_protected/pengaturan'
+      path: '/pengaturan'
+      fullPath: '/pengaturan'
+      preLoaderRoute: typeof ProtectedPengaturanRouteImport
+      parentRoute: typeof ProtectedRoute
+    }
+    '/_protected/penjualan': {
+      id: '/_protected/penjualan'
+      path: '/penjualan'
+      fullPath: '/penjualan'
+      preLoaderRoute: typeof ProtectedPenjualanRouteImport
+      parentRoute: typeof ProtectedRoute
+    }
+    '/_protected/riwayat': {
+      id: '/_protected/riwayat'
+      path: '/riwayat'
+      fullPath: '/riwayat'
+      preLoaderRoute: typeof ProtectedRiwayatRouteImport
+      parentRoute: typeof ProtectedRoute
+    }
+    '/_protected/staf': {
+      id: '/_protected/staf'
+      path: '/staf'
+      fullPath: '/staf'
+      preLoaderRoute: typeof ProtectedStafRouteImport
+      parentRoute: typeof ProtectedRoute
+    }
+    '/_protected/stok': {
+      id: '/_protected/stok'
+      path: '/stok'
+      fullPath: '/stok'
+      preLoaderRoute: typeof ProtectedStokRouteImport
+      parentRoute: typeof ProtectedRoute
+    }
+    '/_protected/kasir/': {
+      id: '/_protected/kasir/'
+      path: '/kasir'
+      fullPath: '/kasir/'
+      preLoaderRoute: typeof ProtectedKasirIndexRouteImport
+      parentRoute: typeof ProtectedRoute
+    }
+    '/_protected/kasir/bayar': {
+      id: '/_protected/kasir/bayar'
+      path: '/kasir/bayar'
+      fullPath: '/kasir/bayar'
+      preLoaderRoute: typeof ProtectedKasirBayarRouteImport
+      parentRoute: typeof ProtectedRoute
+    }
+    '/_protected/kasir/manual': {
+      id: '/_protected/kasir/manual'
+      path: '/kasir/manual'
+      fullPath: '/kasir/manual'
+      preLoaderRoute: typeof ProtectedKasirManualRouteImport
       parentRoute: typeof ProtectedRoute
     }
   }
@@ -182,14 +346,30 @@ const AuthRouteWithChildren = AuthRoute._addFileChildren(AuthRouteChildren)
 
 interface ProtectedRouteChildren {
   ProtectedAdminRoute: typeof ProtectedAdminRoute
-  ProtectedAppRoute: typeof ProtectedAppRoute
+  ProtectedMenuMejaRoute: typeof ProtectedMenuMejaRoute
   ProtectedNotesRoute: typeof ProtectedNotesRoute
+  ProtectedPengaturanRoute: typeof ProtectedPengaturanRoute
+  ProtectedPenjualanRoute: typeof ProtectedPenjualanRoute
+  ProtectedRiwayatRoute: typeof ProtectedRiwayatRoute
+  ProtectedStafRoute: typeof ProtectedStafRoute
+  ProtectedStokRoute: typeof ProtectedStokRoute
+  ProtectedKasirBayarRoute: typeof ProtectedKasirBayarRoute
+  ProtectedKasirManualRoute: typeof ProtectedKasirManualRoute
+  ProtectedKasirIndexRoute: typeof ProtectedKasirIndexRoute
 }
 
 const ProtectedRouteChildren: ProtectedRouteChildren = {
   ProtectedAdminRoute: ProtectedAdminRoute,
-  ProtectedAppRoute: ProtectedAppRoute,
+  ProtectedMenuMejaRoute: ProtectedMenuMejaRoute,
   ProtectedNotesRoute: ProtectedNotesRoute,
+  ProtectedPengaturanRoute: ProtectedPengaturanRoute,
+  ProtectedPenjualanRoute: ProtectedPenjualanRoute,
+  ProtectedRiwayatRoute: ProtectedRiwayatRoute,
+  ProtectedStafRoute: ProtectedStafRoute,
+  ProtectedStokRoute: ProtectedStokRoute,
+  ProtectedKasirBayarRoute: ProtectedKasirBayarRoute,
+  ProtectedKasirManualRoute: ProtectedKasirManualRoute,
+  ProtectedKasirIndexRoute: ProtectedKasirIndexRoute,
 }
 
 const ProtectedRouteWithChildren = ProtectedRoute._addFileChildren(

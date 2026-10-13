@@ -1,0 +1,618 @@
+<!-- dpai:page {"scoped":true,"typography":true} -->
+<style>
+  .p-kasir { display: grid; gap: var(--space-6); align-content: start; min-height: 100vh; font-family: var(--font-ui); }
+  .k-context { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-3); margin: calc(var(--space-4) * -1) 0 0; font: 400 var(--text-body-sm) / var(--leading-body-sm) var(--font-ui); color: var(--color-text-muted); }
+  .k-context .k-reset { margin-inline-start: auto; margin-block: -6px; color: var(--color-text-muted); }
+  .k-context .k-reset:hover { color: var(--color-text); }
+
+  .k-stats { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: var(--space-3); }
+  .k-stats .l-staf-metric > strong { display: flex; flex-wrap: wrap; align-items: baseline; column-gap: 6px; white-space: normal; font-variant-numeric: normal; }
+  .k-stats em { white-space: nowrap; font: 500 var(--text-body-sm) / 1 var(--font-ui); font-style: normal; letter-spacing: 0; color: var(--color-text-muted); }
+
+  .k-toolbar { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: var(--space-3); }
+  .k-toolbar .l-staf-search { min-width: min(320px, 100%); }
+
+  .k-board { display: grid; grid-template-columns: repeat(4, minmax(232px, 1fr)); gap: var(--space-3); overflow-x: auto; padding-block-end: var(--space-1); }
+  .k-lane { display: flex; flex-direction: column; min-width: 0; padding: var(--space-2); border-radius: var(--radius-card); background: var(--color-surface-muted); }
+  .k-lane-head { display: flex; align-items: center; gap: var(--space-2); padding: var(--space-2) var(--space-2) var(--space-3); }
+  .k-lane-head h2 { margin: 0; font: 600 15px / 1.2 var(--font-ui); letter-spacing: -0.15px; }
+  .k-lane-head .l-staf-chip { margin-inline-start: auto; }
+  .k-lane-body { display: grid; grid-template-columns: minmax(0, 1fr); align-content: start; gap: var(--space-2); min-height: 240px; max-height: calc(100vh - 330px); overflow-y: auto; padding: 2px; scrollbar-width: thin; }
+  .k-lane-empty { padding: var(--space-6) var(--space-3); border: var(--border-hairline) dashed var(--color-border-strong); border-radius: var(--radius-image); text-align: center; font: 500 var(--text-body-sm) / var(--leading-body-sm) var(--font-ui); color: var(--color-text-muted); }
+
+  .k-card { position: relative; padding: var(--space-3) var(--space-3) var(--space-3) var(--space-4); border: var(--border-hairline) solid var(--color-border); border-radius: var(--radius-image); background: var(--color-surface); transition: border-color var(--duration-fast) var(--ease-standard); }
+  .k-card:hover { border-color: var(--color-border-strong); }
+  .k-card[data-state="new"]::before { content: ""; position: absolute; inset-block: 12px; inset-inline-start: 0; width: 3px; border-radius: var(--radius-pill); background: var(--color-accent); }
+  .k-card[data-late] { border-color: var(--color-warning); }
+  .k-card-head { display: flex; align-items: center; gap: var(--space-2); }
+  .k-open { all: unset; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font: 600 var(--text-body-md) / 1.25 var(--font-ui); letter-spacing: -0.32px; cursor: pointer; }
+  .k-open::after { content: ""; position: absolute; inset: 0; border-radius: var(--radius-image); }
+  .k-open:focus-visible::after { outline: 2px solid var(--color-focus-ring); outline-offset: 3px; }
+  .k-time { flex: none; display: inline-flex; align-items: center; gap: 4px; margin-inline-start: auto; font: 500 var(--text-label-sm) / 1 var(--font-ui); color: var(--color-text-muted); white-space: nowrap; }
+  .k-card[data-late] .k-time { color: var(--color-warning-text); }
+  .k-src { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin-top: 4px; font: 400 var(--text-label-sm) / var(--leading-label-sm) var(--font-ui); color: var(--color-text-muted); }
+  .k-src .l-staf-chip { margin-inline-start: auto; }
+  .k-items { display: grid; gap: 6px; margin: var(--space-3) 0; padding: var(--space-3) 0; border-block: var(--border-hairline) dashed var(--color-border); list-style: none; font: 400 var(--text-body-sm) / 1.4 var(--font-ui); }
+  .k-items b { display: inline-block; min-width: 26px; font-weight: 600; }
+  .k-note { display: flex; align-items: center; gap: 4px; margin: 2px 0 0 26px; font: 500 var(--text-label-sm) / var(--leading-label-sm) var(--font-ui); font-style: italic; color: var(--color-warning-text); }
+  .k-foot { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: var(--space-2); margin-bottom: var(--space-3); }
+  .k-total { font: 600 var(--text-body-md) / 1 var(--font-ui); font-variant-numeric: tabular-nums; white-space: nowrap; }
+  .k-act { position: relative; z-index: 1; }
+
+  /* Detail (drawer) */
+  .k-d-title { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-2); }
+  .k-steps { display: flex; margin: 0 0 var(--space-6); padding: 0; list-style: none; }
+  .k-step { position: relative; flex: 1; display: grid; justify-items: center; gap: 6px; font: 500 var(--text-label-sm) / 1.2 var(--font-ui); color: var(--color-text-muted); text-align: center; }
+  .k-step i { z-index: 1; display: grid; place-items: center; width: 24px; height: 24px; border: 2px solid var(--color-border-strong); border-radius: var(--radius-pill); background: var(--color-surface); color: var(--color-on-primary); font-style: normal; }
+  .k-step::before { content: ""; position: absolute; inset-block-start: 11px; inset-inline: -50% 50%; height: 2px; background: var(--color-border); }
+  .k-step:first-child::before { display: none; }
+  .k-step[data-state="done"] { color: var(--color-text); }
+  .k-step[data-state="done"] i { border-color: var(--color-primary); background: var(--color-primary); }
+  .k-step[data-state="done"]::before, .k-step[data-state="current"]::before { background: var(--color-primary); }
+  .k-step[data-state="current"] { color: var(--color-text); font-weight: 600; }
+  .k-step[data-state="current"] i { border-color: var(--color-accent); box-shadow: 0 0 0 4px var(--color-accent-soft); }
+  .k-sec { margin: var(--space-6) 0 var(--space-3); font: 600 var(--text-label-sm) / var(--leading-label-sm) var(--font-ui); color: var(--color-text-muted); }
+  .k-d-items { display: grid; gap: var(--space-3); margin: 0; padding: 0; list-style: none; }
+  .k-d-item { display: flex; align-items: flex-start; gap: var(--space-3); }
+  .k-d-item > div { flex: 1; min-width: 0; }
+  .k-d-item strong { display: block; font: 600 var(--text-body-sm) / 1.35 var(--font-ui); }
+  .k-d-item small { font: 400 var(--text-label-sm) / var(--leading-label-sm) var(--font-ui); color: var(--color-text-muted); }
+  .k-d-item .k-note { margin: 4px 0 0; }
+  .k-sum { display: grid; gap: 6px; margin-top: var(--space-4); padding-top: var(--space-4); border-block-start: var(--border-hairline) dashed var(--color-border-strong); font: 400 var(--text-body-sm) / 1.4 var(--font-ui); color: var(--color-text-muted); }
+  .k-sum div { display: flex; justify-content: space-between; gap: var(--space-3); }
+  .k-sum span:last-child { font-variant-numeric: tabular-nums; }
+  .k-sum .k-sum-total { padding-top: var(--space-1); font: 600 17px / 1.3 var(--font-ui); color: var(--color-text); }
+  .k-paybox { display: flex; align-items: center; gap: var(--space-3); margin-top: var(--space-4); padding: var(--space-3) var(--space-4); border: var(--border-hairline) solid var(--color-border); border-radius: var(--radius-image); background: var(--color-surface-subtle); }
+  .k-paybox > iconify-icon { flex: none; font-size: 22px; color: var(--color-warning-text); }
+  .k-paybox[data-paid] > iconify-icon { color: var(--color-positive); }
+  .k-paybox strong { display: block; font: 600 var(--text-body-sm) / 1.3 var(--font-ui); }
+  .k-paybox small { font: 400 var(--text-label-sm) / var(--leading-label-sm) var(--font-ui); color: var(--color-text-muted); }
+  .k-meta { display: grid; grid-template-columns: auto 1fr; gap: 6px var(--space-4); margin: 0; font: 400 var(--text-body-sm) / 1.4 var(--font-ui); }
+  .k-meta dt { color: var(--color-text-muted); }
+  .k-meta dd { margin: 0; font-weight: 500; text-align: end; }
+  .k-row { display: flex; flex-wrap: wrap; gap: var(--space-2); width: 100%; }
+  .k-row > .l-staf-btn { flex: 1; }
+  .k-drawer-foot { display: grid; justify-content: stretch; gap: var(--space-2); }
+
+  .k-reasons { display: flex; flex-wrap: wrap; gap: var(--space-2); margin-top: var(--space-3); }
+  .k-dlg-text { margin: 0; font: 400 var(--text-body-sm) / var(--leading-body-sm) var(--font-ui); color: var(--color-text-muted); }
+  .k-dlg-list { display: grid; gap: 6px; margin: var(--space-4) 0 0; padding: 0; list-style: none; font: 400 var(--text-body-sm) / 1.4 var(--font-ui); }
+  .k-dlg-list li { display: flex; align-items: flex-start; gap: var(--space-2); }
+  .k-dlg-list iconify-icon { flex: none; margin-top: 2px; color: var(--color-text-muted); }
+
+  @media (max-width: 1180px) {
+    .k-board { grid-template-columns: repeat(2, minmax(0, 1fr)); overflow: visible; }
+    .k-lane-body { max-height: none; min-height: 120px; }
+  }
+  @media (max-width: 1100px) {
+    .k-stats { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  }
+  @media (max-width: 560px) {
+    .k-board { grid-template-columns: minmax(0, 1fr); }
+    .k-stats { grid-template-columns: minmax(0, 1fr); }
+  }
+</style>
+
+<template data-slot="header-actions">
+  <button class="l-staf-iconbtn" type="button" data-action="sound" aria-pressed="true" aria-label="Suara notifikasi pesanan baru" title="Suara notifikasi"><iconify-icon icon="lucide:bell" aria-hidden="true"></iconify-icon></button>
+  <button class="l-staf-btn" type="button" data-action="simulate" title="Prototipe: kirim pesanan QR tiruan"><iconify-icon icon="lucide:zap" aria-hidden="true"></iconify-icon>Simulasi pesanan QR</button>
+  <button class="l-staf-btn" data-variant="primary" type="button" data-action="manual"><iconify-icon icon="lucide:plus" aria-hidden="true"></iconify-icon>Pesanan manual</button>
+</template>
+
+<template data-slot="content">
+  <main aria-label="Pesanan" class="p-kasir" data-node-id="kasir">
+    <div class="k-context" data-node-id="kasir.context">
+      <span data-part="clock">Memuat…</span>
+      <span class="l-staf-chip" data-tone="positive">Pesanan QR masuk otomatis</span>
+      <button class="l-staf-btn k-reset" data-variant="ghost" data-size="sm" type="button" data-act="reset" title="Prototipe: kembalikan pesanan contoh A-101…A-107"><iconify-icon icon="lucide:rotate-ccw" aria-hidden="true"></iconify-icon>Reset data demo</button>
+    </div>
+
+    <section class="k-stats" aria-label="Ringkasan hari ini" data-part="stats" data-node-id="kasir.stats"></section>
+
+    <div class="k-toolbar" data-node-id="kasir.toolbar">
+      <div class="l-staf-seg" role="tablist" aria-label="Sumber pesanan" data-part="type-seg"></div>
+      <label class="l-staf-search">
+        <iconify-icon icon="lucide:search" aria-hidden="true"></iconify-icon>
+        <input type="search" placeholder="Cari no. pesanan, meja, atau menu" aria-label="Cari pesanan" autocomplete="off" data-part="q">
+      </label>
+    </div>
+
+    <div class="k-board" aria-live="polite" data-part="board" data-node-id="kasir.board"></div>
+
+    <!-- Detail pesanan -->
+    <dialog class="l-staf-dialog" data-kind="drawer" aria-labelledby="kasir-d-title" data-part="drawer" data-node-id="kasir.drawer">
+      <div class="l-staf-dialog-head">
+        <div>
+          <div class="k-d-title"><h2 id="kasir-d-title" data-part="d-title"></h2><span class="l-staf-chip" data-part="d-status"></span></div>
+          <p data-part="d-meta"></p>
+        </div>
+        <button class="l-staf-iconbtn" type="button" data-close aria-label="Tutup detail"><iconify-icon icon="lucide:x" aria-hidden="true"></iconify-icon></button>
+      </div>
+      <div class="l-staf-dialog-body" data-part="d-body"></div>
+      <div class="l-staf-dialog-foot k-drawer-foot" data-part="d-foot"></div>
+    </dialog>
+
+    <!-- Batalkan -->
+    <dialog class="l-staf-dialog" data-size="sm" aria-labelledby="kasir-cx-title" data-part="cancel" data-node-id="kasir.cancel">
+      <div class="l-staf-dialog-head">
+        <div><h2 id="kasir-cx-title">Batalkan pesanan?</h2><p data-part="cx-sub"></p></div>
+        <button class="l-staf-iconbtn" type="button" data-close aria-label="Tutup"><iconify-icon icon="lucide:x" aria-hidden="true"></iconify-icon></button>
+      </div>
+      <div class="l-staf-dialog-body">
+        <p class="k-dlg-text">Pilih alasan pembatalan. Status di layar pelanggan ikut berubah.</p>
+        <div class="k-reasons l-staf-seg" role="group" aria-label="Alasan pembatalan" data-part="reasons"></div>
+      </div>
+      <div class="l-staf-dialog-foot">
+        <button class="l-staf-btn" type="button" data-close>Kembali</button>
+        <button class="l-staf-btn" data-variant="danger" type="button" data-part="cx-confirm" disabled><iconify-icon icon="lucide:x" aria-hidden="true"></iconify-icon>Ya, batalkan</button>
+      </div>
+    </dialog>
+
+    <!-- Reset data demo (prototipe) -->
+    <dialog class="l-staf-dialog" data-size="sm" aria-labelledby="kasir-rs-title" data-part="reset" data-node-id="kasir.reset">
+      <div class="l-staf-dialog-head">
+        <div><h2 id="kasir-rs-title">Reset data demo?</h2><p>Prototipe: data hanya tersimpan di browser ini.</p></div>
+        <button class="l-staf-iconbtn" type="button" data-close aria-label="Tutup"><iconify-icon icon="lucide:x" aria-hidden="true"></iconify-icon></button>
+      </div>
+      <div class="l-staf-dialog-body">
+        <p class="k-dlg-text">Pesanan, pembayaran, dan transaksi sesi ini dihapus, lalu diisi ulang dengan contoh awal.</p>
+        <ul class="k-dlg-list">
+          <li><iconify-icon icon="lucide:clipboard-list" aria-hidden="true"></iconify-icon>7 pesanan contoh A-101…A-107 dimuat ulang</li>
+          <li><iconify-icon icon="lucide:qr-code" aria-hidden="true"></iconify-icon>Pesanan QR dari halaman pelanggan ikut dihapus</li>
+          <li><iconify-icon icon="lucide:history" aria-hidden="true"></iconify-icon>Nomor pesanan berikutnya kembali ke A-108</li>
+        </ul>
+      </div>
+      <div class="l-staf-dialog-foot">
+        <button class="l-staf-btn" type="button" data-close>Batal</button>
+        <button class="l-staf-btn" data-variant="danger" type="button" data-part="rs-confirm"><iconify-icon icon="lucide:rotate-ccw" aria-hidden="true"></iconify-icon>Ya, reset data</button>
+      </div>
+    </dialog>
+
+    <div class="l-staf-toast" popover="manual" role="status" data-part="toast"></div>
+  </main>
+</template>
+
+<script>
+  /* ===== Data tiruan (struktur mengikuti skema PRD §6) ===== */
+  const SETTINGS = { cafe_name: "Kedai Senja", address: "Jl. Kaliurang Km 5, Yogyakarta", phone: "0812-2700-1234", tax_percent: 10, footer: "Terima kasih, sampai jumpa lagi!" };
+  const MENUS = [
+    ["m1", "makanan", "Nasi Goreng Kampung", 32000, "🍳", true], ["m2", "makanan", "Ayam Geprek Sambal Matah", 35000, "🍗", true],
+    ["m3", "makanan", "Mie Goreng Jawa", 30000, "🍜", true], ["m4", "makanan", "Rice Bowl Chicken Teriyaki", 36000, "🍱", true],
+    ["m5", "makanan", "Nasi Ayam Bakar Madu", 38000, "🍖", false], ["d1", "minuman", "Kopi Susu Gula Aren", 22000, "☕", true],
+    ["d2", "minuman", "Es Americano", 20000, "🧊", true], ["d3", "minuman", "Matcha Latte", 28000, "🍵", true],
+    ["d4", "minuman", "Es Teh Manis", 10000, "🥤", true], ["d5", "minuman", "Lemon Tea", 15000, "🍋", true],
+    ["d6", "minuman", "Jus Alpukat", 25000, "🥑", false], ["s1", "lainnya", "Kentang Goreng", 20000, "🍟", true],
+    ["s2", "lainnya", "Pisang Goreng Keju", 18000, "🍌", true], ["s3", "lainnya", "Roti Bakar Cokelat Keju", 22000, "🍞", true],
+    ["s4", "lainnya", "Croissant Butter", 24000, "🥐", true], ["s5", "lainnya", "Air Mineral", 8000, "💧", true],
+  ].map(([id, category_id, name, price, image_url, is_available]) => ({ id, category_id, name, price, image_url, is_available }));
+  const menuById = Object.fromEntries(MENUS.map((m) => [m.id, m]));
+  const MENU_WEIGHT = { m1: 9, m2: 7, m3: 5, m4: 5, m5: 3, d1: 12, d2: 6, d3: 5, d4: 8, d5: 4, d6: 2, s1: 8, s2: 4, s3: 4, s4: 3, s5: 4 };
+  const TABLES = Array.from({ length: 12 }, (_, i) => ({ table_number: String(i + 1).padStart(2, "0"), is_active: i !== 11, area: i < 8 ? "Dalam" : "Teras" }));
+  const USERS = { OWNER: "Iul Rahman", CASHIER: "Rina Kartika" };
+
+  /* ===== Kontrak data lintas halaman (CONTRACTS.md — salinan apa adanya) ===== */
+  const KEY = { cust: "iulfnb:cust", pos: "iulfnb:pos", live: "iulfnb:orders-live", beat: "iulfnb:kasir-beat", seq: "iulfnb:seq", role: "iulfnb:role" };
+  const SEQ_BASE = 107;
+  const ls = {
+    get(k, d) { try { const v = localStorage.getItem(k); return v == null ? d : JSON.parse(v); } catch { return d; } },
+    set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch {} },
+    del(k) { try { localStorage.removeItem(k); } catch {} },
+  };
+  function nextOrderCode() {
+    const n = Math.max(ls.get(KEY.seq, SEQ_BASE), SEQ_BASE) + 1;
+    ls.set(KEY.seq, n);
+    return "A-" + String(n).padStart(3, "0");
+  }
+  function posSeed() {
+    const ago = (m) => new Date(Date.now() - m * 60000).toISOString();
+    const L = (id, qty, note = "") => { const m = menuById[id]; return { menu_id: id, name: m.name, image_url: m.image_url, price: m.price, qty, note }; };
+    const base = { customer: null, payment_status: "BELUM", payment_method: null, payment_channel: null, paid_amount: null, cashier: null, paid_at: null, completed_at: null, cancel_reason: null, live: false };
+    return [
+      { ...base, code: "A-101", order_type: "QR", table: "05", items: [L("m3", 1), L("d2", 1), L("s5", 1)], status: "DIANTAR", created_at: ago(38) },
+      { ...base, code: "A-102", order_type: "QR", table: "02", items: [L("m4", 2), L("d5", 2)], status: "DIANTAR", created_at: ago(31) },
+      { ...base, code: "A-103", order_type: "QR", table: "09", items: [L("d1", 2, "1 panas, 1 dingin"), L("s1", 1)], status: "SIAP", created_at: ago(19) },
+      { ...base, code: "A-104", order_type: "MANUAL", table: null, customer: "Budi", items: [L("m1", 1, "Dibungkus"), L("d4", 1)], status: "DIPROSES", payment_status: "LUNAS", payment_method: "NON_CASH", payment_channel: "QRIS", paid_amount: 46200, cashier: "Rina Kartika", paid_at: ago(13), created_at: ago(14) },
+      { ...base, code: "A-105", order_type: "QR", table: "07", items: [L("m2", 1, "Ekstra pedas"), L("d4", 2)], status: "DIPROSES", created_at: ago(17) },
+      { ...base, code: "A-106", order_type: "QR", table: "03", items: [L("m1", 2, "Tidak pedas"), L("d3", 1), L("s2", 1)], status: "MENUNGGU", created_at: ago(3) },
+      { ...base, code: "A-107", order_type: "QR", table: "10", items: [L("d1", 1, "Es sedikit"), L("s4", 1)], status: "MENUNGGU", created_at: ago(1) },
+    ];
+  }
+  function loadPos() {
+    let p = ls.get(KEY.pos, null);
+    if (!p || p.v !== 1 || Date.now() - Date.parse(p.seeded_at) > 12 * 3600e3) {
+      p = { v: 1, seeded_at: new Date().toISOString(), orders: posSeed(), done: [], pay_code: null, manual_draft: null, flash: null };
+      ls.set(KEY.pos, p);
+      ls.set(KEY.seq, Math.max(ls.get(KEY.seq, SEQ_BASE), SEQ_BASE));
+    }
+    return p;
+  }
+  const savePos = (p) => ls.set(KEY.pos, p);
+  /** Tarik pesanan QR dari jembatan yang belum ada di pos.orders/pos.done (mutasi p, kembalikan yang baru) */
+  function pullLive(p) {
+    const known = new Set([...p.orders, ...p.done].map((o) => o.code)), added = [];
+    for (const l of ls.get(KEY.live, [])) {
+      if (known.has(l.code) || Date.now() - Date.parse(l.created_at) > 12 * 3600e3 || ["SELESAI", "DIBATALKAN"].includes(l.status)) continue;
+      const o = { code: l.code, order_type: "QR", table: l.table, customer: null, live: true, status: l.status || "MENUNGGU", payment_status: l.payment_status || "BELUM",
+        payment_method: null, payment_channel: null, paid_amount: null, cashier: null, created_at: l.created_at, paid_at: null, completed_at: null, cancel_reason: null,
+        items: l.items.map((i) => ({ menu_id: i.menu_id, name: i.name, image_url: menuById[i.menu_id]?.image_url || "🍽️", price: i.price, qty: i.qty, note: i.note || "" })) };
+      p.orders.push(o); added.push(o);
+    }
+    return added;
+  }
+  /** Setelah status/pembayaran pesanan live berubah, tulis balik ke jembatan */
+  function syncLive(o) {
+    if (!o.live) return;
+    ls.set(KEY.live, ls.get(KEY.live, []).map((x) => x.code === o.code ? { ...x, status: o.status, payment_status: o.payment_status, updated_at: Date.now() } : x));
+  }
+  /** Pindahkan pesanan ke done saat SELESAI/DIBATALKAN */
+  function finishOrder(p, o, status) {
+    o.status = status; o.completed_at = new Date().toISOString();
+    p.orders = p.orders.filter((x) => x.code !== o.code);
+    p.done.push(o);
+    syncLive(o);
+  }
+
+  /* ===== Util ===== */
+  const $ = (part) => root.querySelector(`[data-part="${part}"]`);
+  const $$ = (sel, el = root) => [...el.querySelectorAll(sel)];
+  const rp = (n) => "Rp " + Math.round(n).toLocaleString("id-ID");
+  const rpShort = (n) => n >= 1e6 ? "Rp " + (n / 1e6).toLocaleString("id-ID", { maximumFractionDigits: 1 }) + " jt" : n >= 1e3 ? "Rp " + Math.round(n / 1e3) + " rb" : rp(n);
+  const esc = (s) => String(s ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+  const hhmm = (d) => new Date(d).toLocaleTimeString("id-ID", { hour: "2-digit", minute: "2-digit" });
+  const longDate = (d) => new Date(d).toLocaleDateString("id-ID", { weekday: "long", day: "numeric", month: "long", year: "numeric" });
+  const minsSince = (d) => Math.max(0, Math.floor((Date.now() - new Date(d)) / 60000));
+  const ago = (d) => { const m = minsSince(d); return m < 1 ? "baru saja" : m < 60 ? m + " mnt lalu" : Math.floor(m / 60) + " jam lalu"; };
+  const sum = (arr, f) => arr.reduce((a, x) => a + f(x), 0);
+  const icon = (name, size = 18) => `<iconify-icon icon="lucide:${name}" aria-hidden="true" style="font-size:${size}px"></iconify-icon>`;
+  const me = USERS[ls.get(KEY.role, "OWNER") === "CASHIER" ? "CASHIER" : "OWNER"];
+  const totals = (items) => {
+    const sub = sum(items, (i) => i.price * i.qty);
+    const tax = Math.round(sub * SETTINGS.tax_percent / 100);
+    return { sub, tax, total: sub + tax, count: sum(items, (i) => i.qty) };
+  };
+  const line = (id, qty, note = "") => { const m = menuById[id]; return { menu_id: id, name: m.name, image_url: m.image_url, price: m.price, qty, note }; };
+
+  /** Riwayat hari ini (deterministik, sama dengan halaman Penjualan) untuk ringkasan */
+  function todayHistory() {
+    let seed = 20261011;
+    const r = () => { seed |= 0; seed = seed + 0x6D2B79F5 | 0; let t = Math.imul(seed ^ seed >>> 15, 1 | seed); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; };
+    const pool = MENUS.flatMap((m) => Array(MENU_WEIGHT[m.id]).fill(m));
+    const hourPool = [0, 0, 0, 0, 0, 0, 0, 0, 3, 4, 5, 7, 10, 9, 6, 5, 6, 8, 10, 9, 7, 5, 3, 0].flatMap((w, h) => Array(w).fill(h));
+    const today = new Date(); today.setHours(0, 0, 0, 0);
+    let done = 0, sales = 0;
+    for (let d = 59; d >= 0; d--) {
+      const day = new Date(today); day.setDate(today.getDate() - d);
+      const weekend = day.getDay() === 0 || day.getDay() === 6;
+      const n = Math.round((weekend ? 58 : 40) * (1 + (60 - d) / 60 * 0.12) * (0.85 + r() * 0.3));
+      const times = Array.from({ length: n }, () => { const t = new Date(day); t.setHours(hourPool[Math.floor(r() * hourPool.length)], Math.floor(r() * 60), Math.floor(r() * 60)); return t; })
+        .filter((t) => t <= Date.now()).sort((a, b) => a - b);
+      for (const _ of times) {
+        const lines = {};
+        const k = 1 + Math.floor(r() * r() * 4);
+        for (let j = 0; j < k; j++) { const m = pool[Math.floor(r() * pool.length)]; lines[m.id] = lines[m.id] || { price: m.price, qty: 0 }; lines[m.id].qty += r() < .8 ? 1 : 2; }
+        // Urutan pengambilan angka acak harus sama dengan genTransactions (meja, metode, kasir)
+        const qr = r() < .7;
+        const cancelled = r() < .02;
+        if (qr || r() < .5) r();
+        if (!cancelled) r();
+        r();
+        if (d === 0 && !cancelled) { done++; sales += totals(Object.values(lines)).total; }
+      }
+    }
+    return { done, sales };
+  }
+
+  /* ===== State: pesanan di localStorage (iulfnb:pos), tampilan di root ===== */
+  const stored = ls.get(KEY.pos, null);
+  let p = loadPos();
+  const justSeeded = !stored || stored.seeded_at !== p.seeded_at;
+  if (root.kasirState?.v !== 2) root.kasirState = { v: 2, fresh: new Map(), filter: { type: "ALL", q: "" }, openCode: null, sound: true, history: null, historyDay: "" };
+  const S = root.kasirState;
+  const dayKey = new Date().toDateString();
+  if (S.historyDay !== dayKey) { S.history = todayHistory(); S.historyDay = dayKey; }
+  const save = () => savePos(p);
+
+  const FLOW = ["MENUNGGU", "DIPROSES", "SIAP", "DIANTAR", "SELESAI"];
+  const STEP_LABEL = ["Baru", "Diproses", "Siap", "Diantar", "Selesai"];
+  const STATUS = { MENUNGGU: ["Baru", "accent"], DIPROSES: ["Diproses", "plain"], SIAP: ["Siap", "positive"], DIANTAR: ["Diantar", "plain"], SELESAI: ["Selesai", "positive"], DIBATALKAN: ["Dibatalkan", "danger"] };
+  const LANES = [
+    { key: "MENUNGGU", title: "Baru masuk", empty: "Belum ada pesanan baru" },
+    { key: "DIPROSES", title: "Diproses", empty: "Tidak ada yang sedang dibuat" },
+    { key: "SIAP", title: "Siap diantar", empty: "Belum ada pesanan siap" },
+    { key: "DIANTAR", title: "Diantar · belum bayar", empty: "Semua pesanan sudah lunas" },
+  ];
+  const find = (code) => p.orders.find((o) => o.code === code) || p.done.find((o) => o.code === code);
+  const isActive = (o) => p.orders.includes(o);
+  const whereLabel = (o) => o.table ? "Meja " + o.table : "Bawa pulang";
+  const srcLabel = (o) => o.order_type === "QR" ? "Pesanan QR" : "Kasir" + (o.customer ? " · a.n. " + o.customer : "");
+  const isLate = (o) => (o.status === "MENUNGGU" && minsSince(o.created_at) >= 5) || (o.status === "DIPROSES" && minsSince(o.created_at) >= 15);
+  const shortAgo = (d) => { const m = minsSince(d); return m < 1 ? "Baru" : m < 60 ? m + " mnt" : Math.floor(m / 60) + " j " + (m % 60) + " m"; };
+  const payChip = (o) => o.payment_status === "LUNAS" ? `<span class="l-staf-chip" data-tone="positive">Lunas</span>` : `<span class="l-staf-chip" data-tone="warning">Belum bayar</span>`;
+  function nextAction(o) {
+    if (o.status === "MENUNGGU") return { label: "Terima & proses", act: "advance" };
+    if (o.status === "DIPROSES") return { label: "Tandai siap", act: "advance" };
+    if (o.status === "SIAP") return { label: o.table ? `Antar ke Meja ${o.table}` : "Serahkan ke pelanggan", act: "advance" };
+    if (o.status === "DIANTAR") return { label: "Terima pembayaran", act: "pay" };
+    return null;
+  }
+
+  /* ===== Toast ===== */
+  const toastEl = $("toast");
+  let toastTimer;
+  function toast(msg) {
+    toastEl.textContent = msg;
+    try { if (toastEl.matches(":popover-open")) toastEl.hidePopover(); toastEl.showPopover(); } catch {}
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => { try { toastEl.hidePopover(); } catch {} }, 2600);
+  }
+  onCleanup(() => { clearTimeout(toastTimer); try { toastEl.hidePopover(); } catch {} });
+
+  /* ===== Dialog ===== */
+  const open = (part) => { const d = $(part); if (!d.open) d.showModal(); };
+  const close = (part) => { const d = $(part); if (d.open) d.close(); };
+  for (const d of $$("dialog")) {
+    d.addEventListener("click", (e) => {
+      if (e.target === d) d.close();
+      if (e.target.closest("[data-close]")) d.close();
+    }, { signal });
+  }
+  onCleanup(() => { for (const d of $$("dialog")) if (d.open) d.close(); });
+
+  /* ===== Jembatan real-time dengan halaman pelanggan & halaman kasir lain (localStorage, prototipe) ===== */
+  addEventListener("storage", (e) => {
+    if (e.key !== null && e.key !== KEY.pos && e.key !== KEY.live) return;
+    p = loadPos();
+    const added = pullLive(p);
+    if (added.length) { save(); for (const o of added) { markFresh(o.code); notify(o); } }
+    render();
+  }, { signal });
+  const beat = () => ls.set(KEY.beat, Date.now());
+  beat();
+  const beatTimer = setInterval(beat, 2000);
+  onCleanup(() => clearInterval(beatTimer));
+
+  /* ===== Notifikasi ===== */
+  let actx;
+  function chime() {
+    if (!S.sound) return;
+    try {
+      actx = actx || new (window.AudioContext || window.webkitAudioContext)();
+      if (actx.state === "suspended") actx.resume();
+      [880, 1318].forEach((f, i) => {
+        const osc = actx.createOscillator(), g = actx.createGain(), t = actx.currentTime + i * .16;
+        osc.frequency.value = f;
+        g.gain.setValueAtTime(.0001, t); g.gain.exponentialRampToValueAtTime(.16, t + .02); g.gain.exponentialRampToValueAtTime(.0001, t + .38);
+        osc.connect(g).connect(actx.destination); osc.start(t); osc.stop(t + .4);
+      });
+    } catch {}
+  }
+  onCleanup(() => { try { actx?.close(); } catch {} });
+  function notify(o) { toast(`Pesanan baru — ${whereLabel(o)} (${o.code})`); chime(); }
+  const freshTimers = new Set();
+  const isFresh = (code) => (S.fresh.get(code) || 0) > Date.now();
+  function markFresh(code) {
+    S.fresh.set(code, Date.now() + 6000);
+    const t = setTimeout(() => { freshTimers.delete(t); S.fresh.delete(code); root.querySelector(`.k-card[data-code="${code}"]`)?.removeAttribute("data-state"); }, 6000);
+    freshTimers.add(t);
+  }
+  onCleanup(() => { for (const t of freshTimers) clearTimeout(t); });
+
+  /* ===== Render ===== */
+  function renderStats() {
+    const unpaid = p.orders.filter((o) => o.payment_status === "BELUM");
+    const finished = p.done.filter((o) => o.status === "SELESAI");
+    const items = [
+      ["Pesanan aktif", p.orders.length, `${p.orders.filter((o) => o.status === "MENUNGGU").length} baru`],
+      ["Belum dibayar", rp(sum(unpaid, (o) => totals(o.items).total)), `${unpaid.length} pesanan`],
+      ["Selesai hari ini", S.history.done + finished.length, "pesanan"],
+      ["Penjualan hari ini", rpShort(S.history.sales + sum(finished, (o) => totals(o.items).total)), ""],
+    ];
+    $("stats").innerHTML = items.map(([label, val, em]) => `<div class="l-staf-metric"><span>${label}</span><strong>${val}${em ? `<em>${em}</em>` : ""}</strong></div>`).join("");
+  }
+  function renderSeg() {
+    const n = (t) => p.orders.filter((o) => t === "ALL" || o.order_type === t).length;
+    $("type-seg").innerHTML = [["ALL", "Semua"], ["QR", "QR meja"], ["MANUAL", "Kasir"]].map(([k, l]) =>
+      `<button type="button" role="tab" data-type="${k}" aria-selected="${S.filter.type === k}">${l}<small>${n(k)}</small></button>`).join("");
+  }
+  function visible() {
+    const q = S.filter.q.trim().toLowerCase();
+    return p.orders.filter((o) => (S.filter.type === "ALL" || o.order_type === S.filter.type) &&
+      (!q || [o.code, o.table ? "meja " + o.table : "bawa pulang", o.customer, ...o.items.map((i) => i.name)].filter(Boolean).join(" ").toLowerCase().includes(q)));
+  }
+  function cardHTML(o) {
+    const t = totals(o.items), a = nextAction(o), late = isLate(o);
+    const shown = o.items.slice(0, 4), more = o.items.length - shown.length;
+    return `<article class="k-card" data-code="${esc(o.code)}"${isFresh(o.code) ? ' data-state="new"' : ""}${late ? " data-late" : ""}>
+      <div class="k-card-head">
+        <button type="button" class="k-open" data-open="${esc(o.code)}" aria-label="Detail pesanan ${esc(o.code)}, ${esc(whereLabel(o))}">${esc(whereLabel(o))}</button>
+        <span class="k-time" title="Masuk ${hhmm(o.created_at)}">${icon("clock", 13)}${shortAgo(o.created_at)}</span>
+      </div>
+      <div class="k-src"><span>${esc(o.code)}</span><span aria-hidden="true">·</span>${icon(o.order_type === "QR" ? "qr-code" : "user", 13)}<span>${esc(srcLabel(o))}</span>${late ? `<span class="l-staf-chip" data-tone="warning">Lama menunggu</span>` : ""}</div>
+      <ul class="k-items">${shown.map((i) => `<li><b>${i.qty}×</b>${esc(i.name)}${i.note ? `<span class="k-note">${icon("sticky-note", 12)}${esc(i.note)}</span>` : ""}</li>`).join("")}
+        ${more > 0 ? `<li style="color:var(--color-text-muted)">+${more} menu lainnya</li>` : ""}</ul>
+      <div class="k-foot"><span class="k-total">${rp(t.total)}</span>${payChip(o)}</div>
+      <button type="button" class="l-staf-btn k-act" data-size="sm" data-block data-act="${a.act}" data-code="${esc(o.code)}">${a.label}</button>
+    </article>`;
+  }
+  function renderBoard() {
+    const scroll = $$(".k-lane-body").map((el) => el.scrollTop);
+    const vis = visible();
+    $("board").innerHTML = LANES.map((l) => {
+      const list = vis.filter((o) => o.status === l.key).sort((a, b) => Date.parse(a.created_at) - Date.parse(b.created_at));
+      return `<section class="k-lane" aria-labelledby="kasir-lane-${l.key}">
+        <header class="k-lane-head"><h2 id="kasir-lane-${l.key}">${l.title}</h2><span class="l-staf-chip" data-tone="${l.key === "MENUNGGU" && list.length ? "accent" : "plain"}">${list.length}</span></header>
+        <div class="k-lane-body">${list.length ? list.map(cardHTML).join("") : `<div class="k-lane-empty">${S.filter.q ? "Tidak ada yang cocok" : l.empty}</div>`}</div>
+      </section>`;
+    }).join("");
+    $$(".k-lane-body").forEach((el, i) => { el.scrollTop = scroll[i] || 0; });
+  }
+  function renderDrawer() {
+    const o = find(S.openCode);
+    if (!o) { close("drawer"); return; }
+    const t = totals(o.items), [stLabel, stTone] = STATUS[o.status], a = isActive(o) ? nextAction(o) : null, idx = FLOW.indexOf(o.status), paid = o.payment_status === "LUNAS";
+    $("d-title").textContent = whereLabel(o);
+    $("d-status").dataset.tone = stTone;
+    $("d-status").textContent = stLabel;
+    $("d-meta").textContent = `${o.code} · ${srcLabel(o)} · masuk ${hhmm(o.created_at)} (${ago(o.created_at)})`;
+    const payDetail = !paid ? "Bisa dibayar sebelum atau sesudah pesanan diantar."
+      : o.payment_method === "CASH" ? `Tunai ${rp(o.paid_amount)} · kembali ${rp(o.paid_amount - t.total)}` : `Non-tunai${o.payment_channel ? " · " + esc(o.payment_channel) : ""}`;
+    $("d-body").innerHTML = `
+      <ol class="k-steps" aria-label="Progres pesanan">${STEP_LABEL.map((l, i) => `<li class="k-step" data-state="${i < idx ? "done" : i === idx ? "current" : "todo"}"><i>${i < idx ? icon("check", 13) : ""}</i>${l}</li>`).join("")}</ol>
+      <h3 class="k-sec">Item pesanan · ${t.count}</h3>
+      <ul class="k-d-items">${o.items.map((i) => `<li class="k-d-item"><span class="l-staf-thumb" aria-hidden="true">${esc(i.image_url)}</span>
+        <div><strong>${esc(i.name)}</strong><small>${i.qty} × ${rp(i.price)}</small>${i.note ? `<span class="k-note">${icon("sticky-note", 12)}${esc(i.note)}</span>` : ""}</div>
+        <span class="l-staf-num" style="font-weight:600">${rp(i.price * i.qty)}</span></li>`).join("")}</ul>
+      <div class="k-sum">
+        <div><span>Subtotal</span><span>${rp(t.sub)}</span></div>
+        <div><span>Pajak ${SETTINGS.tax_percent}%</span><span>${rp(t.tax)}</span></div>
+        <div class="k-sum-total"><span>Total</span><span>${rp(t.total)}</span></div>
+      </div>
+      <div class="k-paybox"${paid ? " data-paid" : ""}>${icon(paid ? "circle-check" : "wallet", 22)}<div><strong>${paid ? "Lunas" : "Belum dibayar"}</strong><small>${payDetail}</small></div></div>
+      <h3 class="k-sec">Info</h3>
+      <dl class="k-meta">
+        <dt>Sumber</dt><dd>${o.order_type === "QR" ? "Scan QR di meja" : "Dicatat kasir"}</dd>
+        <dt>Jenis</dt><dd>${o.table ? "Makan di tempat" : "Bawa pulang"}</dd>
+        ${o.customer ? `<dt>Pelanggan</dt><dd>${esc(o.customer)}</dd>` : ""}
+        ${o.cashier ? `<dt>Kasir</dt><dd>${esc(o.cashier)}</dd>` : ""}
+      </dl>`;
+    const canCancel = isActive(o) && !paid && ["MENUNGGU", "DIPROSES"].includes(o.status);
+    $("d-foot").innerHTML = `
+      ${a ? `<button type="button" class="l-staf-btn" data-variant="primary" data-block data-act="${a.act}" data-code="${esc(o.code)}">${a.label}</button>` : ""}
+      <div class="k-row">
+        ${isActive(o) && !paid && a?.act !== "pay" ? `<button type="button" class="l-staf-btn" data-size="sm" data-act="pay" data-code="${esc(o.code)}">${icon("banknote", 16)}Terima pembayaran</button>` : ""}
+        ${paid ? `<button type="button" class="l-staf-btn" data-size="sm" data-act="receipt" data-code="${esc(o.code)}">${icon("printer", 16)}Lihat struk</button>` : ""}
+        ${canCancel ? `<button type="button" class="l-staf-btn" data-size="sm" data-variant="danger" data-act="cancel" data-code="${esc(o.code)}">${icon("x", 16)}Batalkan</button>` : ""}
+      </div>`;
+  }
+  function renderClock() { $("clock").textContent = `${longDate(new Date())} · ${hhmm(new Date())} · Kasir: ${me}`; }
+  function render() {
+    renderStats(); renderSeg(); renderBoard();
+    if ($("drawer").open) renderDrawer();
+  }
+
+  /* ===== Aksi pesanan (setiap aksi disimpan ke iulfnb:pos) ===== */
+  function advance(code) {
+    const o = find(code);
+    if (!o || !isActive(o) || o.status === "DIANTAR") return;
+    o.status = FLOW[FLOW.indexOf(o.status) + 1];
+    if (o.status === "DIANTAR" && o.payment_status === "LUNAS") { complete(o); return; }
+    syncLive(o);
+    save();
+    render();
+    toast({ DIPROSES: `${o.code} diterima — mulai dibuat`, SIAP: `${o.code} siap — antar ke ${whereLabel(o).toLowerCase()}`, DIANTAR: `${o.code} sudah diantar — menunggu pembayaran` }[o.status]);
+  }
+  function complete(o) {
+    finishOrder(p, o, "SELESAI");
+    save();
+    if (S.openCode === o.code) close("drawer");
+    render();
+    toast(`${o.code} selesai — diantar & lunas`);
+  }
+  function openDetail(code) { S.openCode = code; renderDrawer(); open("drawer"); }
+  /** Pembayaran & struk ada di halaman sendiri: simpan kode lalu pindah ke #/kasir/bayar */
+  function goPay(code) {
+    if (!find(code)) return;
+    p.pay_code = code;
+    save();
+    close("drawer");
+    location.hash = "#/kasir/bayar";
+  }
+
+  const REASONS = ["Pelanggan batal", "Menu habis", "Pesanan ganda", "Salah input"];
+  let cancelCode = null, cancelReason = null;
+  function openCancel(code) {
+    const o = find(code);
+    if (!o) return;
+    cancelCode = code; cancelReason = null;
+    $("cx-sub").textContent = `${o.code} · ${whereLabel(o)} · ${rp(totals(o.items).total)}`;
+    $("reasons").innerHTML = REASONS.map((r) => `<button type="button" aria-pressed="false" data-reason="${r}">${r}</button>`).join("");
+    $("cx-confirm").disabled = true;
+    open("cancel");
+  }
+  function confirmCancel() {
+    const o = find(cancelCode);
+    if (!o || !isActive(o) || !cancelReason) return;
+    o.cancel_reason = cancelReason;
+    finishOrder(p, o, "DIBATALKAN");
+    save();
+    close("cancel");
+    if (S.openCode === o.code) close("drawer");
+    render();
+    toast(`${o.code} dibatalkan — ${cancelReason.toLowerCase()}`);
+  }
+
+  function simulateQR() {
+    const r = Math.random, pick = (a) => a[Math.floor(r() * a.length)];
+    const avail = MENUS.filter((m) => m.is_available).sort(() => r() - .5);
+    const NOTES = { makanan: ["Tidak pedas", "Ekstra pedas"], minuman: ["Es sedikit", "Tanpa gula", "Gula sedikit"], lainnya: ["Saus terpisah"] };
+    const busy = new Set(p.orders.map((o) => o.table));
+    const free = TABLES.filter((t) => t.is_active && !busy.has(t.table_number));
+    const o = {
+      code: nextOrderCode(), order_type: "QR", table: pick(free.length ? free : TABLES.filter((t) => t.is_active)).table_number, customer: null,
+      items: avail.slice(0, 1 + Math.floor(r() * 3)).map((m) => line(m.id, r() < .75 ? 1 : 2, r() < .4 ? pick(NOTES[m.category_id]) : "")),
+      status: "MENUNGGU", payment_status: "BELUM", payment_method: null, payment_channel: null, paid_amount: null, cashier: null,
+      created_at: new Date().toISOString(), paid_at: null, completed_at: null, cancel_reason: null, live: false,
+    };
+    p.orders.push(o);
+    save();
+    markFresh(o.code);
+    render();
+    notify(o);
+  }
+  // Prototipe: satu pesanan QR tiruan masuk 7 detik setelah data demo baru dibuat
+  let demoTimer;
+  const scheduleDemo = () => { clearTimeout(demoTimer); demoTimer = setTimeout(simulateQR, 7000); };
+  onCleanup(() => clearTimeout(demoTimer));
+
+  function resetDemo() {
+    ls.del(KEY.pos); ls.del(KEY.live); ls.del(KEY.seq);
+    p = loadPos();
+    S.fresh.clear(); S.openCode = null;
+    close("reset"); close("drawer");
+    render();
+    toast("Data demo direset — 7 pesanan contoh dimuat ulang");
+    scheduleDemo();
+  }
+
+  /* ===== Event ===== */
+  root.addEventListener("click", (e) => {
+    const b = e.target.closest("button");
+    if (!b) return;
+    const d = b.dataset;
+    if (d.open) return openDetail(d.open);
+    if (d.act === "advance") return advance(d.code);
+    if (d.act === "pay" || d.act === "receipt") return goPay(d.code);
+    if (d.act === "cancel") return openCancel(d.code);
+    if (d.act === "reset") return open("reset");
+    if (d.type) { S.filter.type = d.type; renderSeg(); renderBoard(); return; }
+    if (d.reason) { cancelReason = d.reason; $$("[data-reason]").forEach((c) => c.setAttribute("aria-pressed", c === b)); $("cx-confirm").disabled = false; return; }
+  }, { signal });
+  root.addEventListener("input", (e) => {
+    if (e.target.dataset.part === "q") { S.filter.q = e.target.value; renderBoard(); }
+  }, { signal });
+  $("cx-confirm").addEventListener("click", confirmCancel, { signal });
+  $("rs-confirm").addEventListener("click", resetDemo, { signal });
+
+  actions?.querySelector('[data-action="manual"]')?.addEventListener("click", () => { location.hash = "#/kasir/manual"; }, { signal });
+  actions?.querySelector('[data-action="simulate"]')?.addEventListener("click", simulateQR, { signal });
+  const soundBtn = actions?.querySelector('[data-action="sound"]');
+  const paintSound = () => {
+    if (!soundBtn) return;
+    soundBtn.setAttribute("aria-pressed", S.sound);
+    soundBtn.innerHTML = icon(S.sound ? "bell" : "bell-off");
+  };
+  soundBtn?.addEventListener("click", () => { S.sound = !S.sound; paintSound(); toast(S.sound ? "Suara notifikasi aktif" : "Suara notifikasi dimatikan"); }, { signal });
+
+  /* ===== Mulai ===== */
+  scrollTo(0, 0); // halaman baru selalu dibuka dari atas
+  const pulled = pullLive(p);
+  if (pulled.length) { save(); for (const o of pulled) markFresh(o.code); }
+  $("q").value = S.filter.q;
+  paintSound();
+  renderClock();
+  render();
+  if (p.flash) { const msg = p.flash; p.flash = null; save(); toast(msg); }
+  const tick = setInterval(() => { renderClock(); renderStats(); renderBoard(); }, 20000);
+  onCleanup(() => clearInterval(tick));
+  if (justSeeded) scheduleDemo();
+</script>

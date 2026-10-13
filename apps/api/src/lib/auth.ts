@@ -9,7 +9,7 @@ import {
 } from "@starter/shared/permissions";
 import { siteConfig } from "@starter/shared/site";
 import { env } from "../config/env";
-import { db } from "../db";
+import { db, pool } from "../db";
 import * as schema from "../db/schema";
 import { logger } from "./logger";
 
@@ -34,6 +34,23 @@ export const auth = betterAuth({
     maxPasswordLength: 128,
     // Add an email provider before enabling verification or password recovery.
     requireEmailVerification: false,
+  },
+  databaseHooks: {
+    user: {
+      create: {
+        // IUL FnB bootstrap: the very first account becomes the cafe's owner
+        // (Pemilik). Everyone after that gets the default role and no cafe
+        // access until an owner adds them as staff.
+        before: async (data) => {
+          if (data.role && data.role !== DEFAULT_ROLE) return;
+          const { rows } = await pool.query<{ exists: boolean }>(
+            'SELECT EXISTS (SELECT 1 FROM "user") AS exists',
+          );
+          if (rows[0]?.exists) return;
+          return { data: { ...data, role: "owner" } };
+        },
+      },
+    },
   },
   rateLimit: {
     // Better Auth only turns its limiter on by itself when NODE_ENV is

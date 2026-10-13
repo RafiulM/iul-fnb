@@ -1,3 +1,19 @@
+# IUL FnB
+
+Cafe ordering system (see [`iul-fnb-PRD.md`](iul-fnb-PRD.md)) built on the ngodingpakeai monorepo starter below.
+
+| App | Path | Dev URL | What |
+| --- | --- | --- | --- |
+| App Kasir + Dashboard | `apps/web` | `WEB_URL` (here http://localhost:3010) | Signed-in staff: `/kasir` (+ `/manual`, `/bayar`), `/riwayat`, `/stok`; owner only: `/menu-meja`, `/penjualan`, `/staf`, `/pengaturan` |
+| App QR Menu | `apps/qr-menu` | `VITE_QR_MENU_URL` (here http://localhost:3011) | Public customer app opened from a table QR: `/?meja=07`, `/menu/:id`, `/keranjang`, `/status` |
+| API | `apps/api` | `BETTER_AUTH_URL` (here http://localhost:4010) | Shared backend for both apps |
+
+The screens are ported from the DesainPakeAI project "iul fnb" (design system "Sunlit Ledger"), downloaded read-only into [`design/`](design/) with `npx desainpakeai-cli` — that folder is the visual source of truth. `desainpakeai/` is an older, superseded prototype.
+
+**Frontend-first status:** both apps still read sample data through their `features/*/api.ts` mock layer (`apps/*/src/lib/mock/db.ts`, kept in the browser's localStorage, with "Reset data demo" on `/kasir`). Each mock function names its real endpoint (`// Later: …`); switching to the API means replacing those bodies with `apiFetch` and removing `ssr: false` from the client-only routes. An account with Better Auth role `owner`/`admin` is a Pemilik; `pnpm role:set <email> owner`.
+
+---
+
 # Express TanStack Postgres — ngodingpakeai starters
 
 A monorepo starter with an **Express 5 API** and a **TanStack Start web app**, sharing one TypeScript contract:

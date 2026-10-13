@@ -20,6 +20,11 @@ export const ac = createAccessControl(statement);
 // signed-in default should be able to do nothing beyond its own records.
 export const roles = {
   user: ac.newRole({ notes: [] }),
+  // IUL FnB staff: Kasir (CASHIER) and Pemilik (OWNER). What they may do in
+  // the cafe is not a Better Auth statement: the owner edits it at runtime,
+  // so the API checks it with requireStaffPermission (see fnb/access.ts).
+  cashier: ac.newRole({ notes: [] }),
+  owner: ac.newRole({ notes: [] }),
   admin: ac.newRole({
     ...adminAc.statements,
     notes: ["read-any", "delete-any"],
@@ -32,6 +37,25 @@ export type AppRole = keyof typeof roles;
 // comma-separated list, so "admin,support" grants the union of both.
 export const DEFAULT_ROLE = "user" satisfies AppRole;
 export const ADMIN_ROLES = ["admin"] satisfies AppRole[];
+
+// Roles that make an account cafe staff, and which of them act as Pemilik
+// (the platform admin counts as Pemilik).
+export const STAFF_ROLES = ["owner", "cashier", "admin"] satisfies AppRole[];
+export const OWNER_ROLES = ["owner", "admin"] satisfies AppRole[];
+
+const roleNames = (role: string | null | undefined) =>
+  (role ?? "").split(",").map((name) => name.trim());
+
+/** The PRD role for a stored Better Auth role, or null for non-staff. */
+export function staffRoleOf(
+  role: string | null | undefined,
+): "OWNER" | "CASHIER" | null {
+  const names = roleNames(role);
+  if (names.some((name) => (OWNER_ROLES as string[]).includes(name)))
+    return "OWNER";
+  if (names.includes("cashier")) return "CASHIER";
+  return null;
+}
 
 // The shape accepted by permission checks, e.g. { notes: ["read-any"] }.
 export type Permissions = Partial<{
