@@ -27,6 +27,7 @@ export function OrderCard({
   now,
   fresh,
   busy,
+  canPay,
   onOpen,
   onAction,
 }: {
@@ -34,10 +35,13 @@ export function OrderCard({
   now: number;
   fresh: boolean;
   busy: boolean;
+  /** The staff member may take payment (Kasir "payment" permission). */
+  canPay: boolean;
   onOpen: (code: string) => void;
   onAction: (act: NextAction["act"], code: string) => void;
 }) {
-  const a = nextAction(o);
+  const next = nextAction(o);
+  const a = next?.act === "pay" && !canPay ? null : next;
   const late = isLate(o, now);
   const where = whereLabel(o);
   const shown = o.items.slice(0, 4);

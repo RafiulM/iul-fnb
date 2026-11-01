@@ -33,6 +33,7 @@ export function OrderDrawer({
   settings,
   now,
   busy,
+  canPay,
   onClose,
   onAction,
 }: {
@@ -40,6 +41,8 @@ export function OrderDrawer({
   settings: CafeSettingsDto;
   now: number;
   busy: boolean;
+  /** The staff member may take payment and print receipts. */
+  canPay: boolean;
   onClose: () => void;
   onAction: (act: DrawerAction, code: string) => void;
 }) {
@@ -56,6 +59,7 @@ export function OrderDrawer({
           settings={settings}
           now={now}
           busy={busy}
+          canPay={canPay}
           onClose={onClose}
           onAction={onAction}
         />
@@ -69,6 +73,7 @@ function DrawerContent({
   settings,
   now,
   busy,
+  canPay,
   onClose,
   onAction,
 }: {
@@ -76,19 +81,23 @@ function DrawerContent({
   settings: CafeSettingsDto;
   now: number;
   busy: boolean;
+  canPay: boolean;
   onClose: () => void;
   onAction: (act: DrawerAction, code: string) => void;
 }) {
   const status = ORDER_STATUS[o.status];
   const active = isActive(o);
-  const a = active ? nextAction(o) : null;
+  const next = active ? nextAction(o) : null;
+  const a = next?.act === "pay" && !canPay ? null : next;
   const idx = ORDER_FLOW.indexOf(o.status);
   const paid = o.paymentStatus === "LUNAS";
   const count = o.items.reduce((n, i) => n + i.qty, 0);
   const canCancel =
     active && !paid && (o.status === "MENUNGGU" || o.status === "DIPROSES");
   const payDetail = !paid
-    ? "Bisa dibayar sebelum atau sesudah pesanan diantar."
+    ? canPay
+      ? "Bisa dibayar sebelum atau sesudah pesanan diantar."
+      : "Akunmu belum diizinkan menerima pembayaran. Panggil pemilik atau kasir lain."
     : o.paymentMethod === "CASH"
       ? `Tunai ${rp(o.paidAmount ?? 0)} · kembali ${rp((o.paidAmount ?? 0) - o.totalAmount)}`
       : `Non-tunai${o.paymentChannel ? " · " + o.paymentChannel : ""}`;
@@ -230,7 +239,7 @@ function DrawerContent({
           </button>
         ) : null}
         <div className="k-row">
-          {active && !paid && a?.act !== "pay" ? (
+          {canPay && active && !paid && a?.act !== "pay" ? (
             <button
               type="button"
               className="l-staf-btn"
@@ -241,7 +250,7 @@ function DrawerContent({
               Terima pembayaran
             </button>
           ) : null}
-          {paid ? (
+          {canPay && paid ? (
             <button
               type="button"
               className="l-staf-btn"

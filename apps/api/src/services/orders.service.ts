@@ -13,7 +13,12 @@ import {
   sql,
   type SQL,
 } from "drizzle-orm";
-import { ORDER_FLOW, orderCode, orderTotals } from "@starter/shared/fnb/domain";
+import {
+  isOpenAt,
+  ORDER_FLOW,
+  orderCode,
+  orderTotals,
+} from "@starter/shared/fnb/domain";
 import type {
   OrderItemDto,
   OrderStatus,
@@ -226,9 +231,19 @@ async function insertOrder(tx: Tx, init: NewOrder) {
   return dto!;
 }
 
-/** A customer's order from a table QR; waits for the cashier (MENUNGGU). */
+/**
+ * A customer's order from a table QR; waits for the cashier (MENUNGGU).
+ * Only during opening hours (cafe time): the QR app checks too, but a phone's
+ * clock or an old open tab must not get an order through after closing.
+ */
 export async function createQrOrder(input: CreateQrOrderInput) {
   return db.transaction(async (tx) => {
+    if (!isOpenAt(await getSettings(tx)))
+      throw new HttpError(
+        409,
+        "CAFE_CLOSED",
+        "Kafe sedang tutup. Pesanan bisa dikirim lagi saat kafe buka.",
+      );
     const table = await findActiveTable(input.qrCode, tx);
     if (!table)
       throw new HttpError(

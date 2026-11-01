@@ -19,6 +19,7 @@ import { Dialog, useToast } from "@/components/fnb/dialog";
 import { useCategories, useMenus } from "@/features/menu/hooks";
 import { useCreateManualOrder, useTodayOrders } from "@/features/orders/hooks";
 import { useSettings } from "@/features/settings/hooks";
+import { useStaffCan } from "@/features/staff/hooks";
 import { useTables } from "@/features/tables/hooks";
 import {
   emptyDraft,
@@ -45,6 +46,7 @@ export function ManualOrder({ cashierName }: { cashierName: string }) {
   const { data: savedDraft } = useManualDraft();
   const saveDraft = useSaveManualDraft();
   const createOrder = useCreateManualOrder();
+  const canPay = useStaffCan("payment");
   const toast = useToast();
   const navigate = useNavigate();
 
@@ -465,22 +467,25 @@ export function ManualOrder({ cashierName }: { cashierName: string }) {
           <div className="m-row">
             <button
               className="l-staf-btn"
+              data-variant={canPay ? undefined : "primary"}
               type="button"
               disabled={!hasLines || createOrder.isPending}
               onClick={() => saveOrder(false)}
             >
               Simpan
             </button>
-            <button
-              className="l-staf-btn"
-              data-variant="primary"
-              type="button"
-              disabled={!hasLines || createOrder.isPending}
-              onClick={() => saveOrder(true)}
-            >
-              <Banknote aria-hidden="true" />
-              Simpan &amp; bayar
-            </button>
+            {canPay ? (
+              <button
+                className="l-staf-btn"
+                data-variant="primary"
+                type="button"
+                disabled={!hasLines || createOrder.isPending}
+                onClick={() => saveOrder(true)}
+              >
+                <Banknote aria-hidden="true" />
+                Simpan &amp; bayar
+              </button>
+            ) : null}
           </div>
         </div>
       </aside>

@@ -1,8 +1,7 @@
 import { useEffect } from "react";
-import { Link } from "@tanstack/react-router";
 import { QrCode } from "lucide-react";
 import { isOpenAt } from "@starter/shared/fnb/domain";
-import { setFlash, takeFlash } from "@/features/browse/state";
+import { takeFlash } from "@/features/browse/state";
 import { useCafe } from "@/features/catalog/hooks";
 import { useCustomerSession } from "@/features/session/store";
 import { useNow } from "@/lib/use-now";
@@ -14,7 +13,7 @@ import { CafeMark } from "@/components/cafe-mark";
 /** Port of design/src/pages/pelanggan-tidak-valid.page.html. */
 export function InvalidTablePage() {
   const { data: cafe } = useCafe();
-  const [session, update] = useCustomerSession();
+  const [session] = useCustomerSession();
   const now = new Date(useNow(60_000));
 
   useDocumentTitle(`QR tidak valid — ${cafe.cafeName} | IUL FnB`);
@@ -41,14 +40,6 @@ export function InvalidTablePage() {
     else groups.push({ r, days: [d] });
   }
   const open = isOpenAt(cafe, now);
-
-  function openAs07() {
-    update((s) => {
-      s.table = "07";
-      s.invalidTable = null;
-    });
-    setFlash("Prototipe: menu dibuka sebagai Meja 07");
-  }
 
   return (
     <main
@@ -161,20 +152,6 @@ export function InvalidTablePage() {
             })}
           </dl>
         </section>
-
-        <div className="pc-proto" data-node-id="pelanggan-tidak-valid.proto">
-          <span className="pc-chip" data-tone="dark">
-            Prototipe
-          </span>
-          <p>
-            Di aplikasi asli, meja aktif diatur pemilik di halaman Menu &amp;
-            Meja. Untuk mencoba alur pesan, buka menu sebagai meja yang valid.
-          </p>
-          <Link className="pc-btn" data-block="" to="/" onClick={openAs07}>
-            <QrCode aria-hidden="true" />
-            Prototipe: buka sebagai Meja 07
-          </Link>
-        </div>
 
         <p className="pc-foot">
           Didukung oleh <strong>IUL FnB</strong>

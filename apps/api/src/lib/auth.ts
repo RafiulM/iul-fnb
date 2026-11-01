@@ -1,5 +1,6 @@
 import { betterAuth } from "better-auth";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
+import { APIError, createAuthMiddleware } from "better-auth/api";
 import { admin } from "better-auth/plugins";
 import {
   ac,
@@ -18,6 +19,18 @@ const authLog = logger.child({ module: "better-auth" });
 // Set by app.ts from Express's req.ip on every request (see TRUST_PROXY).
 export const CLIENT_IP_HEADER = "x-starter-client-ip";
 
+/**
+ * Does any account exist yet? The very first one becomes the cafe's owner
+ * (Pemilik), and public sign-up exists only for it: afterwards an owner adds
+ * staff from Akun & Staf.
+ */
+export async function hasAnyAccount() {
+  const { rows } = await pool.query<{ exists: boolean }>(
+    'SELECT EXISTS (SELECT 1 FROM "user") AS exists',
+  );
+  return rows[0]?.exists ?? false;
+}
+
 export const auth = betterAuth({
   appName: siteConfig.name,
   // The API's public origin. Better Auth serves /api/auth/* from here and sets
@@ -35,6 +48,19 @@ export const auth = betterAuth({
     // Add an email provider before enabling verification or password recovery.
     requireEmailVerification: false,
   },
+  hooks: {
+    // Public sign-up only bootstraps the first account (the owner). Owners
+    // add staff with the admin plugin's createUser (POST /api/staff), which
+    // is a different endpoint and not affected.
+    before: createAuthMiddleware(async (ctx) => {
+      if (ctx.path === "/sign-up/email" && (await hasAnyAccount()))
+        throw new APIError("FORBIDDEN", {
+          code: "SIGN_UP_CLOSED",
+          message:
+            "Pendaftaran sudah ditutup. Minta pemilik kafe membuatkan akun dari halaman Akun & Staf.",
+        });
+    }),
+  },
   databaseHooks: {
     user: {
       create: {
@@ -43,10 +69,7 @@ export const auth = betterAuth({
         // access until an owner adds them as staff.
         before: async (data) => {
           if (data.role && data.role !== DEFAULT_ROLE) return;
-          const { rows } = await pool.query<{ exists: boolean }>(
-            'SELECT EXISTS (SELECT 1 FROM "user") AS exists',
-          );
-          if (rows[0]?.exists) return;
+          if (await hasAnyAccount()) return;
           return { data: { ...data, role: "owner" } };
         },
       },

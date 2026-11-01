@@ -2,7 +2,6 @@ import { useEffect, useRef, useState } from "react";
 import type { MouseEvent } from "react";
 import { useNavigate } from "@tanstack/react-router";
 import { Clock, CreditCard, Search, SearchX, X } from "lucide-react";
-import { isOpenAt } from "@starter/shared/fnb/domain";
 import type { MenuDto } from "@starter/shared/fnb/types";
 import { useCafe, useMenu } from "@/features/catalog/hooks";
 import { useCustomerSession } from "@/features/session/store";
@@ -59,25 +58,22 @@ export function MenuHome() {
   const cartBtnRef = useRef<HTMLButtonElement>(null);
 
   const table = session.table || DEFAULT_TABLE;
-  const open = isOpenAt(cafe, now);
-  const blocked = orderingBlocked(session, cafe, now);
+  const blocked = orderingBlocked(cafe, now);
   const nextOpen = nextOpenLabel(cafe, now);
   const closedMsg = `Kafe sedang tutup · buka lagi ${nextOpen}`;
   const today = hoursOn(cafe, now);
   const menuById = new Map(menus.map((m) => [m.id, m]));
 
   // Header chip (design paintHeader)
-  const hours = session.browseOnly
+  const hours = blocked
     ? {
         tone: "danger",
         text: `Tutup · buka ${nextOpen.replace("pukul ", "")}`,
       }
-    : !open
-      ? { tone: "accent", text: "Prototipe · jam buka diabaikan" }
-      : {
-          tone: "positive",
-          text: `Buka · ${dot(today?.from || "08:00")}–${dot(today?.to || "22:00")}`,
-        };
+    : {
+        tone: "positive",
+        text: `Buka · ${dot(today?.from || "08:00")}–${dot(today?.to || "22:00")}`,
+      };
 
   useEffect(() => {
     const prev = document.title;
@@ -156,15 +152,6 @@ export function MenuHome() {
     void navigate({ to: "/keranjang" });
   }
 
-  function forceOpen() {
-    update((s) => {
-      s.browseOnly = false;
-      s.forceOpen = true;
-    });
-    toast("Prototipe: jam operasional diabaikan — kamu bisa memesan");
-    searchRef.current?.focus({ preventScroll: true });
-  }
-
   /* ----- menu list (design renderMenu) ----- */
   const query = q.trim().toLowerCase();
   const match = (m: MenuDto) =>
@@ -230,9 +217,7 @@ export function MenuHome() {
           </div>
           <p className="pl-greet">{greeting(now.getHours())} 👋</p>
           <p className="pl-thesis">
-            {session.browseOnly
-              ? "Intip menu kami dulu, yuk."
-              : "Mau pesan apa hari ini?"}
+            {blocked ? "Intip menu kami dulu, yuk." : "Mau pesan apa hari ini?"}
           </p>
           <div className="pl-meta">
             <span className="pl-chip" data-tone={hours.tone}>
@@ -245,7 +230,7 @@ export function MenuHome() {
           </div>
         </header>
 
-        <div className="pl-alert" role="status" hidden={!session.browseOnly}>
+        <div className="pl-alert" role="status" hidden={!blocked}>
           <Clock aria-hidden="true" />
           <div>
             <strong>{closedMsg}</strong>
@@ -253,9 +238,6 @@ export function MenuHome() {
               Kamu tetap bisa melihat menu. Tombol tambah dan keranjang aktif
               lagi saat kafe buka.
             </span>
-            <button type="button" onClick={forceOpen}>
-              Prototipe: anggap kafe buka
-            </button>
           </div>
         </div>
 

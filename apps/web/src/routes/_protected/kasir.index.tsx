@@ -5,6 +5,7 @@ import { siteConfig } from "@/config/site";
 import { KasirScreen } from "@/features/kasir/components/kasir-screen";
 import { todayOrdersQuery } from "@/features/orders/queries";
 import { settingsQuery } from "@/features/settings/queries";
+import { staffPermissionsQuery } from "@/features/staff/queries";
 
 // `flash`: a one-off toast from another Kasir screen, e.g.
 // navigate({ to: "/kasir", search: { flash: "A-108 dicatat — …" } }).
@@ -20,6 +21,7 @@ export const Route = createFileRoute("/_protected/kasir/")({
     Promise.all([
       context.queryClient.ensureQueryData(todayOrdersQuery()),
       context.queryClient.ensureQueryData(settingsQuery()),
+      context.queryClient.ensureQueryData(staffPermissionsQuery()),
     ]),
   component: Page,
 });

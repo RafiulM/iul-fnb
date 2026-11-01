@@ -13,7 +13,7 @@ import {
 import { rp } from "@starter/shared/fnb/domain";
 import { NOTE_CHIPS } from "@starter/shared/fnb/fixtures";
 import { useCafe, useMenu } from "@/features/catalog/hooks";
-import { readSession, useCustomerSession } from "@/features/session/store";
+import { useCustomerSession } from "@/features/session/store";
 import { useNow } from "@/lib/use-now";
 import { lineKey, MAX_QTY, NOTE_MAX, qtyOf, saveCartLine } from "../cart";
 import { nextOpenLabel, orderingBlocked } from "../hours";
@@ -54,7 +54,7 @@ export function MenuDetail({ menuId, edit }: Props) {
         (l) => l.menuId === m.id && lineKey(l.menuId, l.note) === edit,
       ) ?? null)
     : null;
-  const blocked = orderingBlocked(session, cafe, new Date(now));
+  const blocked = orderingBlocked(cafe, new Date(now));
   const ok = m.isAvailable && !blocked;
   const toCart = edit != null;
 
@@ -123,8 +123,8 @@ export function MenuDetail({ menuId, edit }: Props) {
   function save() {
     const n = qty;
     const text = note.trim().slice(0, NOTE_MAX);
-    // Re-check against the latest session (another tab may have changed it)
-    if (!m.isAvailable || orderingBlocked(readSession(), cafe)) {
+    // Re-check the clock: the cafe may have closed since the page rendered.
+    if (!m.isAvailable || orderingBlocked(cafe)) {
       toast(
         m.isAvailable
           ? "Kafe sedang tutup — belum bisa memesan"

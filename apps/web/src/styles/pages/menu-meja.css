@@ -1024,9 +1024,12 @@
   .mm-drop:hover {
     border-color: var(--color-text);
   }
-  .mm-drop[data-over] {
-    border-color: var(--color-accent);
-    background: var(--color-accent-soft);
+  .mm-drop:disabled {
+    cursor: not-allowed;
+    opacity: 0.65;
+  }
+  .mm-drop:disabled:hover {
+    border-color: var(--color-border-strong);
   }
   .mm-sublabel {
     margin: 0 0 6px;

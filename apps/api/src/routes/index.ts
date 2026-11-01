@@ -6,6 +6,7 @@ import { categoriesRouter, menusRouter, recipesRouter } from "./menu.routes";
 import { notesRouter } from "./notes.routes";
 import { ordersRouter, transactionsRouter } from "./orders.routes";
 import { publicRouter } from "./public.routes";
+import { registrationRouter } from "./registration.routes";
 import { reportsRouter } from "./reports.routes";
 import { settingsRouter } from "./settings.routes";
 import { staffRouter } from "./staff.routes";
@@ -19,6 +20,7 @@ apiRouter.use(noStore);
 apiRouter.use("/health", healthRouter);
 apiRouter.use("/notes", notesRouter);
 apiRouter.use("/admin", adminRouter);
+apiRouter.use("/registration", registrationRouter);
 
 // IUL FnB. Customer QR Menu app (no account):
 apiRouter.use("/public", publicRouter);

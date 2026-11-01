@@ -64,7 +64,7 @@ export function CartPage() {
   const t = orderTotals(rows, cafe);
   const empty = rows.length === 0;
   const sending = send.isPending;
-  const off = orderingBlocked(cafe, session, new Date(now));
+  const off = orderingBlocked(cafe, new Date(now));
   const table = session.table || "–";
 
   useDocumentTitle(`Keranjang Meja ${table} — ${cafe.cafeName} | IUL FnB`);

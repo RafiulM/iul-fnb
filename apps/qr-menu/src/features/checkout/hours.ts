@@ -51,12 +51,9 @@ export function nextOpenLabel(settings: Hours, now = new Date()) {
   return "pukul 08.00";
 }
 
-/** Can the customer send an order right now? */
-export const orderingBlocked = (
-  settings: Hours,
-  session: { browseOnly: boolean; forceOpen: boolean },
-  now: Date,
-) => session.browseOnly || (!isOpenAt(settings, now) && !session.forceOpen);
+/** Can the customer send an order right now? (The API checks this too.) */
+export const orderingBlocked = (settings: Hours, now: Date) =>
+  !isOpenAt(settings, now);
 
 /**
  * When the cafe opens next (the tutup page's plan). While the cafe is actually

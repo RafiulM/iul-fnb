@@ -15,6 +15,9 @@ export type Paginated<T> = { data: T[]; meta: PageMeta };
 
 export type DataResponse<T> = { data: T };
 
+/** GET /api/registration: public sign-up is open only until the first account (the owner) exists. */
+export type RegistrationDto = { open: boolean };
+
 export type NoteDto = {
   id: string;
   title: string;

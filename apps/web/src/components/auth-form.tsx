@@ -78,6 +78,8 @@ const NETWORK_MSG =
   "Tidak bisa terhubung ke server. Periksa koneksi internet, lalu coba lagi.";
 const RATE_LIMIT_MSG =
   "Terlalu banyak percobaan. Tunggu sebentar, lalu coba lagi.";
+export const SIGN_UP_CLOSED_MSG =
+  "Pendaftaran akun baru sudah ditutup karena kafe ini sudah punya pemilik. Akun kasir dibuat oleh pemilik dari halaman Akun & Staf.";
 
 /** Friendly Indonesian copy. Never says whether an email is registered. */
 function describeError(
@@ -87,6 +89,7 @@ function describeError(
   const code = error.code ?? "";
   if (!error.status) return { alert: NETWORK_MSG };
   if (error.status === 429) return { alert: RATE_LIMIT_MSG };
+  if (code === "SIGN_UP_CLOSED") return { alert: SIGN_UP_CLOSED_MSG };
   if (code === "INVALID_EMAIL")
     return { field: "email", fieldMsg: emailMsg("x") };
   if (code === "PASSWORD_TOO_SHORT")
@@ -257,7 +260,17 @@ function AffixField({
   );
 }
 
-export function AuthForm({ mode }: { mode: Mode }) {
+export function AuthForm({
+  mode,
+  signUpOpen,
+  notice,
+}: {
+  mode: Mode;
+  /** Public sign-up is only for the first (owner) account; null = unknown. */
+  signUpOpen: boolean | null;
+  /** Shown above the form on arrival, e.g. why /sign-up sent you here. */
+  notice?: string;
+}) {
   const signingUp = mode === "sign-up";
   const router = useRouter();
   const navigate = useNavigate();
@@ -266,7 +279,7 @@ export function AuthForm({ mode }: { mode: Mode }) {
   const [values, setValues] = useState({ name: "", email: "", password: "" });
   const [errors, setErrors] = useState<Errors>({});
   const [tried, setTried] = useState(false);
-  const [alert, setAlert] = useState("");
+  const [alert, setAlert] = useState(notice ?? "");
   const [phase, setPhase] = useState<"idle" | "busy" | "done">("idle");
   const [showPassword, setShowPassword] = useState(false);
   const [remember, setRemember] = useState(false);
@@ -570,29 +583,33 @@ export function AuthForm({ mode }: { mode: Mode }) {
           <p>
             {signingUp
               ? "Akun kasir biasanya ditambahkan oleh pemilik dari halaman Akun & Staf, jadi kasir tidak perlu mendaftar sendiri."
-              : "Akun kasir dibuat oleh pemilik. Kalau kamu pemilik yang baru mulai, buat akun pertamamu di sini."}
+              : signUpOpen === false
+                ? "Akun kasir dan pemilik lain dibuat oleh pemilik kafe dari halaman Akun & Staf. Minta pemilik membuatkan akun untukmu."
+                : "Akun kasir dibuat oleh pemilik. Kalau kamu pemilik yang baru mulai, buat akun pertamamu di sini."}
           </p>
-          <div className="lg-demo-btns">
-            <Link
-              className="lg-demo-btn"
-              to={signingUp ? "/sign-in" : "/sign-up"}
-            >
-              <span className="lg-avatar" aria-hidden="true">
-                {signingUp ? <LogIn /> : <Store />}
-              </span>
-              <span className="lg-grow">
-                <strong>
-                  {signingUp ? "Masuk ke akun" : "Buat akun pemilik"}
-                </strong>
-                <small>
-                  {signingUp
-                    ? "Untuk kasir dan pemilik yang sudah terdaftar"
-                    : "Penjualan, menu, stok, staf & pengaturan"}
-                </small>
-              </span>
-              <ChevronRight aria-hidden="true" style={{ fontSize: 16 }} />
-            </Link>
-          </div>
+          {signingUp || signUpOpen !== false ? (
+            <div className="lg-demo-btns">
+              <Link
+                className="lg-demo-btn"
+                to={signingUp ? "/sign-in" : "/sign-up"}
+              >
+                <span className="lg-avatar" aria-hidden="true">
+                  {signingUp ? <LogIn /> : <Store />}
+                </span>
+                <span className="lg-grow">
+                  <strong>
+                    {signingUp ? "Masuk ke akun" : "Buat akun pemilik"}
+                  </strong>
+                  <small>
+                    {signingUp
+                      ? "Untuk kasir dan pemilik yang sudah terdaftar"
+                      : "Penjualan, menu, stok, staf & pengaturan"}
+                  </small>
+                </span>
+                <ChevronRight aria-hidden="true" style={{ fontSize: 16 }} />
+              </Link>
+            </div>
+          ) : null}
         </section>
 
         <a className="lg-cust" href={tableMenuUrl("07")}>

@@ -1,3 +1,7 @@
+import {
+  apiErrorMessage,
+  NETWORK_ERROR_MESSAGE,
+} from "@starter/shared/fnb/domain";
 import type { ApiErrorBody } from "@starter/shared/types";
 
 // The customer app calls only the API's public endpoints: no account and no
@@ -51,11 +55,7 @@ export async function publicFetch<T>(
       body: body === undefined ? undefined : JSON.stringify(body),
     });
   } catch {
-    throw new ApiError(
-      0,
-      "NETWORK_ERROR",
-      "Tidak tersambung ke server. Periksa koneksi lalu coba lagi.",
-    );
+    throw new ApiError(0, "NETWORK_ERROR", NETWORK_ERROR_MESSAGE);
   }
   const payload = (await response.json().catch(() => null)) as
     ({ data: T } & Partial<ApiErrorBody>) | null;
@@ -64,7 +64,7 @@ export async function publicFetch<T>(
     throw new ApiError(
       response.status,
       error?.code ?? "HTTP_ERROR",
-      error?.message ?? "Terjadi kesalahan. Coba lagi.",
+      apiErrorMessage(response.status, error?.code, error?.message),
     );
   }
   return payload.data;

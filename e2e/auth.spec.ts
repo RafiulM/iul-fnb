@@ -1,5 +1,5 @@
 import { expect, test } from "@playwright/test";
-import { API_URL, fitsWidth, headers, PASSWORD } from "./helpers";
+import { API_URL, fitsWidth, headers, OWNER_EMAIL, PASSWORD } from "./helpers";
 
 test("anonymous visitors cannot access the protected app", async ({
   page,
@@ -17,13 +17,14 @@ test("anonymous visitors cannot access the protected app", async ({
   expect(await session.json()).toBeNull();
 });
 
+// Runs first on the empty test database: the cafe's first account (its owner).
 test("signup, persisted session, signout, rejected password, and signin work across origins", async ({
   page,
   context,
 }) => {
   const errors: string[] = [];
   page.on("pageerror", (error) => errors.push(error.message));
-  const email = `builder-${Date.now()}@example.com`;
+  const email = OWNER_EMAIL;
   await page.goto("/sign-up");
   await page.getByLabel("Nama", { exact: true }).fill("Ada Builder");
   await page.getByLabel("Email", { exact: true }).fill(email);
@@ -68,6 +69,31 @@ test("signup, persisted session, signout, rejected password, and signin work acr
   expect(errors).toEqual([]);
 });
 
+test("public sign-up closes once the cafe has its owner", async ({
+  page,
+  request,
+}) => {
+  const closed = await request.post(`${API_URL}/api/auth/sign-up/email`, {
+    headers,
+    data: {
+      name: "Orang Luar",
+      email: `outsider-${Date.now()}@example.com`,
+      password: PASSWORD,
+    },
+  });
+  expect(closed.status()).toBe(403);
+  expect((await closed.json()).code).toBe("SIGN_UP_CLOSED");
+
+  await page.goto("/sign-up");
+  await expect(page).toHaveURL(/\/sign-in\?daftar=tutup$/);
+  await expect(
+    page.getByRole("alert").filter({ hasText: "Pendaftaran akun baru" }),
+  ).toContainText("sudah ditutup");
+  await expect(
+    page.getByRole("link", { name: /Buat akun pemilik/ }),
+  ).toHaveCount(0);
+});
+
 test("auth rejects untrusted origins and invalid signup data", async ({
   request,
 }) => {
@@ -96,7 +122,10 @@ test("auth pages fit a narrow screen", async ({ page }) => {
     page.getByRole("heading", { name: "Masuk ke akun" }),
   ).toBeVisible();
   expect(await fitsWidth(page)).toBe(true);
-  await page.getByRole("link", { name: /Buat akun pemilik/ }).click();
-  await expect(page.getByLabel("Email", { exact: true })).toBeVisible();
+  // Sign-up is closed by now: /sign-up shows sign-in with the notice.
+  await page.goto("/sign-up");
+  await expect(
+    page.getByRole("alert").filter({ hasText: "Pendaftaran akun baru" }),
+  ).toBeVisible();
   expect(await fitsWidth(page)).toBe(true);
 });

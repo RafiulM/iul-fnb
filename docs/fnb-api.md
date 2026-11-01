@@ -20,22 +20,29 @@ pnpm db:seed            # menu, tables, ingredients, recipes, settings
 pnpm db:seed --orders   # plus ~60 days of demo sales and today's board
 ```
 
-The seed only fills empty sections and never changes existing rows.
+The seed only fills empty sections and never changes existing rows. Rerunning
+`--orders` later adds demo sales for the days after the newest stored order, up
+to today (including today's board when today has no orders yet).
 
 **First owner:** the very first account that signs up becomes the owner
-(Pemilik). Later sign-ups get no cafe access until an owner adds them on the
-staff screen, or you run `pnpm role:set <email> owner|cashier`.
+(Pemilik). After that, public sign-up is closed: `POST
+/api/auth/sign-up/email` answers `403 SIGN_UP_CLOSED`, and the web app's
+`/sign-up` sends visitors to `/sign-in` with a notice. Owners add staff on the
+Akun & Staf screen, or you run `pnpm role:set <email> owner|cashier`.
+`GET /api/registration` (no account needed) answers `{ data: { open } }`.
 
 ## Time
 
-"Today", order numbers (`A-001`, restarting daily), and report dates use the
-cafe's time zone, `Asia/Jakarta`. Dates in queries are `YYYY-MM-DD`.
+"Today", order numbers (`A-001`, restarting daily), opening hours, and report
+dates use the cafe's time zone, `Asia/Jakarta`, whatever zone the server or a
+customer's phone uses. Dates in queries are `YYYY-MM-DD`.
 
 ## Public endpoints (QR Menu app)
 
 No cookies. CORS allows `VITE_QR_MENU_URL` (or `QR_MENU_URL`) without
 credentials. Rate limited per IP (300 requests/minute, 20 new orders per
-10 minutes), plus at most 5 orders waiting (MENUNGGU) per table.
+10 minutes), plus at most 5 orders waiting (MENUNGGU) per table. Outside the
+opening hours in the settings, new orders get `409 CAFE_CLOSED`.
 
 | Method | Path                       | Notes                                                                                                                      |
 | ------ | -------------------------- | -------------------------------------------------------------------------------------------------------------------------- |

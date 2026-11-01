@@ -1,4 +1,8 @@
 import { createIsomorphicFn } from "@tanstack/react-start";
+import {
+  apiErrorMessage,
+  NETWORK_ERROR_MESSAGE,
+} from "@starter/shared/fnb/domain";
 import type { ApiErrorBody } from "@starter/shared/types";
 import { API_URL } from "@/lib/env";
 import {
@@ -7,7 +11,8 @@ import {
   logUpstreamFailure,
 } from "@/lib/api/upstream.server";
 
-// A failed API call, carrying the API's error envelope.
+// A failed API call, carrying the API's error envelope. `message` is always
+// Indonesian copy that can be shown to the cashier as is.
 export class ApiError extends Error {
   constructor(
     public status: number,
@@ -79,11 +84,7 @@ export async function apiFetch<T>(
   } catch (err) {
     if (signal?.aborted) throw err;
     onFailure(path, { err });
-    throw new ApiError(
-      0,
-      "NETWORK_ERROR",
-      "We couldn't reach the server. Check your connection and try again.",
-    );
+    throw new ApiError(0, "NETWORK_ERROR", NETWORK_ERROR_MESSAGE);
   }
 
   if (response.status === 204) return undefined as T;
@@ -95,7 +96,7 @@ export async function apiFetch<T>(
     throw new ApiError(
       response.status,
       error?.code ?? "HTTP_ERROR",
-      error?.message ?? `Request failed with status ${response.status}.`,
+      apiErrorMessage(response.status, error?.code, error?.message),
       error?.details,
     );
   }

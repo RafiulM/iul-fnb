@@ -1,11 +1,12 @@
 import { randomUUID } from "node:crypto";
 import { Pool } from "pg";
-import { beforeEach, describe, expect, it } from "vitest";
+import { beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
+import { cafeClock } from "@starter/shared/fnb/domain";
 import { createApp } from "../app";
 import { env } from "../config/env";
 import { cafeDate } from "../lib/fnb";
 import { resetRateLimits } from "../lib/rate-limit";
-import { agent, originHeader, setRole, signUp } from "./helpers";
+import { agent, originHeader, publicSignUp, setRole, signUp } from "./helpers";
 
 const app = createApp();
 const QR_ORIGIN = new URL(env.QR_MENU_URL).origin;
@@ -80,7 +81,23 @@ async function menuOf(client: Client, menuId: string) {
   return list.find((m) => m.id === menuId)!;
 }
 
+/** Opening hours for every day of the week (settings.hours, Monday first). */
+const everyDay = (from: string, to: string) =>
+  Array.from({ length: 7 }, () => ({ open: true, from, to }));
+
 beforeEach(() => resetRateLimits());
+
+// QR orders are refused outside opening hours, so open the test cafe all day:
+// the order tests must not depend on when they run. The opening-hours test
+// sets (and restores) its own.
+beforeAll(async () => {
+  const owner = await staff("owner");
+  const saved = await owner
+    .patch("/api/settings")
+    .set(originHeader)
+    .send({ hours: everyDay("00:00", "23:59") });
+  expect(saved.status).toBe(200);
+});
 
 describe("FnB access control", () => {
   it("answers 401 without a session and 403 for non-staff accounts", async () => {
@@ -413,6 +430,64 @@ describe("QR order to cashier board", () => {
   });
 });
 
+describe("Opening hours", () => {
+  it("refuses QR orders while the cafe is closed, in Jakarta time", async () => {
+    const owner = await staff("owner");
+    const { menu, table } = await catalog(owner);
+    const today = cafeDate();
+    const at = (hhmm: string) => new Date(`${today}T${hhmm}:00+07:00`);
+    const hours = everyDay("08:00", "22:00");
+    const setHours = async (value: typeof hours) =>
+      expect(
+        (
+          await owner
+            .patch("/api/settings")
+            .set(originHeader)
+            .send({ hours: value })
+        ).status,
+      ).toBe(200);
+    const order = () =>
+      agent(app)
+        .post("/api/public/orders")
+        .set({ Origin: QR_ORIGIN })
+        .send({ qrCode: table.qrCode, items: [{ menuId: menu.id, qty: 1 }] });
+
+    await setHours(hours);
+    // Run the server clock somewhere else: hours still follow the cafe.
+    const tz = process.env.TZ;
+    process.env.TZ = "UTC";
+    vi.useFakeTimers({ toFake: ["Date"] });
+    try {
+      vi.setSystemTime(at("07:59"));
+      const early = await order();
+      expect(early.status).toBe(409);
+      expect(early.body.error.code).toBe("CAFE_CLOSED");
+      expect(early.body.error.message).toMatch(/Kafe sedang tutup/);
+
+      vi.setSystemTime(at("08:00"));
+      expect((await order()).status).toBe(201);
+      vi.setSystemTime(at("21:59"));
+      expect((await order()).status).toBe(201);
+      vi.setSystemTime(at("22:00"));
+      expect((await order()).status).toBe(409);
+
+      // A day marked closed takes no orders at all.
+      const closedToday = everyDay("08:00", "22:00");
+      closedToday[cafeClock(at("12:00")).day]!.open = false;
+      vi.useRealTimers();
+      await setHours(closedToday);
+      vi.useFakeTimers({ toFake: ["Date"] });
+      vi.setSystemTime(at("12:00"));
+      expect((await order()).status).toBe(409);
+    } finally {
+      vi.useRealTimers();
+      if (tz === undefined) delete process.env.TZ;
+      else process.env.TZ = tz;
+      await setHours(everyDay("00:00", "23:59"));
+    }
+  });
+});
+
 describe("Menu management", () => {
   it("validates names, prices, and empty-category deletes", async () => {
     const owner = await staff("owner");
@@ -675,15 +750,33 @@ describe("First account", () => {
     } finally {
       await pool.end();
     }
+    const registration = async () =>
+      (await agent(app).get("/api/registration")).body.data;
+    expect(await registration()).toEqual({ open: true });
+
     const first = agent(app);
-    await signUp(first, "Pemilik Pertama");
+    expect((await publicSignUp(first, "Pemilik Pertama")).status).toBe(200);
     expect((await first.get("/api/staff")).status).toBe(200);
     const list = (await first.get("/api/staff")).body.data;
     expect(list).toHaveLength(1);
     expect(list[0]).toMatchObject({ role: "OWNER", isPrimaryOwner: true });
 
-    const second = agent(app);
-    await signUp(second, "Pengunjung");
-    expect((await second.get("/api/orders")).status).toBe(403);
+    // From now on outsiders cannot register themselves.
+    expect(await registration()).toEqual({ open: false });
+    const second = await publicSignUp(agent(app), "Pengunjung");
+    expect(second.status).toBe(403);
+    expect(second.body.code).toBe("SIGN_UP_CLOSED");
+
+    // The owner still adds staff from Akun & Staf.
+    const added = await first
+      .post("/api/staff")
+      .set(originHeader)
+      .send({
+        name: "Kasir Baru",
+        email: `kasir-baru-${tag()}@example.com`,
+        role: "CASHIER",
+        password: "Kasir-password-1",
+      });
+    expect(added.status).toBe(201);
   });
 });

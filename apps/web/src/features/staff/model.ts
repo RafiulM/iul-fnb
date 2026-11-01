@@ -97,5 +97,15 @@ export function deactivateBlock(
   return null;
 }
 
+/**
+ * May someone with `role` do `key`? A Pemilik always may; a Kasir needs the
+ * owner's matrix. Only hides controls: the API checks every request itself.
+ */
+export const staffCan = (
+  perms: PermissionRow[],
+  role: StaffRole,
+  key: PermissionKey,
+) => role === "OWNER" || !!perms.find((p) => p.key === key)?.CASHIER;
+
 export const cashierAccess = (perms: PermissionRow[]) =>
   Object.fromEntries(perms.map((p) => [p.key, p.CASHIER])) as CashierAccess;

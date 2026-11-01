@@ -7,6 +7,7 @@ import { manualDraftQuery } from "@/features/kasir-manual/queries";
 import { categoriesQuery, menusQuery } from "@/features/menu/queries";
 import { todayOrdersQuery } from "@/features/orders/queries";
 import { settingsQuery } from "@/features/settings/queries";
+import { staffPermissionsQuery } from "@/features/staff/queries";
 import { tablesQuery } from "@/features/tables/queries";
 
 export const Route = createFileRoute("/_protected/kasir/manual")({
@@ -19,6 +20,7 @@ export const Route = createFileRoute("/_protected/kasir/manual")({
       queryClient.ensureQueryData(settingsQuery()),
       queryClient.ensureQueryData(todayOrdersQuery()),
       queryClient.ensureQueryData(manualDraftQuery()),
+      queryClient.ensureQueryData(staffPermissionsQuery()),
     ]),
   component: Page,
 });

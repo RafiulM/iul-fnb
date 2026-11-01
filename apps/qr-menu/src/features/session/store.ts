@@ -19,8 +19,6 @@ export type CustomerSession = {
   order: PublicOrderDto | null;
   /** Cafe closed: customer chose "lihat menu saja" (browse only). */
   browseOnly: boolean;
-  /** Prototype escape hatch: order even outside opening hours. */
-  forceOpen: boolean;
   /** Table number from an invalid/inactive QR, for the "tidak valid" screen. */
   invalidTable: string | null;
   updatedAt: string;
@@ -35,7 +33,6 @@ export const emptySession = (table = "", qr = table): CustomerSession => ({
   cart: [],
   order: null,
   browseOnly: false,
-  forceOpen: false,
   invalidTable: null,
   updatedAt: new Date().toISOString(),
 });
@@ -57,6 +54,8 @@ function read(): CustomerSession {
     if (parsed?.v === 1) {
       value = { ...emptySession(), ...parsed };
       value.qr ||= value.table;
+      // Older builds saved a prototype-only "forceOpen" override.
+      delete (value as { forceOpen?: unknown }).forceOpen;
     }
     // Orders saved by the prototype (no API id/timeline) cannot be tracked.
     if (value.order && !value.order.timeline) value.order = null;

@@ -3,6 +3,7 @@ import { Pool } from "pg";
 import request from "supertest";
 import type { Express } from "express";
 import { createApp } from "../app";
+import { auth } from "../lib/auth";
 
 if (!process.env.STARTER_TEST_RUN?.startsWith("starter-pg-test-"))
   throw new Error(
@@ -19,18 +20,36 @@ export function agent(app: Express = createApp()) {
   return request.agent(app);
 }
 
+const PASSWORD = "Test-password-123!";
+
+// Public sign-up only creates the very first account (the cafe owner), so
+// test accounts are created the way an owner adds staff (Better Auth's admin
+// createUser, default role) and then sign in for real to get a session cookie.
 export async function signUp(
   client: ReturnType<typeof agent>,
   name = "Test User",
 ) {
   const email = `test-${randomUUID()}@example.com`;
+  await auth.api.createUser({ body: { name, email, password: PASSWORD } });
   const response = await client
+    .post("/api/auth/sign-in/email")
+    .set(originHeader)
+    .send({ email, password: PASSWORD });
+  if (response.status !== 200)
+    throw new Error(`Sign-in failed with ${response.status}`);
+  return email;
+}
+
+/** The real public sign-up endpoint (only open while there are no accounts). */
+export function publicSignUp(
+  client: ReturnType<typeof agent>,
+  name = "Test User",
+) {
+  const email = `test-${randomUUID()}@example.com`;
+  return client
     .post("/api/auth/sign-up/email")
     .set(originHeader)
-    .send({ name, email, password: "Test-password-123!" });
-  if (response.status !== 200)
-    throw new Error(`Sign-up failed with ${response.status}`);
-  return email;
+    .send({ name, email, password: PASSWORD });
 }
 
 // Roles are granted out of band, the way pnpm role:set does it.

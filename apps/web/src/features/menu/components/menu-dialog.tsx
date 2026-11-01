@@ -3,7 +3,6 @@ import {
   useLayoutEffect,
   useRef,
   useState,
-  type DragEvent,
   type FormEvent,
   type ReactNode,
 } from "react";
@@ -62,7 +61,6 @@ const EMOJIS = [
   "🍪",
   "💧",
 ];
-const UPLOAD_SOON = "Prototipe: unggah foto belum aktif — pakai ikon dulu, ya";
 
 const fmtNum = (n: number) =>
   n.toLocaleString("id-ID", { maximumFractionDigits: 2 });
@@ -165,7 +163,6 @@ function MenuForm({
   );
   const [errs, setErrs] = useState<FieldErrors>({});
   const [rowErrs, setRowErrs] = useState<Record<number, RowError>>({});
-  const [over, setOver] = useState(false);
 
   const ingById = new Map(ingredients.map((i) => [i.id, i]));
   const ingSorted = [...ingredients].sort((a, b) =>
@@ -385,26 +382,6 @@ function MenuForm({
     }
   }
 
-  const dropProps = {
-    onDragEnter: (e: DragEvent) => {
-      e.preventDefault();
-      setOver(true);
-    },
-    onDragOver: (e: DragEvent) => {
-      e.preventDefault();
-      setOver(true);
-    },
-    onDragLeave: (e: DragEvent) => {
-      e.preventDefault();
-      setOver(false);
-    },
-    onDrop: (e: DragEvent) => {
-      e.preventDefault();
-      setOver(false);
-      toast(UPLOAD_SOON);
-    },
-  };
-
   return (
     <form className="mm-form" noValidate onSubmit={submit}>
       <div className="l-staf-dialog-head">
@@ -427,25 +404,21 @@ function MenuForm({
       </div>
       <div className="l-staf-dialog-body">
         <div className="mm-mgrid">
-          <div className="mm-photo">
+          <div
+            className="mm-photo"
+            // A file dropped here must not open in the tab and lose the form.
+            onDragOver={(e) => e.preventDefault()}
+            onDrop={(e) => e.preventDefault()}
+          >
             <div className="mm-photo-prev">
               <span aria-hidden="true">{emoji}</span>
               <small>Pratinjau</small>
             </div>
-            <button
-              type="button"
-              className="mm-drop"
-              data-over={over ? "" : undefined}
-              onClick={() => toast(UPLOAD_SOON)}
-              {...dropProps}
-            >
+            {/* Photo upload needs file storage, which this app does not have yet. */}
+            <button type="button" className="mm-drop" disabled>
               <Upload aria-hidden="true" style={{ fontSize: 20 }} />
-              <strong>Unggah foto</strong>
-              <small>
-                Seret ke sini atau klik
-                <br />
-                JPG/PNG, maks. 2 MB
-              </small>
+              <strong>Unggah foto belum tersedia</strong>
+              <small>Untuk sekarang, pilih ikon menu di bawah.</small>
             </button>
             <div>
               <p className="mm-sublabel" id="menu-meja-emo-lbl">

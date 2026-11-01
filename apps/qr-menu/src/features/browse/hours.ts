@@ -30,16 +30,13 @@ export function nextOpenLabel(settings: Hours, now = new Date()) {
   return "pukul 08.00";
 }
 
-/** Ordering is off: browse-only mode, or outside opening hours without the prototype override. */
-export const orderingBlocked = (
-  session: Pick<CustomerSession, "browseOnly" | "forceOpen">,
-  settings: Hours,
-  now = new Date(),
-) => session.browseOnly || (!isOpenAt(settings, now) && !session.forceOpen);
+/** Ordering is off outside opening hours (the API refuses those orders too). */
+export const orderingBlocked = (settings: Hours, now = new Date()) =>
+  !isOpenAt(settings, now);
 
-/** Outside opening hours and not browse-only / forced open → the "Kafe Tutup" screen. */
+/** Outside opening hours and not browsing the menu anyway → the "Kafe Tutup" screen. */
 export const mustClose = (
-  session: Pick<CustomerSession, "browseOnly" | "forceOpen">,
+  session: Pick<CustomerSession, "browseOnly">,
   settings: Hours,
   now = new Date(),
-) => !isOpenAt(settings, now) && !session.forceOpen && !session.browseOnly;
+) => !isOpenAt(settings, now) && !session.browseOnly;

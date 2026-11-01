@@ -1,6 +1,6 @@
 import { randomUUID } from "node:crypto";
 import { expect, test } from "@playwright/test";
-import { API_URL, headers, PASSWORD, setRole, signUp } from "./helpers";
+import { API_URL, headers, setRole, signUp } from "./helpers";
 
 test("admin endpoints answer 401 without a session and 403 for the default role", async ({
   request,
@@ -38,12 +38,8 @@ test("the admin page renders only for a permitted role and can delete any note",
   });
   const note = (await created.json()).data;
 
-  const email = `roles-${randomUUID()}@example.com`;
-  await page.goto("/sign-up");
-  await page.getByLabel("Nama", { exact: true }).fill("Page Viewer");
-  await page.getByLabel("Email", { exact: true }).fill(email);
-  await page.getByLabel("Kata sandi", { exact: true }).fill(PASSWORD);
-  await page.getByRole("button", { name: "Buat akun", exact: true }).click();
+  const email = await signUp(page.request, "Page Viewer");
+  await page.goto("/kasir");
   await expect(page).toHaveURL(/\/kasir$/);
 
   await page.goto("/admin");

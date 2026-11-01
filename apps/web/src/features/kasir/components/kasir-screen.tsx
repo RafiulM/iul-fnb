@@ -11,6 +11,7 @@ import {
   useTodayOrders,
 } from "@/features/orders/hooks";
 import { useSettings } from "@/features/settings/hooks";
+import { useStaffCan } from "@/features/staff/hooks";
 import { useNow } from "@/lib/use-now";
 import { useNewQrOrders } from "../hooks";
 import {
@@ -59,6 +60,9 @@ export function KasirScreen({
   const now = useNow(20_000);
   const { data: orders } = useTodayOrders({ live: true });
   const { data: settings } = useSettings();
+  // Without the "payment" permission a Kasir runs the board but never sees
+  // pay or receipt actions (the API refuses them anyway).
+  const canPay = useStaffCan("payment");
 
   const advance = useAdvanceOrder();
   const cancel = useCancelOrder();
@@ -319,6 +323,7 @@ export function KasirScreen({
                         now={now}
                         fresh={fresh.has(o.code)}
                         busy={busyCode === o.code}
+                        canPay={canPay}
                         onOpen={setOpenCode}
                         onAction={onAction}
                       />
@@ -339,6 +344,7 @@ export function KasirScreen({
           settings={settings}
           now={now}
           busy={!!drawerOrder && busyCode === drawerOrder.code}
+          canPay={canPay}
           onClose={() => setOpenCode(null)}
           onAction={onAction}
         />

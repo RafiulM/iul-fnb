@@ -277,23 +277,6 @@
     color: var(--color-text-muted);
   }
 
-  /* ---------- Prototipe ---------- */
-  .pc-proto {
-    display: grid;
-    gap: 10px;
-    margin: 22px var(--space-4) 0;
-    padding: 14px var(--space-4) var(--space-4);
-    border: var(--border-hairline) dashed var(--color-border-strong);
-    border-radius: var(--radius-card);
-  }
-  .pc-proto p {
-    font: 400 13px / 1.5 var(--font-ui);
-    color: var(--color-text-muted);
-  }
-  .pc-proto .pc-chip {
-    justify-self: start;
-  }
-
   .pc-btn {
     display: inline-flex;
     align-items: center;

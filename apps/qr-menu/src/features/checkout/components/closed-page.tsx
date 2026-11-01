@@ -73,13 +73,6 @@ export function ClosedPage() {
         : `Mode lihat menu: pesan lagi mulai pukul ${dotT(p.time)}`,
     );
   }
-  function forceOpen() {
-    update((s) => {
-      s.forceOpen = true;
-      s.browseOnly = false;
-    });
-    setFlash("Prototipe: kafe dianggap sedang buka");
-  }
 
   return (
     <main
@@ -183,19 +176,15 @@ export function ClosedPage() {
           </Link>
         </div>
 
-        <p className="pc-demo" data-node-id="pelanggan-tutup.proto">
-          <Zap aria-hidden="true" />
-          <span>
+        {p.preview ? (
+          // The cafe opened while this page was showing.
+          <p className="pc-demo" role="status">
+            <Zap aria-hidden="true" />
             <span>
-              {p.preview && p.today
-                ? `Saat ini kafe sebenarnya buka (${range(p.today)}); tampilan memakai keadaan setelah tutup pukul ${dotT(p.today[1])}.`
-                : "Halaman ini muncul otomatis di luar jam buka."}
-            </span>{" "}
-            <Link to="/" onClick={forceOpen}>
-              Prototipe: anggap kafe sedang buka
-            </Link>
-          </span>
-        </p>
+              Kafe sudah buka lagi. <Link to="/">Mulai pesan sekarang</Link>
+            </span>
+          </p>
+        ) : null}
 
         <p className="pc-foot">
           Didukung oleh <strong>IUL FnB</strong>

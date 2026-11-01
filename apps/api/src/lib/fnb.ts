@@ -1,8 +1,10 @@
+import { CAFE_TIME_ZONE } from "@starter/shared/fnb/domain";
 import { HttpError } from "./http-error";
 
-// The cafe's local time zone. "Today", order numbers (which restart daily),
-// and report buckets all use it, whatever the server's own clock zone is.
-export const CAFE_TIME_ZONE = "Asia/Jakarta";
+// The cafe's local time zone (shared with the apps). "Today", order numbers
+// (which restart daily), and report buckets all use it, whatever the server's
+// own clock zone is.
+export { CAFE_TIME_ZONE };
 
 const dayFormat = new Intl.DateTimeFormat("en-CA", {
   timeZone: CAFE_TIME_ZONE,

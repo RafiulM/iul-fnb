@@ -52,14 +52,47 @@ export const STOCK_BADGE: Record<
   HABIS: { tone: "danger", label: "Habis" },
 };
 
-/** Is the cafe open at `at` according to its weekly hours (Monday-first)? */
+/**
+ * The cafe's local time zone. "Today", opening hours, and order numbers use
+ * it, whatever time zone the server or the customer's phone is set to.
+ */
+export const CAFE_TIME_ZONE = "Asia/Jakarta";
+
+const clockFormat = new Intl.DateTimeFormat("en-US", {
+  timeZone: CAFE_TIME_ZONE,
+  weekday: "short",
+  hour: "2-digit",
+  minute: "2-digit",
+  hourCycle: "h23",
+});
+const MONDAY_FIRST: Record<string, number> = {
+  Mon: 0,
+  Tue: 1,
+  Wed: 2,
+  Thu: 3,
+  Fri: 4,
+  Sat: 5,
+  Sun: 6,
+};
+
+/** Weekday (0 = Monday, like settings.hours) and minutes since midnight of `at` in the cafe. */
+export function cafeClock(at: Date = new Date()) {
+  const part: Record<string, string> = {};
+  for (const p of clockFormat.formatToParts(at)) part[p.type] = p.value;
+  return {
+    day: MONDAY_FIRST[part.weekday ?? ""] ?? 0,
+    mins: Number(part.hour) * 60 + Number(part.minute),
+  };
+}
+
+/** Is the cafe open at `at` according to its weekly hours, in cafe time? */
 export function isOpenAt(
   settings: Pick<CafeSettingsDto, "hours">,
   at: Date = new Date(),
 ) {
-  const day = settings.hours[(at.getDay() + 6) % 7];
+  const { day: weekday, mins } = cafeClock(at);
+  const day = settings.hours[weekday];
   if (!day?.open || !day.from || !day.to) return false;
-  const mins = at.getHours() * 60 + at.getMinutes();
   const toMins = (t: string) => {
     const [h, m] = t.split(":").map(Number);
     return (h ?? 0) * 60 + (m ?? 0);
@@ -103,6 +136,47 @@ export function orderTotals(
   }
   const tax = Math.round((subtotal * settings.taxPercent) / 100);
   return { subtotal, tax, service, total: subtotal + tax + service, count };
+}
+
+/* ---------- API error copy ---------- */
+
+// The API's generic errors (sign-in, permissions, validation, request body,
+// server failures) carry the starter's English text, while the cafe's own
+// errors are already Indonesian. Both frontends show the copy below instead,
+// keyed by the error code, so cashiers and customers never see English.
+
+const GENERIC: Record<string, string> = {
+  VALIDATION_ERROR:
+    "Data yang dikirim belum sesuai. Periksa lagi isiannya, lalu coba lagi.",
+  UNAUTHORIZED: "Sesi kamu sudah berakhir. Silakan masuk lagi.",
+  FORBIDDEN:
+    "Akun kamu belum punya izin untuk tindakan ini. Minta pemilik mengaturnya di Akun & Staf.",
+  FORBIDDEN_ORIGIN:
+    "Permintaan ditolak karena asal halamannya tidak dikenal. Muat ulang halaman, lalu coba lagi.",
+  INVALID_JSON: "Data yang dikirim rusak. Muat ulang halaman, lalu coba lagi.",
+  UNSUPPORTED_MEDIA_TYPE:
+    "Data yang dikirim rusak. Muat ulang halaman, lalu coba lagi.",
+  LENGTH_REQUIRED:
+    "Data yang dikirim rusak. Muat ulang halaman, lalu coba lagi.",
+  PAYLOAD_TOO_LARGE:
+    "Data terlalu besar untuk dikirim. Kurangi isinya, lalu coba lagi.",
+  INTERNAL_ERROR: "Terjadi kesalahan di server. Coba lagi sebentar lagi.",
+};
+
+export const NETWORK_ERROR_MESSAGE =
+  "Tidak bisa terhubung ke server. Periksa koneksi internet, lalu coba lagi.";
+
+/** The message to show for a failed API call, always in Indonesian. */
+export function apiErrorMessage(
+  status: number,
+  code: string | undefined,
+  message: string | undefined,
+) {
+  if (code && Object.hasOwn(GENERIC, code)) return GENERIC[code]!;
+  // Unknown API paths; "Pesanan tidak ditemukan." and the like stay as sent.
+  if (code === "NOT_FOUND" && message === "Route not found.")
+    return "Alamat tidak ditemukan. Muat ulang halaman, lalu coba lagi.";
+  return message || `Permintaan gagal (kode ${status}). Coba lagi.`;
 }
 
 /* ---------- Formatting (id-ID) ---------- */

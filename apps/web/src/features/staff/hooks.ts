@@ -3,6 +3,8 @@ import {
   useQueryClient,
   useSuspenseQuery,
 } from "@tanstack/react-query";
+import { useRouteContext } from "@tanstack/react-router";
+import type { PermissionKey } from "@starter/shared/fnb/fixtures";
 import {
   createStaff,
   savePermissions,
@@ -10,7 +12,12 @@ import {
   setStaffPassword,
   updateStaff,
 } from "./api";
-import type { CashierAccess, StaffInput, StaffMember } from "./model";
+import {
+  staffCan,
+  type CashierAccess,
+  type StaffInput,
+  type StaffMember,
+} from "./model";
 import { staffKeys, staffMembersQuery, staffPermissionsQuery } from "./queries";
 
 export function useStaffMembers() {
@@ -19,6 +26,13 @@ export function useStaffMembers() {
 
 export function useStaffPermissions() {
   return useSuspenseQuery(staffPermissionsQuery());
+}
+
+/** May the signed-in staff member do `key`? For hiding controls only. */
+export function useStaffCan(key: PermissionKey) {
+  const { role } = useRouteContext({ from: "/_protected" });
+  const { data } = useStaffPermissions();
+  return staffCan(data, role, key);
 }
 
 function useInvalidateStaff() {

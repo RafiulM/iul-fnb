@@ -1,9 +1,10 @@
 // Loads the IUL FnB sample data (menu, tables, ingredients, recipes, settings,
 // and optionally demo orders) into an EMPTY database: pnpm db:seed
-// Add --orders for ~60 days of sales history plus today's open orders.
+// Add --orders for ~60 days of sales history plus today's open orders; rerun
+// it later to fill the days after the newest order up to today.
 // Existing rows are never changed; a section that already has data is skipped.
 import "./load-env";
-import { count, sql } from "drizzle-orm";
+import { count, max, sql } from "drizzle-orm";
 import {
   CATEGORIES,
   generateTransactions,
@@ -29,7 +30,7 @@ import {
   orders,
   recipeItems,
 } from "./db/schema";
-import { cafeDate } from "./lib/fnb";
+import { addDays, cafeDate } from "./lib/fnb";
 
 const withOrders = process.argv.includes("--orders");
 
@@ -115,12 +116,20 @@ try {
     console.log(`Seeded ${TABLES.length} tables.`);
   }
 
-  if (withOrders && (await isEmpty(orders))) {
-    const now = Date.now();
-    const today = cafeDate(new Date(now));
+  const now = Date.now();
+  const today = cafeDate(new Date(now));
+  // Start the day after the newest order already stored (60 days back on an
+  // empty table), so rerunning later fills the gap up to today.
+  const [{ last } = { last: null }] = withOrders
+    ? await db.select({ last: max(orders.businessDate) }).from(orders)
+    : [];
+  const from = last ? addDays(last, 1) : addDays(today, -59);
+
+  if (withOrders && from <= today) {
+    const gapDays = (Date.parse(today) - Date.parse(from)) / 86_400_000 + 1;
     // Renumber per cafe-local day so codes restart daily like real orders.
-    const history = generateTransactions(60, now)
-      .filter((o) => cafeDate(new Date(o.createdAt)) < today)
+    const history = generateTransactions(Math.max(60, gapDays), now)
+      .filter((o) => cafeDate(new Date(o.createdAt)) >= from)
       .sort((a, b) => a.createdAt.localeCompare(b.createdAt));
     const seqByDay = new Map<string, number>();
     const rows: ReturnType<typeof orderRow>[] = [];
@@ -146,11 +155,12 @@ try {
       seqByDay.set(day, seq);
       add(o, day, seq);
     }
-    // Today's board continues from the fixtures' own numbers (A-101…).
+    // Today's board continues from the fixtures' own numbers (A-101…). The
+    // day goes into the id so a later gap fill never reuses an earlier board's.
     for (const o of seedActiveOrders(now)) {
       const seq = Number(o.code.slice(2));
       seqByDay.set(today, Math.max(seqByDay.get(today) ?? 0, seq));
-      add(o, today, seq);
+      add({ ...o, id: `o-${today.replaceAll("-", "")}-${o.code}` }, today, seq);
     }
     await db.transaction(async (tx) => {
       await insertChunks(rows, (chunk) => tx.insert(orders).values(chunk));
@@ -170,9 +180,11 @@ try {
           },
         });
     });
-    console.log(`Seeded ${rows.length} demo orders (${items.length} lines).`);
+    console.log(
+      `Seeded ${rows.length} demo orders (${items.length} lines) for ${from} to ${today}.`,
+    );
   } else if (withOrders) {
-    console.log("Orders already exist; demo orders skipped.");
+    console.log("Orders already reach today; demo orders skipped.");
   }
   console.log("Sample data ready.");
 } catch (error) {
