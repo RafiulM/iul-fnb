@@ -90,6 +90,8 @@ docker build -f apps/web/Dockerfile --build-arg VITE_API_URL=https://api.example
 docker build -f apps/qr-menu/Dockerfile --build-arg VITE_API_URL=https://api.example.com -t my-qr-menu .
 ```
 
+Platforms that cannot run a one-off migrator job can migrate from the API image itself, e.g. as a post-deployment command (Coolify): `node dist/migrate.js`. Migrations are idempotent, so running them on every release is safe.
+
 ```sh
 docker run --rm -e DATABASE_URL="$DATABASE_URL" my-api-migrate
 

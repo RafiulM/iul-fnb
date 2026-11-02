@@ -5,7 +5,8 @@
 #   docker build -f apps/api/Dockerfile -t my-api .
 #   docker build -f apps/api/Dockerfile --target migrator -t my-api-migrate .
 #
-# Run the migrator once per release, then start the API. See docs/deployment.md.
+# Run the migrator once per release, then start the API. The API image can
+# also migrate itself: `node dist/migrate.js`. See docs/deployment.md.
 
 ARG NODE_VERSION=22-slim
 
@@ -50,8 +51,10 @@ ENV NODE_ENV=production \
     PORT=4000 \
     HOST=0.0.0.0
 # Files stay owned by root: the unprivileged node user can run the code but
-# never rewrite it.
+# never rewrite it. drizzle/ lets platforms without a one-off job (e.g. a
+# Coolify post-deployment command) run `node dist/migrate.js` in this image.
 COPY --from=builder /app/apps/api/dist ./dist
+COPY --from=builder /app/apps/api/drizzle ./drizzle
 USER node
 EXPOSE 4000
 
