@@ -1,15 +1,18 @@
 # Hosting the monorepo
 
-Deploy two Node.js services — the API and the web app — connected to a persistent PostgreSQL service. Neither app keeps data on its filesystem.
+Deploy three Node.js services — the API, the Kasir web app, and the customer QR Menu app — connected to a persistent PostgreSQL service. None of them keeps data on its filesystem.
 
 ## Domains and cookies
 
-The browser calls the API directly with cookies, and the web server reads the same cookie during server rendering. Put both apps on subdomains of one site and share the cookie with `COOKIE_DOMAIN`:
+The browser calls the API directly with cookies, and the web server reads the same cookie during server rendering. Put the API and the web app on subdomains of one site and share the cookie with `COOKIE_DOMAIN`:
 
-| App | Example origin            |
-| --- | ------------------------- |
-| API | `https://api.example.com` |
-| Web | `https://app.example.com` |
+| App     | Example origin             |
+| ------- | -------------------------- |
+| API     | `https://api.example.com`  |
+| Web     | `https://app.example.com`  |
+| QR Menu | `https://menu.example.com` |
+
+The QR Menu calls only the API's cookie-less `/api/public` endpoints, so it may live on any domain; the API allows it through `QR_MENU_URL`.
 
 Unrelated domains (e.g. `app.example.com` and `example-api.net`) are not supported: the web server would never receive the session cookie. `pnpm run doctor` checks this rule against your settings. Better Auth marks cookies `Secure` automatically when `BETTER_AUTH_URL` is HTTPS.
 
@@ -25,6 +28,7 @@ DATABASE_URL=postgresql://user:password@database-host:5432/app
 BETTER_AUTH_SECRET=your-random-secret-at-least-32-characters
 BETTER_AUTH_URL=https://api.example.com
 WEB_URL=https://app.example.com
+QR_MENU_URL=https://menu.example.com
 COOKIE_DOMAIN=.example.com
 # Behind a load balancer or reverse proxy (hop count, or a subnet list; never true):
 TRUST_PROXY=1
@@ -40,11 +44,22 @@ TRUST_PROXY=1
 NODE_ENV=production
 # Build time — inlined into the browser bundle:
 VITE_API_URL=https://api.example.com
+VITE_QR_MENU_URL=https://menu.example.com # printed into table QR codes
 # Runtime, optional — the address the web server uses to reach the API privately:
 API_INTERNAL_URL=http://api:4000
 ```
 
-`NODE_ENV=production` switches both servers to JSON logs and the web app to sending HSTS. The Docker images set it; set it yourself everywhere else.
+**QR Menu**:
+
+```dotenv
+NODE_ENV=production
+# Build time — inlined into the browser bundle:
+VITE_API_URL=https://api.example.com
+# Runtime, optional — the address the server uses to reach the API privately:
+API_INTERNAL_URL=http://api:4000
+```
+
+`NODE_ENV=production` switches the API and web servers to JSON logs and both web apps to sending HSTS. The Docker images set it; set it yourself everywhere else.
 
 `TRUST_PROXY` matters: the API resolves the client IP from it and hands that IP to Better Auth for per-IP rate limits on sign-in/sign-up. Set the number of proxies in front of the API (usually `1`) or their subnets. The API refuses `true`, which would trust any `X-Forwarded-For` a client sends and let it choose the IP its attempts are counted under. Without a proxy, leave it unset (the socket address is used and client-supplied `X-Forwarded-For` is ignored).
 
@@ -55,12 +70,13 @@ Keep provider-required TLS settings. Do not disable certificate verification. Th
 ```sh
 pnpm install --frozen-lockfile
 pnpm db:migrate
-VITE_API_URL=https://api.example.com pnpm build
-NODE_ENV=production node apps/api/dist/server.js           # API
-NODE_ENV=production node apps/web/.output/server/index.mjs # Web
+VITE_API_URL=https://api.example.com VITE_QR_MENU_URL=https://menu.example.com pnpm build
+NODE_ENV=production node apps/api/dist/server.js               # API
+NODE_ENV=production node apps/web/.output/server/index.mjs     # Web
+NODE_ENV=production node apps/qr-menu/.output/server/index.mjs # QR Menu
 ```
 
-Apply migrations once per release. Both servers honor `PORT` and `HOST`. The API bundle (`apps/api/dist`) includes its dependencies; it needs only `dist/` (and `drizzle/` for migrations).
+Apply migrations once per release. All servers honor `PORT` and `HOST`. The API bundle (`apps/api/dist`) includes its dependencies; it needs only `dist/` (and `drizzle/` for migrations).
 
 ## Docker images
 
@@ -69,7 +85,9 @@ Build from the repository root. Each Dockerfile prunes the workspace with `turbo
 ```sh
 docker build -f apps/api/Dockerfile -t my-api .
 docker build -f apps/api/Dockerfile --target migrator -t my-api-migrate .
-docker build -f apps/web/Dockerfile --build-arg VITE_API_URL=https://api.example.com -t my-web .
+docker build -f apps/web/Dockerfile --build-arg VITE_API_URL=https://api.example.com \
+  --build-arg VITE_QR_MENU_URL=https://menu.example.com -t my-web .
+docker build -f apps/qr-menu/Dockerfile --build-arg VITE_API_URL=https://api.example.com -t my-qr-menu .
 ```
 
 ```sh
@@ -80,20 +98,22 @@ docker run -d -p 4000:4000 \
   -e BETTER_AUTH_SECRET="$BETTER_AUTH_SECRET" \
   -e BETTER_AUTH_URL=https://api.example.com \
   -e WEB_URL=https://app.example.com \
+  -e QR_MENU_URL=https://menu.example.com \
   -e COOKIE_DOMAIN=.example.com \
   -e TRUST_PROXY=1 \
   my-api
 
 docker run -d -p 3000:3000 -e API_INTERNAL_URL=http://api:4000 my-web
+docker run -d -p 3001:3000 -e API_INTERNAL_URL=http://api:4000 my-qr-menu
 ```
 
-The builds need no secrets. Pass real values to running containers; never put secrets in `--build-arg`, `ENV`, or the image. `VITE_API_URL` is public by design. Rebuild the web image when the API's public origin changes.
+The builds need no secrets. Pass real values to running containers; never put secrets in `--build-arg`, `ENV`, or the image. `VITE_API_URL` is public by design. Rebuild both web images when the API's public origin changes, and the Kasir image when the QR Menu's origin changes.
 
-Both images run as the unprivileged `node` user. Their `HEALTHCHECK`s report liveness only (`/api/health`, `/icon.svg`), so a database outage does not restart healthy processes. `GET /api/health/ready` additionally checks PostgreSQL for platforms that want a readiness probe. Both servers shut down gracefully on SIGTERM.
+All images run as the unprivileged `node` user, which cannot modify the shipped code (it stays owned by root). Their `HEALTHCHECK`s report liveness only (`/api/health`, `/icon.svg`), so a database outage does not restart healthy processes. `GET /api/health/ready` additionally checks PostgreSQL for platforms that want a readiness probe. All servers shut down gracefully on SIGTERM.
 
 ## Logs in production
 
-Both servers write one JSON object per line to stdout with `level`, `time`, `service` (`api`/`web`), `env`, `msg`, and `reqId` (plus `userId` on authenticated API requests). Ship stdout to your log platform; correlate a page render across services by `reqId`. Forward an `X-Request-Id` from your load balancer and both servers reuse it. `LOG_LEVEL` adjusts verbosity; `LOG_SQL=true` is for debugging only.
+The API and web servers write one JSON object per line to stdout with `level`, `time`, `service` (`api`/`web`), `env`, `msg`, and `reqId` (plus `userId` on authenticated API requests). Ship stdout to your log platform; correlate a page render across services by `reqId`. Forward an `X-Request-Id` from your load balancer and both servers reuse it. `LOG_LEVEL` adjusts verbosity; `LOG_SQL=true` is for debugging only.
 
 ## Connection pooling and scaling
 
@@ -103,7 +123,7 @@ The API uses one node-postgres pool with at most ten connections per process. Mu
 
 Built in: authenticated and origin-checked API routes, ownership filtered in SQL, sign-in/sign-up rate limits, 100 kB request bodies (including Better Auth's), `httpOnly` `SameSite=Lax` session cookies, helmet on the API, and frame/nosniff/referrer headers (plus HSTS in production) on the web app. Before launch, confirm:
 
-- [ ] Both origins are HTTPS and `NODE_ENV=production` is set on both services.
+- [ ] All origins are HTTPS and `NODE_ENV=production` is set on every service.
 - [ ] `TRUST_PROXY` matches your proxy hops, so rate limits see real client IPs.
 - [ ] Nothing untrusted is served under `COOKIE_DOMAIN` (see [Domains and cookies](#domains-and-cookies)).
 - [ ] Several API instances share rate-limit storage (see [scaling](#connection-pooling-and-scaling)).

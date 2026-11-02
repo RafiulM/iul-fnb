@@ -30,10 +30,14 @@ compose.test.yaml
 **/Dockerfile
 .dockerignore
 
-# Documentation and editor config.
+# Documentation, design references, and editor config.
 docs
 *.md
 !README.md
+design
+desainpakeai
+thumbnail
+scripts
 .mcp.json
 .prettierrc.json
 .prettierignore

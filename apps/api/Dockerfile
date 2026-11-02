@@ -38,8 +38,8 @@ RUN pnpm --filter @starter/api run build
 FROM node:${NODE_VERSION} AS migrator
 WORKDIR /app
 ENV NODE_ENV=production
-COPY --from=builder --chown=node:node /app/apps/api/dist ./dist
-COPY --from=builder --chown=node:node /app/apps/api/drizzle ./drizzle
+COPY --from=builder /app/apps/api/dist ./dist
+COPY --from=builder /app/apps/api/drizzle ./drizzle
 USER node
 CMD ["node", "dist/migrate.js"]
 
@@ -49,7 +49,9 @@ WORKDIR /app
 ENV NODE_ENV=production \
     PORT=4000 \
     HOST=0.0.0.0
-COPY --from=builder --chown=node:node /app/apps/api/dist ./dist
+# Files stay owned by root: the unprivileged node user can run the code but
+# never rewrite it.
+COPY --from=builder /app/apps/api/dist ./dist
 USER node
 EXPOSE 4000
 

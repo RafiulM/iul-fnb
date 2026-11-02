@@ -1,12 +1,13 @@
 # Production image for the customer QR Menu app (TanStack Start). Build from the
-# repository root, passing the public origins inlined into the browser bundle:
+# repository root, passing the API's public origin (it is inlined into the
+# browser bundle):
 #
 #   docker build -f apps/qr-menu/Dockerfile \
-#     --build-arg VITE_API_URL=https://api.example.com \
-#     --build-arg VITE_QR_MENU_URL=https://menu.example.com -t my-qr-menu .
+#     --build-arg VITE_API_URL=https://api.example.com -t my-qr-menu .
 #
-# While the app still uses its frontend-first mock data, VITE_API_URL is unused
-# but already required so the image is ready for the API phase.
+# At runtime, set API_INTERNAL_URL when the server reaches the API over a
+# private address (e.g. http://api:4000) to render pages. The API must list
+# this app's public origin in QR_MENU_URL. See docs/deployment.md.
 
 ARG NODE_VERSION=22-slim
 
@@ -28,11 +29,9 @@ FROM deps AS builder
 COPY --from=pruner /app/out/full/ .
 COPY tsconfig.base.json starter.config.json ./
 ARG VITE_API_URL
-ARG VITE_QR_MENU_URL
 RUN test -n "$VITE_API_URL" || { echo "Pass --build-arg VITE_API_URL=<the API's public origin>"; exit 1; }
 ENV NODE_ENV=production \
-    VITE_API_URL=$VITE_API_URL \
-    VITE_QR_MENU_URL=$VITE_QR_MENU_URL
+    VITE_API_URL=$VITE_API_URL
 RUN pnpm --filter @starter/qr-menu run build
 
 # --- Runner: Nitro's node-server output is self-contained -------------------
@@ -41,7 +40,9 @@ WORKDIR /app
 ENV NODE_ENV=production \
     PORT=3000 \
     HOST=0.0.0.0
-COPY --from=builder --chown=node:node /app/apps/qr-menu/.output ./.output
+# Files stay owned by root: the unprivileged node user can run the code but
+# never rewrite it.
+COPY --from=builder /app/apps/qr-menu/.output ./.output
 USER node
 EXPOSE 3000
 

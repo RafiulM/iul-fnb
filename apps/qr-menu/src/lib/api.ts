@@ -1,3 +1,4 @@
+import { createIsomorphicFn } from "@tanstack/react-start";
 import {
   apiErrorMessage,
   NETWORK_ERROR_MESSAGE,
@@ -12,20 +13,29 @@ const CONFIGURED_API_URL = new URL(
 
 const LOOPBACK = new Set(["localhost", "127.0.0.1", "[::1]"]);
 
-// A phone that opened the menu through this machine's LAN address cannot
-// reach "localhost": call the API on the same host the page came from.
-function apiOrigin() {
-  if (
-    typeof window !== "undefined" &&
-    LOOPBACK.has(CONFIGURED_API_URL.hostname) &&
-    !LOOPBACK.has(window.location.hostname)
-  ) {
-    const url = new URL(CONFIGURED_API_URL);
-    url.hostname = window.location.hostname;
-    return url.origin;
-  }
-  return CONFIGURED_API_URL.origin;
-}
+// Where to call the API from the current environment.
+// - Server (SSR loaders): API_INTERNAL_URL when the API sits on a private
+//   address (e.g. http://api:4000 in Docker), else the public origin.
+// - Browser: the public origin. A phone that opened the menu through this
+//   machine's LAN address cannot reach "localhost", so it calls the API on
+//   the same host the page came from.
+const apiOrigin = createIsomorphicFn()
+  .server(() =>
+    process.env.API_INTERNAL_URL
+      ? new URL(process.env.API_INTERNAL_URL).origin
+      : CONFIGURED_API_URL.origin,
+  )
+  .client(() => {
+    if (
+      LOOPBACK.has(CONFIGURED_API_URL.hostname) &&
+      !LOOPBACK.has(window.location.hostname)
+    ) {
+      const url = new URL(CONFIGURED_API_URL);
+      url.hostname = window.location.hostname;
+      return url.origin;
+    }
+    return CONFIGURED_API_URL.origin;
+  });
 
 /** A failed API call, carrying the API's error envelope. */
 export class ApiError extends Error {

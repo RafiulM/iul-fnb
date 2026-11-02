@@ -1,10 +1,11 @@
-# Production image for the TanStack Start web app. Build from the repository
-# root, passing the API's public origin (it is inlined into the browser bundle):
+# Production image for the TanStack Start web app (Kasir). Build from the
+# repository root, passing the public origins inlined into the browser bundle:
 #
 #   docker build -f apps/web/Dockerfile --build-arg VITE_API_URL=https://api.example.com \
 #     --build-arg VITE_QR_MENU_URL=https://menu.example.com -t my-web .
 #
-# VITE_QR_MENU_URL is the customer QR Menu app's public origin (table QR links).
+# VITE_QR_MENU_URL is the customer QR Menu app's public origin: printed table
+# QR codes carry it, so both are required.
 #
 # At runtime, set API_INTERNAL_URL when the web server reaches the API over a
 # private address (e.g. http://api:4000). See docs/deployment.md.
@@ -30,7 +31,8 @@ COPY --from=pruner /app/out/full/ .
 COPY tsconfig.base.json starter.config.json ./
 ARG VITE_API_URL
 ARG VITE_QR_MENU_URL
-RUN test -n "$VITE_API_URL" || { echo "Pass --build-arg VITE_API_URL=<the API's public origin>"; exit 1; }
+RUN test -n "$VITE_API_URL" || { echo "Pass --build-arg VITE_API_URL=<the API's public origin>"; exit 1; }; \
+    test -n "$VITE_QR_MENU_URL" || { echo "Pass --build-arg VITE_QR_MENU_URL=<the QR Menu app's public origin>"; exit 1; }
 ENV NODE_ENV=production \
     VITE_API_URL=$VITE_API_URL \
     VITE_QR_MENU_URL=$VITE_QR_MENU_URL
@@ -42,7 +44,9 @@ WORKDIR /app
 ENV NODE_ENV=production \
     PORT=3000 \
     HOST=0.0.0.0
-COPY --from=builder --chown=node:node /app/apps/web/.output ./.output
+# Files stay owned by root: the unprivileged node user can run the code but
+# never rewrite it.
+COPY --from=builder /app/apps/web/.output ./.output
 USER node
 EXPOSE 3000
 
