@@ -277,6 +277,32 @@
 </template>
 
 <script>
+  /* dpai:scoped-mount */
+  /* Runtime Canvas memberi root/signal/onCleanup/actions ke script scoped. Compiler lokal
+     (dpai --workspace, export) menggabung semua script halaman tanpa itu, sehingga deklarasi
+     bentrok dan halaman kosong. Bungkus ini meneruskan nilai runtime bila ada; bila tidak,
+     ia memasang halaman sendiri saat section-nya aktif dan membersihkannya saat disembunyikan. */
+  ((mount) => {
+    if (typeof root !== "undefined") return mount(root, signal, onCleanup, typeof actions !== "undefined" ? actions : null);
+    const page = document.querySelector('[data-prototype-page][data-page-id="login"]');
+    if (!page) return;
+    const host = page.querySelector(".l-staf-content") || page;
+    const bar = page.querySelector(".l-staf-actions");
+    let ctrl = null;
+    const cleanups = [];
+    const sync = () => {
+      if (!page.hidden && !ctrl) {
+        ctrl = new AbortController();
+        try { mount(host, ctrl.signal, (fn) => cleanups.push(fn), bar); } catch (error) { console.error(error); }
+      } else if (page.hidden && ctrl) {
+        ctrl.abort();
+        ctrl = null;
+        for (const fn of cleanups.splice(0)) { try { fn(); } catch {} }
+      }
+    };
+    addEventListener("hashchange", sync);
+    sync();
+  })((root, signal, onCleanup, actions) => {
   /* PROTOTIPE: tidak ada autentikasi sungguhan. Kata sandi tidak pernah dibaca isinya,
      disimpan, dicatat, atau dikirim ke mana pun — hanya dicek "sudah diisi" lalu dikosongkan. */
 
@@ -481,4 +507,5 @@
   showAlert("");
   // Fokus otomatis ke email hanya di layar lebar (di ponsel keyboard akan menutupi layar)
   if (matchMedia("(min-width: 900px)").matches) email.focus({ preventScroll: true });
+  });
 </script>
