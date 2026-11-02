@@ -1,10 +1,15 @@
 import { defineConfig } from "tsup";
 
-// Bundles the server and the migrator into self-contained ESM files, including
-// @starter/shared (TypeScript source) and npm dependencies, so the production
-// image ships only dist/ and drizzle/ — no node_modules.
+// Bundles the server, the migrator, and the sample-data seed into
+// self-contained ESM files, including @starter/shared (TypeScript source) and
+// npm dependencies, so the production image ships only dist/ and drizzle/ —
+// no node_modules.
 export default defineConfig({
-  entry: { server: "src/server.ts", migrate: "src/migrate.ts" },
+  entry: {
+    server: "src/server.ts",
+    migrate: "src/migrate.ts",
+    seed: "src/seed.ts",
+  },
   format: "esm",
   platform: "node",
   target: "node22",

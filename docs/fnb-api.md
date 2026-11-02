@@ -20,6 +20,9 @@ pnpm db:seed            # menu, tables, ingredients, recipes, settings
 pnpm db:seed --orders   # plus ~60 days of demo sales and today's board
 ```
 
+In the production API image the same seed is `node dist/seed.js [--orders]`
+(see `docs/deployment.md`).
+
 The seed only fills empty sections and never changes existing rows. Rerunning
 `--orders` later adds demo sales for the days after the newest stored order, up
 to today (including today's board when today has no orders yet).

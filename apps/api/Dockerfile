@@ -6,7 +6,8 @@
 #   docker build -f apps/api/Dockerfile --target migrator -t my-api-migrate .
 #
 # Run the migrator once per release, then start the API. The API image can
-# also migrate itself: `node dist/migrate.js`. See docs/deployment.md.
+# also migrate itself: `node dist/migrate.js`, and load the sample data into
+# an empty database: `node dist/seed.js`. See docs/deployment.md.
 
 ARG NODE_VERSION=22-slim
 
@@ -26,7 +27,7 @@ FROM base AS deps
 COPY --from=pruner /app/out/json/ .
 RUN --mount=type=cache,id=pnpm,target=/pnpm/store pnpm install --frozen-lockfile
 
-# --- Bundle the server and migrator -----------------------------------------
+# --- Bundle the server, migrator, and seed ----------------------------------
 FROM deps AS builder
 COPY --from=pruner /app/out/full/ .
 COPY tsconfig.base.json starter.config.json ./

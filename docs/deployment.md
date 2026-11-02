@@ -92,6 +92,8 @@ docker build -f apps/qr-menu/Dockerfile --build-arg VITE_API_URL=https://api.exa
 
 Platforms that cannot run a one-off migrator job can migrate from the API image itself, e.g. as a post-deployment command (Coolify): `node dist/migrate.js`. Migrations are idempotent, so running them on every release is safe.
 
+To load the sample menu, tables, ingredients, recipes, and settings into a fresh database, run `node dist/seed.js` once in the API container after migrating (e.g. from Coolify's terminal, or `docker exec <api-container> node dist/seed.js`). It reads the API's environment, so run it where `DATABASE_URL` and `BETTER_AUTH_SECRET` are set. It only fills empty sections and never changes existing rows. `--orders` also adds ~60 days of demo sales: leave it off for a real cafe.
+
 ```sh
 docker run --rm -e DATABASE_URL="$DATABASE_URL" my-api-migrate
 

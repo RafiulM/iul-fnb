@@ -1,5 +1,6 @@
 // Loads the IUL FnB sample data (menu, tables, ingredients, recipes, settings,
-// and optionally demo orders) into an EMPTY database: pnpm db:seed
+// and optionally demo orders) into an EMPTY database: pnpm db:seed, or
+// `node dist/seed.js` in the API image (it reads the API's environment).
 // Add --orders for ~60 days of sales history plus today's open orders; rerun
 // it later to fill the days after the newest order up to today.
 // Existing rows are never changed; a section that already has data is skipped.
