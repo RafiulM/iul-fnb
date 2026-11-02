@@ -19,7 +19,7 @@ const fields = {
 };
 
 /** A fresh, unguessable QR token such as "ks-9f3a1c2b7d". */
-const newQrCode = () => "ks-" + randomBytes(5).toString("hex");
+export const newQrCode = () => "ks-" + randomBytes(5).toString("hex");
 
 const DUPLICATE = "Nomor meja sudah dipakai.";
 

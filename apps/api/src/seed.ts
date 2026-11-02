@@ -3,7 +3,8 @@
 // `node dist/seed.js` in the API image (it reads the API's environment).
 // Add --orders for ~60 days of sales history plus today's open orders; rerun
 // it later to fill the days after the newest order up to today.
-// Existing rows are never changed; a section that already has data is skipped.
+// Existing rows are never changed; a section that already has data is skipped,
+// except tables: sample numbers not taken yet are added beside existing ones.
 import "./load-env";
 import { count, max, sql } from "drizzle-orm";
 import {
@@ -32,15 +33,12 @@ import {
   recipeItems,
 } from "./db/schema";
 import { addDays, cafeDate } from "./lib/fnb";
+import { newQrCode } from "./services/tables.service";
 
 const withOrders = process.argv.includes("--orders");
 
 async function isEmpty(
-  table:
-    | typeof cafeSettings
-    | typeof menuCategories
-    | typeof cafeTables
-    | typeof orders,
+  table: typeof cafeSettings | typeof menuCategories | typeof orders,
 ) {
   const [{ n } = { n: 0 }] = await db.select({ n: count() }).from(table);
   return n === 0;
@@ -112,10 +110,14 @@ try {
       `Seeded ${CATEGORIES.length} categories, ${MENUS.length} menus, ${INGREDIENTS.length} ingredients, ${RECIPE_ITEMS.length} recipe lines.`,
     );
   }
-  if (await isEmpty(cafeTables)) {
-    await db.insert(cafeTables).values(TABLES);
-    console.log(`Seeded ${TABLES.length} tables.`);
-  }
+  // Printed QR codes must be unguessable, and the fixture tokens are public in
+  // this repository: give every seeded table a fresh one.
+  const tables = await db
+    .insert(cafeTables)
+    .values(TABLES.map((t) => ({ ...t, qrCode: newQrCode() })))
+    .onConflictDoNothing()
+    .returning({ id: cafeTables.id });
+  if (tables.length) console.log(`Seeded ${tables.length} tables.`);
 
   const now = Date.now();
   const today = cafeDate(new Date(now));
